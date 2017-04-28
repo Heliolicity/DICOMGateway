@@ -1,6 +1,7 @@
 package com.gateway.dicom.protocols;
 
 import java.io.Serializable;
+import java.util.Random;
 
 /*
  * 
@@ -29,12 +30,14 @@ public class C_ECHO_RQ implements Serializable {
 		//this.commandGroupLength = new DataElement(0x0000, 0x0000, "UL", 1, "");
 		this.affectedSOPClassUID = new DataElement(0x0000, 0x0002, "UI", 1, "1.2.840.10008.1.1");
 		this.elementLength = this.affectedSOPClassUID.getElementLength();
-		this.commandField = new DataElement(0x0000, 0x0100, "US", 1, "0030H");
+		//this.commandField = new DataElement(0x0000, 0x0100, "US", 1, "0030H");
+		this.commandField = new DataElement(0x0000, 0x0100, "US", 1, "0030");
 		this.elementLength += this.commandField.getElementLength();
-		long randomNum = ThreadLocalRandom.current().nextLong(0, 65535);
+		short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
 		this.messageID = new DataElement(0x0000, 0x0110, "US", 1, "" + randomNum);
 		this.elementLength += this.messageID.getElementLength();
-		this.commandDataSetType = new DataElement(0x0800, 0x0100, "US", 1, "0101H");
+		//this.commandDataSetType = new DataElement(0x0800, 0x0100, "US", 1, "0101H");
+		this.commandDataSetType = new DataElement(0x0800, 0x0100, "US", 1, "0101");
 		this.elementLength += this.commandDataSetType.getElementLength();
 		this.commandGroupLength = new DataElement(0x0000, 0x0000, "UL", 1, "" + this.elementLength);
 		

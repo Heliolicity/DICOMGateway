@@ -15,6 +15,7 @@ public class DataElement implements Serializable {
 	private String valueRepresentation;
 	private int valueLength;
 	private String elementData;
+	private short shrElementData;
 	private int[] metaInfo;
 	private String uniqueIdentifier;
 	private int elementLength;
@@ -35,6 +36,13 @@ public class DataElement implements Serializable {
 		this.elementData = elementData;
 	}
 	
+	public DataElement(int groupNumber, int elementNumber, short shrElementData) {
+		super();
+		this.groupNumber = groupNumber;
+		this.elementNumber = elementNumber;
+		this.shrElementData = shrElementData;
+	}
+	
 	public DataElement(int groupNumber, int elementNumber, String valueRepresentation, int valueLength, String elementData) {
 		super();
 		this.groupNumber = groupNumber;
@@ -44,6 +52,15 @@ public class DataElement implements Serializable {
 		this.elementData = elementData;
 	}
 
+	public DataElement(int groupNumber, int elementNumber, String valueRepresentation, int valueLength, short shrElementData) {
+		super();
+		this.groupNumber = groupNumber;
+		this.elementNumber = elementNumber;
+		this.valueRepresentation = valueRepresentation;
+		this.valueLength = valueLength;
+		this.shrElementData = shrElementData;
+	}
+	
 	public String generateUniqueIdentifier(String uid) {
 		
 		String sdf = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss").format(new Date());
@@ -113,6 +130,12 @@ public class DataElement implements Serializable {
 						plen = 0;
 						
 					}
+					
+				}
+				
+				else {
+
+					//What if it's a short, not a String?
 					
 				}
 				
@@ -212,6 +235,14 @@ public class DataElement implements Serializable {
 
 	public void setElementData(String elementData) {
 		this.elementData = elementData;
+	}
+
+	public short getShrElementData() {
+		return shrElementData;
+	}
+
+	public void setShrElementData(short shrElementData) {
+		this.shrElementData = shrElementData;
 	}
 
 	public int[] getMetaInfo() {
