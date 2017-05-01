@@ -4,18 +4,16 @@ public class TestMain {
 
 	public static void main (String args []) {
 		
-		A_ASSOCIATE_RQ request = new A_ASSOCIATE_RQ("1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1");
-		request.buildProtocolVersion();
-		request.buildCallingAE();
-		request.buildCalledAE();
-		request.buildApplicationContext();
-		request.buildPresentationContext();
-		request.buildUserInformation();
-		request.buildPduLength();
-		request.buildRequest();
+		//A_ASSOCIATE_RQ request = new A_ASSOCIATE_RQ("1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1");
 		
-		byte[] arr = request.getRequest();
-		
+		int i = 21;
+				String hex = Integer.toHexString(i);
+				System.out.println("Hex value is " + hex);
+	
+				String hexNumber = "21";
+						int decimal = Integer.parseInt(hexNumber, 16);
+						System.out.println("Hex value is " + decimal);
+				
 	}
 	
 	private static void pl(String s) { System.out.println(s); }

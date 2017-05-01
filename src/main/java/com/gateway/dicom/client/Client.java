@@ -2,11 +2,18 @@ package com.gateway.dicom.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.net.Socket;
 
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.entities.DataElement;
+import com.gateway.dicom.entities.ApplicationContext;
+import com.gateway.dicom.entities.PresentationContext_RQ;
+import com.gateway.dicom.entities.UserInformation;
+import com.gateway.dicom.entities.AbstractSyntax;
+import com.gateway.dicom.entities.TransferSyntax;
 import com.gateway.dicom.lib.DicomValueRepresentationInputStream;
 import com.gateway.dicom.lib.DicomValueRepresentationOutputStream;
 
@@ -19,6 +26,8 @@ public class Client {
     private DataInputStream dis = null;
     private DicomValueRepresentationInputStream inputStream;
     private DicomValueRepresentationOutputStream outputStream;
+    private ByteArrayOutputStream byteOutputStream;
+    private ByteArrayInputStream byteInputStream;
     private C_ECHO_RQ echoRequest = null;
     private A_ASSOCIATE_RQ associateRequest = null;
     
@@ -116,20 +125,154 @@ public class Client {
     	
     	try {
         	
-    		this.associateRequest = new A_ASSOCIATE_RQ("1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1", "1.2.840.10008.3.1.1.1");
-			this.associateRequest.buildProtocolVersion();
-			this.associateRequest.buildCallingAE();
-			this.associateRequest.buildCalledAE();
-			this.associateRequest.buildApplicationContext();
-			this.associateRequest.buildPresentationContext();
-			this.associateRequest.buildUserInformation();
-			this.associateRequest.buildPduLength();
-			this.associateRequest.buildRequest();
-			
-			//this.outputStream.writeString(string);
-			//Q: How to write a byte array to the output stream?
-			
-			
+    		//Create a byte stream for re-use
+    		ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    		byte[] arr;
+    		
+    		//Build Application Context
+    		ApplicationContext applicationContext = new ApplicationContext("1.2.840.10008.3.1.1.1");
+    		arr = applicationContext.getApplicationContextName().getBytes();
+    		applicationContext.setItemLength(arr.length);
+    		
+    		//Build User Information
+    		UserInformation userInformation = new UserInformation("1.2.840.10008.3.1.1.1");
+    		arr = userInformation.getUserData().getBytes();
+    		userInformation.setItemLength(arr.length);
+    		
+    		//Build Transfer Syntax
+    		TransferSyntax transferSyntax = new TransferSyntax("1.2.840.10008.3.1.1.1");
+    		arr = transferSyntax.getTransferSyntaxName().getBytes();
+    		transferSyntax.setItemLength(arr.length);
+    		
+    		//Build Abstract Syntax
+    		AbstractSyntax abstractSyntax = new AbstractSyntax("1.2.840.10008.3.1.1.1");
+    		arr = abstractSyntax.getAbstractSyntaxName().getBytes();
+    		abstractSyntax.setItemLength(arr.length);
+    		
+    		//Write the Application Context, Abstract Sytax, Transfer Syntax and User Information
+    		//to a buffer and get the size of each item.  This value is needed for the Presentation Context
+    		byte a = applicationContext.getItemType();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		a = applicationContext.getReserved();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		int b = applicationContext.getItemType();
+    		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
+    		arr = applicationContext.getApplicationContextName().getBytes();
+    		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
+
+    		int applicationContextLength = stream.size();
+    		
+    		stream.reset();
+    		
+    		a = userInformation.getItemType();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		a = userInformation.getReserved();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		b = userInformation.getItemLength();
+    		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
+    		arr = userInformation.getUserData().getBytes();
+    		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
+    		
+    		int userInformationLength = stream.size();
+    		
+    		stream.reset();
+    		
+    		a = abstractSyntax.getItemType();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		a = abstractSyntax.getReserved();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		b = abstractSyntax.getItemLength();
+    		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
+    		arr = abstractSyntax.getAbstractSyntaxName().getBytes();
+    		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
+    		
+    		int abstractSyntaxLength = stream.size();
+    		
+    		stream.reset();
+    		
+    		a = transferSyntax.getItemType();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		a = transferSyntax.getReserved();
+    		stream.write(a);
+    		pl("BUFFER SIZE: " + stream.size());
+    		b = transferSyntax.getItemLength();
+    		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
+    		arr = transferSyntax.getTransferSyntaxName().getBytes();
+    		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
+    		
+    		int transferSyntaxLength = stream.size();
+    		
+    		stream.reset();
+    		
+    		//Build the Presentation Context
+    		PresentationContext_RQ presentationContext = new PresentationContext_RQ(1, transferSyntax, abstractSyntax);
+    		
+    		b = presentationContext.getPresentationContextID();
+    		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
+    		
+    		for (int i = 0; i < 3; i ++) {
+    		
+    			a = presentationContext.getItemType();
+    			stream.write(a);
+    			pl("BUFFER SIZE: " + stream.size());
+    			
+    		}
+    		
+    		presentationContext.setItemLength(stream.size() + abstractSyntaxLength + transferSyntaxLength);
+    		
+    		int presentationContextLength = presentationContext.getItemLength();
+    		
+    		stream.reset();
+    		
+    		this.associateRequest = new A_ASSOCIATE_RQ();
+    		this.associateRequest.setCalledAE("1.2.840.10008.3.1.1.1");
+    		this.associateRequest.setCallingAE("1.2.840.10008.3.1.1.1");
+    		this.associateRequest.setPresentationContext(presentationContext);
+    		this.associateRequest.setApplicationContext(applicationContext);
+    		this.associateRequest.setUserInformation(userInformation);
+    		
+    		b = this.associateRequest.getProtocolVersion();
+    		stream.write(b);
+    		
+    		for (int i = 0; i < 2; i ++) {
+    			
+    			a = this.associateRequest.getReserved();
+    			stream.write(a);
+    			
+    		}
+    		
+    		arr = this.associateRequest.getCalledAE().getBytes();
+    		stream.write(arr);
+    		arr = this.associateRequest.getCallingAE().getBytes();
+    		stream.write(arr);
+    		
+    		for (int i = 0; i < 32; i ++) {
+    			
+    			a = this.associateRequest.getReserved();
+    			stream.write(a);
+    			
+    		}
+    		
+    		int associateRequestLength = stream.size();
+    		associateRequestLength += applicationContextLength + presentationContextLength + userInformationLength;
+    		this.associateRequest.setPduLength(associateRequestLength);
+    		
 			retval = true;
         
         } 
