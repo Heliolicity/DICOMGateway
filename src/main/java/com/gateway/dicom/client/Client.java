@@ -119,12 +119,85 @@ public class Client {
     	
     }
     
-    public boolean sendAssociationRequest() {
+    public boolean sendAssociateRequest() {
     	
     	boolean retval = false;
     	
     	try {
         	
+    		boolean built = this.buildAssociateRequest();
+    		
+    		if (built) {
+    	
+    			this.writeByte(this.associateRequest.getPduType());
+    			this.writeByte(this.associateRequest.getReserved());
+    			this.writeInt(this.associateRequest.getPduLength());
+    			this.writeInt(this.associateRequest.getProtocolVersion());
+    			this.writeByte(this.associateRequest.getReserved());
+    			this.writeByte(this.associateRequest.getReserved());
+    			this.writeString(this.associateRequest.getCalledAE());
+    			this.writeString(this.associateRequest.getCallingAE());
+    			
+    			for (int a = 0; a < 32; a ++) this.writeByte(this.associateRequest.getReserved());
+    			
+    			this.writeByte(this.associateRequest.getApplicationContext().getItemType());
+    			this.writeByte(this.associateRequest.getApplicationContext().getReserved());
+    			this.writeInt(this.associateRequest.getApplicationContext().getItemLength());
+    			this.writeString(this.associateRequest.getApplicationContext().getApplicationContextName());
+    			
+    			this.writeByte(this.associateRequest.getPresentationContext().getItemType());
+    			this.writeByte(this.associateRequest.getPresentationContext().getReserved());
+    			this.writeInt(this.associateRequest.getPresentationContext().getItemLength());
+    			this.writeInt(this.associateRequest.getPresentationContext().getPresentationContextID());
+    			
+    				this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
+    				this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
+    				this.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+    				this.writeString(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName());
+    				
+    				this.writeByte(this.associateRequest.getPresentationContext().getTransferSyntaxSubItem().getItemType());
+    				this.writeByte(this.associateRequest.getPresentationContext().getTransferSyntaxSubItem().getReserved());
+    				this.writeInt(this.associateRequest.getPresentationContext().getTransferSyntaxSubItem().getItemLength());
+    				this.writeString(this.associateRequest.getPresentationContext().getTransferSyntaxSubItem().getTransferSyntaxName());
+    				
+    			this.writeByte(this.associateRequest.getUserInformation().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getItemLength());
+    			this.writeString(this.associateRequest.getUserInformation().getUserData());
+    			
+    			pl("Successfully sent A-ASSOCIATE-RQ");
+    			retval = true;
+    			
+    		}
+    		
+    		else {
+    			
+    			pl("Could not build A-ASSOCIATE-RQ");
+    			retval = false;
+    			
+    		}
+    	
+        } 
+    	
+        catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }
+        
+    	
+    	return retval;
+    	
+    }
+
+    public boolean buildAssociateRequest() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+    		
     		//Create a byte stream for re-use
     		ByteArrayOutputStream stream = new ByteArrayOutputStream();
     		byte[] arr;
@@ -249,23 +322,28 @@ public class Client {
     		
     		b = this.associateRequest.getProtocolVersion();
     		stream.write(b);
+    		pl("BUFFER SIZE: " + stream.size());
     		
     		for (int i = 0; i < 2; i ++) {
     			
     			a = this.associateRequest.getReserved();
     			stream.write(a);
+    			pl("BUFFER SIZE: " + stream.size());
     			
     		}
     		
     		arr = this.associateRequest.getCalledAE().getBytes();
     		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
     		arr = this.associateRequest.getCallingAE().getBytes();
     		stream.write(arr);
+    		pl("BUFFER SIZE: " + stream.size());
     		
     		for (int i = 0; i < 32; i ++) {
     			
     			a = this.associateRequest.getReserved();
     			stream.write(a);
+    			pl("BUFFER SIZE: " + stream.size());
     			
     		}
     		
@@ -273,18 +351,17 @@ public class Client {
     		associateRequestLength += applicationContextLength + presentationContextLength + userInformationLength;
     		this.associateRequest.setPduLength(associateRequestLength);
     		
-			retval = true;
-        
-        } 
+    		retval = true;
+    		
+    	}
     	
-        catch (Exception e) {   
-        	
+    	catch (Exception e) {
+
         	pl("EXCEPTION: " + e.getMessage());
         	e.printStackTrace();
         	retval = false;
-            
-        }
-        
+    		
+    	}
     	
     	return retval;
     	
@@ -308,6 +385,57 @@ public class Client {
         }
     	
         return retval;
+    	
+    }
+    
+    public void writeByte(byte val) {
+    	
+    	try {
+            
+    		this.outputStream.writeUInt8(val);
+    		
+        }
+    	
+        catch (Exception e) {
+        
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	
+        }
+    	
+    }
+    
+    public void writeInt(int val) {
+    	
+    	try {
+            
+    		this.outputStream.writeUInt32(val);
+    		
+        }
+    	
+        catch (Exception e) {
+        
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	
+        }
+    	
+    }
+   
+    public void writeString(String val) {
+    	
+    	try {
+            
+    		this.outputStream.writeString(val);
+    		
+        }
+    	
+        catch (Exception e) {
+        
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	
+        }
     	
     }
     

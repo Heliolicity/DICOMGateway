@@ -14,7 +14,7 @@ public class TestMain {
 
 	public static void main (String args []) {
 		
-		/*Client client = null;
+		Client client = null;
 		boolean connected = false;
 		FileInputStream fileInputStream;
 		String host = null;
@@ -44,20 +44,19 @@ public class TestMain {
 				
 				try {
 					
-					boolean result = client.sendAssociationRequest();
+					boolean result = client.sendAssociateRequest();
 					
-					boolean result = client.sendEchoRequest();
+					if (result) pl("A-ASSOCIATE-RQ Request Sent");
+					else pl("A-ASSOCIATE-RQ NOT Sent");
+
 					
-					if (result) pl("Echo Request Sent");
-					else pl("Echo Request NOT Sent");
-					
-					fileInputStream = new FileInputStream("IMG_2116.JPG");
+					/*fileInputStream = new FileInputStream("IMG_2116.JPG");
 					
 					while (fileInputStream.available() > 0) {
 						
 						pl("" + fileInputStream.read());
 						
-					}
+					}*/
 					
 				}
 				
@@ -76,56 +75,7 @@ public class TestMain {
 				
 			}
 				
-		}*/
-		
-		try {
-        	
-    		//Create a byte stream for re-use
-    		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    		byte[] arr;
-    		
-    		//Build Application Context
-    		ApplicationContext applicationContext = new ApplicationContext("1.2.840.10008.3.1.1.1");
-    		arr = applicationContext.getApplicationContextName().getBytes();
-    		applicationContext.setItemLength(arr.length);
-    		
-    		//Build User Information
-    		UserInformation userInformation = new UserInformation("1.2.840.10008.3.1.1.1");
-    		arr = userInformation.getUserData().getBytes();
-    		userInformation.setItemLength(arr.length);
-    		
-    		//Build Transfer Syntax
-    		TransferSyntax transferSyntax = new TransferSyntax("1.2.840.10008.3.1.1.1");
-    		arr = transferSyntax.getTransferSyntaxName().getBytes();
-    		transferSyntax.setItemLength(arr.length);
-    		
-    		//Build Abstract Syntax
-    		AbstractSyntax abstractSyntax = new AbstractSyntax("1.2.840.10008.3.1.1.1");
-    		arr = abstractSyntax.getAbstractSyntaxName().getBytes();
-    		abstractSyntax.setItemLength(arr.length);
-    		
-    		byte a = applicationContext.getItemType();
-    		stream.write(a);
-    		pl("BUFFER SIZE: " + stream.size());
-    		a = applicationContext.getReserved();
-    		stream.write(a);
-    		pl("BUFFER SIZE: " + stream.size());
-    		int b = applicationContext.getItemType();
-    		stream.write(b);
-    		pl("BUFFER SIZE: " + stream.size());
-    		arr = applicationContext.getApplicationContextName().getBytes();
-    		stream.write(arr);
-    		pl("BUFFER SIZE: " + stream.size());
-        
-        } 
-    	
-        catch (Exception e) {   
-        	
-        	pl("EXCEPTION: " + e.getMessage());
-        	e.printStackTrace();
-            
-        }
-    
+		}
 		
 	}
 	
