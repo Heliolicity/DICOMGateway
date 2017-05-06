@@ -1,44 +1,21 @@
 package com.gateway.dicom.entities;
 
-public class ApplicationContext {
+import java.io.ByteArrayOutputStream;
 
-	private byte itemType = 0x10;
-	private byte reserved = 0x00;
-	private int itemLength;
+public class ApplicationContext extends DICOMItem {
+
+	//private byte itemType = 0x10;
 	private String applicationContextName;
 	
-	public ApplicationContext(String applicationContextName) {
+	public ApplicationContext(byte itemType, String applicationContextName) {
 		super();
+		this.itemType = itemType;
 		this.applicationContextName = applicationContextName;
-		//byte[] bytes = this.applicationContextName.getBytes();
-		//this.itemLength = bytes.length;
+		byte[] bytes = this.applicationContextName.getBytes();
+		this.itemLength = this.convertDecToHex(bytes.length);
 	}
 	
 	public ApplicationContext() { super(); }
-
-	public byte getItemType() {
-		return itemType;
-	}
-
-	public void setItemType(byte itemType) {
-		this.itemType = itemType;
-	}
-
-	public byte getReserved() {
-		return reserved;
-	}
-
-	public void setReserved(byte reserved) {
-		this.reserved = reserved;
-	}
-
-	public int getItemLength() {
-		return itemLength;
-	}
-
-	public void setItemLength(int itemLength) {
-		this.itemLength = itemLength;
-	}
 
 	public String getApplicationContextName() {
 		return applicationContextName;
@@ -48,5 +25,25 @@ public class ApplicationContext {
 		this.applicationContextName = applicationContextName;
 	}
 
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.stream = new ByteArrayOutputStream();
+			this.stream.write(this.itemLength);
+			this.stream.write(this.reserved);
+			this.stream.write(this.itemLength);
+			this.stream.write(this.applicationContextName.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
 	
 }

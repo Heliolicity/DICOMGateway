@@ -4,11 +4,16 @@ public class TestMain {
 
 	public static void main (String args []) {
 		
-		String hexNumber = "0030H";
-		int decimal = Integer.parseInt(hexNumber, 16);
-		System.out.println("Hex value is " + decimal);
+		int dec = 24;
+		String hex = Integer.toHexString(dec);
+		System.out.println(hex);
+		int test = Integer.parseInt(hex);
+		System.out.println(test);
 		
-		int test = 0x0030;
+		String binaryIntInStr = Integer.toBinaryString(8);
+		System.out.println(binaryIntInStr);
+		test = Integer.parseInt(binaryIntInStr);
+		System.out.println(test);
 		
 	}
 	

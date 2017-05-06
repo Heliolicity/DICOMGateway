@@ -1,44 +1,20 @@
 package com.gateway.dicom.entities;
 
-public class AbstractSyntax {
+import java.io.ByteArrayOutputStream;
 
-	private byte itemType = 0x30;
-	private byte reserved = 0x00;
-	private int itemLength;
-	private String abstractSyntaxName;
+public class AbstractSyntax extends DICOMItem {
+
+	protected String abstractSyntaxName;
 	
-	public AbstractSyntax(String abstractSyntaxName) {
+	public AbstractSyntax(byte itemType, String abstractSyntaxName) {
 		super();
+		this.itemType = itemType;
 		this.abstractSyntaxName = abstractSyntaxName;
 		byte[] bytes = this.abstractSyntaxName.getBytes();
-		this.itemLength = bytes.length;
+		this.itemLength = this.convertDecToHex(bytes.length);
 	}
 	
 	public AbstractSyntax() { super(); }
-
-	public byte getItemType() {
-		return itemType;
-	}
-
-	public void setItemType(byte itemType) {
-		this.itemType = itemType;
-	}
-
-	public byte getReserved() {
-		return reserved;
-	}
-
-	public void setReserved(byte reserved) {
-		this.reserved = reserved;
-	}
-
-	public int getItemLength() {
-		return itemLength;
-	}
-
-	public void setItemLength(int itemLength) {
-		this.itemLength = itemLength;
-	}
 
 	public String getAbstractSyntaxName() {
 		return abstractSyntaxName;
@@ -46,6 +22,27 @@ public class AbstractSyntax {
 
 	public void setAbstractSyntaxName(String abstractSyntaxName) {
 		this.abstractSyntaxName = abstractSyntaxName;
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.stream = new ByteArrayOutputStream();
+			this.stream.write(this.itemLength);
+			this.stream.write(this.reserved);
+			this.stream.write(this.itemLength);
+			this.stream.write(this.abstractSyntaxName.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
 	}
 	
 }

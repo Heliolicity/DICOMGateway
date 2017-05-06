@@ -122,7 +122,7 @@ public class Client {
     public boolean sendAssociateRequest() {
     	
     	boolean retval = false;
-    	
+    	/*
     	try {
         	
     		boolean built = this.buildAssociateRequest();
@@ -187,7 +187,7 @@ public class Client {
             
         }
         
-    	
+    	*/
     	return retval;
     	
     }
@@ -195,12 +195,13 @@ public class Client {
     public boolean buildAssociateRequest() {
     	
     	boolean retval = false;
-    	
+    	/*
     	try {
     		
     		//Create a byte stream for re-use
     		ByteArrayOutputStream stream = new ByteArrayOutputStream();
     		byte[] arr;
+    		byte type;
     		
     		//Build Application Context
     		ApplicationContext applicationContext = new ApplicationContext("1.2.840.10008.3.1.1.1");
@@ -218,7 +219,8 @@ public class Client {
     		transferSyntax.setItemLength(arr.length);
     		
     		//Build Abstract Syntax
-    		AbstractSyntax abstractSyntax = new AbstractSyntax("1.2.840.10008.3.1.1.1");
+    		type = 0x30;
+    		AbstractSyntax abstractSyntax = new AbstractSyntax(type, "1.2.840.10008.3.1.1.1");
     		arr = abstractSyntax.getAbstractSyntaxName().getBytes();
     		abstractSyntax.setItemLength(arr.length);
     		
@@ -362,7 +364,7 @@ public class Client {
         	retval = false;
     		
     	}
-    	
+    	*/
     	return retval;
     	
     }

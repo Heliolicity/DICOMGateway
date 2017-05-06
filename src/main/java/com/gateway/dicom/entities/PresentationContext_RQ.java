@@ -1,49 +1,29 @@
 package com.gateway.dicom.entities;
 
-public class PresentationContext_RQ {
+import java.util.ArrayList;
+import java.util.List;
 
-	private byte itemType = 0x20;
-	private byte reserved = 0x00;
-	private int itemLength;
-	private int presentationContextID;
-	private TransferSyntax transferSyntaxSubItem;
+public class PresentationContext_RQ extends DICOMItem {
+
+	//private byte itemType = 0x20;
+	private int presentationContextID; //This should be an unsigned binary integer - does this need special handling?
+	private List<TransferSyntax> transferSyntaxSubItems;
 	private AbstractSyntax abstractSyntaxSubItem;
 	
-	public PresentationContext_RQ(int presentationContextID,
-			TransferSyntax transferSyntaxSubItem, 
+	public PresentationContext_RQ(byte itemType, 
+			int presentationContextID,
+			List<TransferSyntax> transferSyntaxSubItems, 
 			AbstractSyntax abstractSyntaxSubItem) {
 		super();
-		this.presentationContextID = presentationContextID;
-		this.transferSyntaxSubItem = transferSyntaxSubItem;		
+		this.itemType = itemType;
+		this.presentationContextID = this.convertDecToBin(presentationContextID);
+		this.transferSyntaxSubItems = transferSyntaxSubItems;		
 		this.abstractSyntaxSubItem = abstractSyntaxSubItem;
+		this.determineLength();
 	}
 	
 	public PresentationContext_RQ() { super(); }
-
-	public byte getItemType() {
-		return itemType;
-	}
-
-	public void setItemType(byte itemType) {
-		this.itemType = itemType;
-	}
-
-	public byte getReserved() {
-		return reserved;
-	}
-
-	public void setReserved(byte reserved) {
-		this.reserved = reserved;
-	}
-
-	public int getItemLength() {
-		return itemLength;
-	}
-
-	public void setItemLength(int itemLength) {
-		this.itemLength = itemLength;
-	}
-
+	
 	public int getPresentationContextID() {
 		return presentationContextID;
 	}
@@ -52,12 +32,12 @@ public class PresentationContext_RQ {
 		this.presentationContextID = presentationContextID;
 	}
 
-	public TransferSyntax getTransferSyntaxSubItem() {
-		return transferSyntaxSubItem;
+	public List<TransferSyntax> getTransferSyntaxSubItems() {
+		return transferSyntaxSubItems;
 	}
 
-	public void setTransferSyntaxSubItem(TransferSyntax transferSyntaxSubItem) {
-		this.transferSyntaxSubItem = transferSyntaxSubItem;
+	public void setTransferSyntaxSubItem(List<TransferSyntax> transferSyntaxSubItems) {
+		this.transferSyntaxSubItems = transferSyntaxSubItems; 
 	}
 
 	public AbstractSyntax getAbstractSyntaxSubItem() {
@@ -68,6 +48,18 @@ public class PresentationContext_RQ {
 		this.abstractSyntaxSubItem = abstractSyntaxSubItem;
 	}
 	
-	
+	public void determineLength() {
+		
+		int length = 1 + 1 + 2 + this.abstractSyntaxSubItem.getItemLength();
+		
+		for (TransferSyntax transferSyntax : this.transferSyntaxSubItems) 
+			
+			length += 1 + 1 + 2 + transferSyntax.getItemLength();
+		
+		length += 1 + 1 + 1 + 1;
+		
+		this.itemLength = length;
+		
+	}
 	
 }
