@@ -30,7 +30,7 @@ public class TransferSyntax extends DICOMItem {
 		try {
 			
 			this.stream = new ByteArrayOutputStream();
-			this.stream.write(this.itemLength);
+			this.stream.write(this.itemType);
 			this.stream.write(this.reserved);
 			this.stream.write(this.itemLength);
 			this.stream.write(this.transferSyntaxName.getBytes());
