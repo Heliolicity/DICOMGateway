@@ -12,7 +12,9 @@ public class ApplicationContext extends DICOMItem {
 		this.itemType = itemType;
 		this.applicationContextName = applicationContextName;
 		byte[] bytes = this.applicationContextName.getBytes();
-		this.itemLength = this.convertDecToHex(bytes.length);
+		this.itemLength = bytes.length;
+		//this.itemLength = this.convertDecToHex(bytes.length);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 	
 	public ApplicationContext() { super(); }

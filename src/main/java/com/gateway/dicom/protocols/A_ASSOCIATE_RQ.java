@@ -6,7 +6,8 @@ import com.gateway.dicom.entities.UserInformation;
 
 public class A_ASSOCIATE_RQ {
 
-	private byte pduType = 0x01;
+	//private byte pduType = 0x01;
+	private byte pduType;
 	private byte reserved = 0x00;
 	private int pduLength; //4 bytes in length
 	private int protocolVersion = 1; //2 bytes in length
@@ -16,9 +17,10 @@ public class A_ASSOCIATE_RQ {
 	private PresentationContext_RQ presentationContext;
 	private UserInformation userInformation;
 	
-	public A_ASSOCIATE_RQ(String calledAE, String callingAE, ApplicationContext applicationContext,
+	public A_ASSOCIATE_RQ(byte pduType, String calledAE, String callingAE, ApplicationContext applicationContext,
 			PresentationContext_RQ presentationContext, UserInformation userInformation) {
 		super();
+		this.pduType = pduType;
 		this.calledAE = calledAE;
 		this.callingAE = callingAE;
 		this.applicationContext = applicationContext;

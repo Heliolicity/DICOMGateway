@@ -11,7 +11,9 @@ public class ImplementationClassUIDSubItem extends DICOMItem {
 		this.itemType = itemType;
 		this.implementationClassUID = implementationClassUID;
 		byte[] bytes = this.implementationClassUID.getBytes();
-		this.itemLength = this.convertDecToHex(bytes.length);
+		this.itemLength = bytes.length;
+		//this.itemLength = this.convertDecToHex(bytes.length);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 	
 	public ImplementationClassUIDSubItem() { super(); }

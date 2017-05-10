@@ -18,6 +18,8 @@ public class ExtendedNegotiationSubItem extends DICOMItem {
 		this.sopClassUIDLength = bytes.length;
 		bytes = this.serviceClassApplicationInformation.getBytes();
 		this.itemLength = 2 + this.sopClassUIDLength + bytes.length;
+		//this.itemLength = this.convertDecToHex(this.itemLength);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 		
 	}
 	

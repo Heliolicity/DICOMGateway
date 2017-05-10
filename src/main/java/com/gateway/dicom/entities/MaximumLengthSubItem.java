@@ -11,6 +11,7 @@ public class MaximumLengthSubItem extends DICOMItem {
 		super();
 		this.itemType = itemType;
 		this.itemLength = 0x00000004;
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 		this.maxPDULengthReceive = maxPDULengthReceive;
 	}
 	

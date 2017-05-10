@@ -12,7 +12,9 @@ public class TransferSyntax extends DICOMItem {
 		this.itemType = itemType;
 		this.transferSyntaxName = transferSyntaxName;
 		byte[] bytes = this.transferSyntaxName.getBytes();
-		this.itemLength = this.convertDecToHex(bytes.length);
+		this.itemLength = bytes.length;
+		//this.itemLength = this.convertDecToHex(bytes.length);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 	
 	public TransferSyntax() { super(); }

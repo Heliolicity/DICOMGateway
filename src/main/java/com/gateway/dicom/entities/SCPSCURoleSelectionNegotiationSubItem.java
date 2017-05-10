@@ -20,6 +20,8 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 		this.scpRole = scpRole;
 		this.scuRole = scuRole;
 		this.itemLength = 2 + this.uidLength + 2 + 2;
+		//this.itemLength = this.convertDecToHex(this.itemLength);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 		
 	}
 	

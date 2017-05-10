@@ -1,5 +1,6 @@
 package com.gateway.dicom.entities;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,12 +15,29 @@ public class PresentationContext_RQ extends DICOMItem {
 			int presentationContextID,
 			List<TransferSyntax> transferSyntaxSubItems, 
 			AbstractSyntax abstractSyntaxSubItem) {
+		
 		super();
 		this.itemType = itemType;
-		this.presentationContextID = this.convertDecToBin(presentationContextID);
+		//this.presentationContextID = this.convertDecToBin(presentationContextID);
+		this.presentationContextID = presentationContextID;
 		this.transferSyntaxSubItems = transferSyntaxSubItems;		
 		this.abstractSyntaxSubItem = abstractSyntaxSubItem;
-		this.determineLength();
+		//this.determineLength();
+		
+		this.abstractSyntaxSubItem.writeToBuffer();
+		int a = this.abstractSyntaxSubItem.getStream().size();
+		
+		int b = 0;
+		
+		for (TransferSyntax transferSyntax : this.transferSyntaxSubItems)  {
+			
+			transferSyntax.writeToBuffer();
+			b += transferSyntax.getStream().size();
+			
+		}
+		
+		this.itemLength = 4 + a + b;
+		
 	}
 	
 	public PresentationContext_RQ() { super(); }
@@ -59,6 +77,36 @@ public class PresentationContext_RQ extends DICOMItem {
 		length += 1 + 1 + 1 + 1;
 		
 		this.itemLength = length;
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.stream = new ByteArrayOutputStream();
+			this.stream.write(this.itemType);
+			this.stream.write(this.reserved);
+			this.stream.write(this.itemLength);
+			this.stream.write(this.presentationContextID);
+			this.stream.write(this.reserved);
+			this.stream.write(this.reserved);
+			this.stream.write(this.reserved);
+			this.stream.writeTo(this.abstractSyntaxSubItem.getStream());
+			
+			for (TransferSyntax transferSyntax : this.transferSyntaxSubItems) 
+				
+				this.stream.writeTo(transferSyntax.getStream());
+			
+			
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
 		
 	}
 	

@@ -11,7 +11,9 @@ public class ImplementationVersionNameSubItem extends DICOMItem {
 		this.itemType = itemType;
 		this.implementationVersionName = implementationVersionName;
 		byte[] bytes = this.implementationVersionName.getBytes();
-		this.itemLength = this.convertDecToHex(bytes.length);
+		this.itemLength = bytes.length;
+		//this.itemLength = this.convertDecToHex(bytes.length);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 
 	public ImplementationVersionNameSubItem() { super(); }

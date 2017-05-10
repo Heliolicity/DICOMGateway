@@ -11,7 +11,9 @@ public class AbstractSyntax extends DICOMItem {
 		this.itemType = itemType;
 		this.abstractSyntaxName = abstractSyntaxName;
 		byte[] bytes = this.abstractSyntaxName.getBytes();
-		this.itemLength = this.convertDecToHex(bytes.length);
+		this.itemLength = bytes.length;
+		//this.itemLength = this.convertDecToHex(bytes.length);
+		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 	
 	public AbstractSyntax() { super(); }
