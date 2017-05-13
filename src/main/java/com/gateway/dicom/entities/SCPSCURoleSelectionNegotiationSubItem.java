@@ -27,6 +27,14 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 	
 	public SCPSCURoleSelectionNegotiationSubItem() { super(); }
 
+	public int getUidLength() {
+		return uidLength;
+	}
+
+	public void setUidLength(int uidLength) {
+		this.uidLength = uidLength;
+	}
+
 	public String getSopClassUID() {
 		return sopClassUID;
 	}
@@ -61,6 +69,8 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 			this.stream.write(this.itemLength);
 			this.stream.write(this.uidLength);
 			this.stream.write(this.sopClassUID.getBytes());
+			this.stream.write(this.scuRole);
+			this.stream.write(this.scpRole);
 		
 		}
 		

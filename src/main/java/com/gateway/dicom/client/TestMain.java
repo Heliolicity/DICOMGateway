@@ -46,8 +46,30 @@ public class TestMain {
 					
 					boolean result = client.sendAssociateRequest();
 					
-					if (result) pl("A-ASSOCIATE-RQ Request Sent");
-					else pl("A-ASSOCIATE-RQ NOT Sent");
+					if (result) {
+						
+						pl("A-ASSOCIATE-RQ Request Sent");
+						result = client.receive();
+						
+						if (result) {
+							
+							pl("Getting something");
+							
+						}
+						
+						else {
+							
+							pl("NOT GETTING ANYTHING");
+							
+						}
+						
+					}
+					
+					else {
+						
+						pl("A-ASSOCIATE-RQ NOT Sent");
+						
+					}
 
 					
 					/*fileInputStream = new FileInputStream("IMG_2116.JPG");

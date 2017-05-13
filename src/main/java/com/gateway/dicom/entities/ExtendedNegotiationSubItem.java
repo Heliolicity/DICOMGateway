@@ -16,6 +16,7 @@ public class ExtendedNegotiationSubItem extends DICOMItem {
 		this.sopClassUID = sopClassUID;
 		byte[] bytes = this.sopClassUID.getBytes();
 		this.sopClassUIDLength = bytes.length;
+		this.serviceClassApplicationInformation = serviceClassApplicationInformation;
 		bytes = this.serviceClassApplicationInformation.getBytes();
 		this.itemLength = 2 + this.sopClassUIDLength + bytes.length;
 		//this.itemLength = this.convertDecToHex(this.itemLength);
@@ -24,6 +25,14 @@ public class ExtendedNegotiationSubItem extends DICOMItem {
 	}
 	
 	public ExtendedNegotiationSubItem() { super(); }
+
+	public int getSopClassUIDLength() {
+		return sopClassUIDLength;
+	}
+
+	public void setSopClassUIDLength(int sopClassUIDLength) {
+		this.sopClassUIDLength = sopClassUIDLength;
+	}
 
 	public String getSopClassUID() {
 		return sopClassUID;

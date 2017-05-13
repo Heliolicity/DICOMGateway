@@ -140,6 +140,76 @@ public class Client {
     	
     			this.writeByte(this.associateRequest.getPduType());
     			this.writeByte(this.associateRequest.getReserved());
+    			this.writeInt(this.associateRequest.getPduLength());
+    			this.writeInt(this.associateRequest.getProtocolVersion());
+    			this.writeByte(this.associateRequest.getReserved());
+    			this.writeByte(this.associateRequest.getReserved());
+    			this.writeString(this.associateRequest.getCalledAE());
+    			this.writeString(this.associateRequest.getCallingAE());
+    			
+    			for (int a = 0; a < 32; a ++) this.writeByte(this.associateRequest.getReserved());
+    			
+    			this.writeByte(this.associateRequest.getApplicationContext().getItemType());
+    			this.writeByte(this.associateRequest.getApplicationContext().getReserved());
+    			this.writeInt(this.associateRequest.getApplicationContext().getItemLength());
+    			this.writeString(this.associateRequest.getApplicationContext().getApplicationContextName());
+    			
+    			this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+    			this.writeString(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName());
+    			
+    			int tsi = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().size();
+    			
+    			for (int b = 0; b < tsi; b ++) {
+    				
+    				TransferSyntax transferSyntax = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().get(b);
+    				this.writeByte(transferSyntax.getItemType());
+    				this.writeByte(transferSyntax.getReserved());
+    				this.writeInt(transferSyntax.getItemLength());
+    				this.writeString(transferSyntax.getTransferSyntaxName());
+    				
+    			}
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getItemLength());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemLength());
+    			this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemLength());
+    			this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getImplementationClassUID());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemLength());
+    			this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getImplementationVersionName());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemLength());
+    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsInvoked());
+    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsPerformed());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemLength());
+    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getUidLength());
+    			this.writeString(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getSopClassUID());
+    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScuRole());
+    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScpRole());
+    			
+    			this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemType());
+    			this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getReserved());
+    			this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemLength());
+    			this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
+    			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID());
+    			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation());
     			
     			pl("Successfully sent A-ASSOCIATE-RQ");
     			retval = true;
@@ -174,8 +244,8 @@ public class Client {
     	try {
     		
     		//Create a byte stream for re-use
-    		ByteArrayOutputStream stream = new ByteArrayOutputStream();
-    		byte[] arr;
+    		//ByteArrayOutputStream stream = new ByteArrayOutputStream();
+    		//byte[] arr;
     		byte type;
     		
     		//Application Context
@@ -199,19 +269,19 @@ public class Client {
     		MaximumLengthSubItem maximumLengthSubItem = new MaximumLengthSubItem(type, 4000);
     		
     		type = 0x52;
-    		ImplementationClassUIDSubItem implementationClassUIDSubItem = new ImplementationClassUIDSubItem(type, ""); 
+    		ImplementationClassUIDSubItem implementationClassUIDSubItem = new ImplementationClassUIDSubItem(type, "TEST"); 
     		
     		type = 0x55;
-    		ImplementationVersionNameSubItem implementationVersionNameSubItem = new ImplementationVersionNameSubItem(type, "");
+    		ImplementationVersionNameSubItem implementationVersionNameSubItem = new ImplementationVersionNameSubItem(type, "TEST");
     		
     		type = 0x53;
     		AsynchronousOperationsWindowSubItem asynchronousOperationsWindowSubItem = new AsynchronousOperationsWindowSubItem(type, 50, 50);
     		
     		type = 0x54;
-    		SCPSCURoleSelectionNegotiationSubItem scpSCURoleSelectionNegotiationSubItem = new SCPSCURoleSelectionNegotiationSubItem(type, "", 0, 0);
+    		SCPSCURoleSelectionNegotiationSubItem scpSCURoleSelectionNegotiationSubItem = new SCPSCURoleSelectionNegotiationSubItem(type, "TEST", 0, 0);
     		
     		type = 0x56;
-    		ExtendedNegotiationSubItem extendedNegotiationSubItem = new ExtendedNegotiationSubItem(type, "", "");
+    		ExtendedNegotiationSubItem extendedNegotiationSubItem = new ExtendedNegotiationSubItem(type, "TEST", "TEST");
     		
     		ImplementationItem implementationItem = new ImplementationItem(implementationClassUIDSubItem, implementationVersionNameSubItem);
     		
@@ -222,11 +292,12 @@ public class Client {
     		type = 0x01;
     		this.associateRequest = new A_ASSOCIATE_RQ();
     		this.associateRequest.setPduType(type);
-    		this.associateRequest.setCalledAE("1.2.840.10008.3.1.1.1");
+    		this.associateRequest.setCalledAE("CONQUESTSRV1    ");
     		this.associateRequest.setCallingAE("1.2.840.10008.3.1.1.1");
     		this.associateRequest.setPresentationContext(presentationContext_RQ);
     		this.associateRequest.setApplicationContext(applicationContext);
     		this.associateRequest.setUserInformation(userInformation);
+    		this.associateRequest.calculateLength();
     		
     		retval = true;
     		
@@ -247,11 +318,19 @@ public class Client {
     public boolean receive() {
     	
     	boolean retval = true;
+    	Object o;
+    	boolean b;
     	
     	try {
     		
             //o = this.dis.read
-            
+    		System.out.println("03. -- About to receive an object...");
+		    //o = this.inputStream.readString(10);
+		    b = this.inputStream.hasMoreData();
+		    System.out.println("04. <- Object received...");
+    		
+		    if (b) pl("MORE DATA");
+		    
         } 
     	
         catch (Exception e) {   

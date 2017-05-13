@@ -22,7 +22,7 @@ public class AsynchronousOperationsWindowSubItem extends DICOMItem {
 	
 	public AsynchronousOperationsWindowSubItem() { super(); }
 
-	public long getMaximumNumberOperationsInvoked() {
+	public int getMaximumNumberOperationsInvoked() {
 		return maximumNumberOperationsInvoked;
 	}
 
@@ -30,7 +30,7 @@ public class AsynchronousOperationsWindowSubItem extends DICOMItem {
 		this.maximumNumberOperationsInvoked = maximumNumberOperationsInvoked;
 	}
 
-	public long getMaximumNumberOperationsPerformed() {
+	public int getMaximumNumberOperationsPerformed() {
 		return maximumNumberOperationsPerformed;
 	}
 
