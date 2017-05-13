@@ -8,6 +8,7 @@ package com.gateway.dicom.lib;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.DataOutputStream;
 
 public class DicomValueRepresentationOutputStream extends DicomPrimitiveOutputStream {
 
@@ -131,4 +132,6 @@ public class DicomValueRepresentationOutputStream extends DicomPrimitiveOutputSt
 		outputStream.close();
 	}
 
+	public void flush() throws IOException { this.outputStream.flush(); }
+	
 }

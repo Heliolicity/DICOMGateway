@@ -8,6 +8,7 @@ package com.gateway.dicom.lib;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.DataInputStream;
 
 public class DicomValueRepresentationInputStream extends DicomPrimitiveInputStream {
 
@@ -32,4 +33,5 @@ public class DicomValueRepresentationInputStream extends DicomPrimitiveInputStre
 		return otherWordString;
 			
 	}
+	
 }

@@ -53,7 +53,7 @@ public class TestMain {
 						
 						if (result) {
 							
-							pl("Getting something");
+							pl("GETTING SOMETHING");
 							
 						}
 						

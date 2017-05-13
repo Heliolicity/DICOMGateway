@@ -34,6 +34,12 @@ public class ConquestTest {
     				+ " on port: " + this.socket.getPort());
     		pl("    -> from local address: " + this.socket.getLocalAddress() 
     				+ " and port: " + this.socket.getLocalPort());
+    		this.dos.write(1);
+    		pl("HERE 6");
+    		this.dos.flush();
+    		pl("HERE 7");
+    		this.dis.read();
+    		pl("HERE 8");
     		
     	} 
         

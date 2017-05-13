@@ -34,7 +34,7 @@ public class TestMain {
 		
 		try {
 			
-			DicomValueRepresentationOutputStream outputStream = 
+			/*DicomValueRepresentationOutputStream outputStream = 
 					new DicomValueRepresentationOutputStream(new FileOutputStream("TEST.dcm"), 
 					DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
 		
@@ -46,7 +46,7 @@ public class TestMain {
 			for (int a = 0; a < preamble.length; a ++) outputStream.writeUInt8(preamble[a]);
 			
 			pl("DONE!");
-			
+			*/
 		}
 		
 		catch (Exception exc) {

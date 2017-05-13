@@ -7,14 +7,16 @@ package com.gateway.dicom.lib;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.DataInputStream;
 
 public class DicomPrimitiveInputStream extends DicomByteOrderable {
 
-	private InputStream inputStream;
+	//private InputStream inputStream;
+	private DataInputStream inputStream;
 	
 	public DicomPrimitiveInputStream(InputStream inputStream, int byteOrdering) {
 		super(byteOrdering);
-		this.inputStream = inputStream;
+		this.inputStream = new DataInputStream(inputStream);
 	}
 	
 	public void skip(int numberOfBytes) throws IOException {
@@ -84,4 +86,9 @@ public class DicomPrimitiveInputStream extends DicomByteOrderable {
 		else 
 			return true;
 	}
+	
+	public String readLine() throws IOException { return this.inputStream.readLine(); }
+	
+	public String readUTF() throws IOException { return this.inputStream.readUTF(); }
+	
 }

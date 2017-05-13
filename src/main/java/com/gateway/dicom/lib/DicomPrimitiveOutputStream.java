@@ -7,14 +7,16 @@ package com.gateway.dicom.lib;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.DataOutputStream;
 
 public class DicomPrimitiveOutputStream extends DicomByteOrderable {
 	
-	protected OutputStream outputStream;
+	//protected OutputStream outputStream;
+	protected DataOutputStream outputStream;
 	
 	public DicomPrimitiveOutputStream(OutputStream outputStream, int byteOrdering) {
 		super(byteOrdering);
-		this.outputStream = outputStream;
+		this.outputStream = new DataOutputStream(outputStream);
 	}
 	
 	public void writeVR(String VR) throws IOException {
@@ -62,5 +64,7 @@ public class DicomPrimitiveOutputStream extends DicomByteOrderable {
 			this.outputStream.write(b0);
 		}
 	}
+	
+	public void flush() throws IOException { this.outputStream.flush(); }
 	
 }

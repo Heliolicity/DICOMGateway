@@ -2,6 +2,7 @@ package com.gateway.dicom.client;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.net.Socket;
@@ -69,6 +70,8 @@ public class Client {
 			
 			this.inputStream = new DicomValueRepresentationInputStream(this.socket.getInputStream(), DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
 			pl("Created input stream successfully.");
+			boolean b = this.inputStream.hasMoreData();
+			pl("DOES IT HAVE DATA: " + b);
 			
 			pl("Connected to Server:" + this.socket.getInetAddress() 
 				+ " on port: " + this.socket.getPort() + " successfully ");
@@ -211,6 +214,8 @@ public class Client {
     			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID());
     			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation());
     			
+    			this.flushOutputStream();
+    			
     			pl("Successfully sent A-ASSOCIATE-RQ");
     			retval = true;
     			
@@ -317,21 +322,25 @@ public class Client {
     
     public boolean receive() {
     	
-    	boolean retval = true;
+    	boolean retval = false;
     	Object o;
     	boolean b;
     	
     	try {
     		
-            //o = this.dis.read
-    		System.out.println("03. -- About to receive an object...");
-		    //o = this.inputStream.readString(10);
-		    b = this.inputStream.hasMoreData();
-		    System.out.println("04. <- Object received...");
+    		boolean stop = false;
     		
-		    if (b) pl("MORE DATA");
-		    
-        } 
+            while (! stop) {
+            
+            	pl("HERE 1");
+            	String response = this.inputStream.readUTF();
+                pl("HERE 2");
+                retval = this.inputStream.hasMoreData();
+                pl("HERE 3");
+                
+            }
+    	
+    	} 
     	
         catch (Exception e) {   
         	
@@ -339,8 +348,8 @@ public class Client {
             return retval;
             
         }
-    	
-        return retval;
+    
+    	return retval;
     	
     }
     
@@ -412,6 +421,10 @@ public class Client {
         }
     	
     }
+    
+    private void flushOutputStream() throws IOException { this.outputStream.flush(); }
+    
+    //private void flushInputStream() throws IOException { this.inputStream.flush(); }
     
 	private void pl(String s) { System.out.println(s); }
 	
