@@ -439,7 +439,7 @@ public class Client {
     	
     	if (args.length == 1) {
     	
-    		Client theApp = new Client(args[0], 5050);
+    		Client client = new Client(args[0], 5678);
 
     		
     		
@@ -452,13 +452,15 @@ public class Client {
     		System.out.println("      or:  java Client hostname (e.g. java Client localhost)");
     	*/
     		
-    		Client client = new Client("localhost", 5050);
+    		Client client = new Client("localhost", 5678);
     		
     		if (client.connectToServer()) {
     			
     			if (client.sendAssociateRequest()) {
     				
     				System.out.println("Sent ASSOCIATE-RQ");
+    				boolean b = client.receive();
+    				System.out.println("RECEIVED: " + b);
     				
     			}
     			
