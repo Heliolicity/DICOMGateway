@@ -4,11 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 import com.gateway.dicom.entities.*;
 import com.gateway.dicom.imagetypes.*;
 import com.gateway.dicom.lib.*;
 import com.gateway.dicom.protocols.*;
+import com.gateway.dicom.server.*;
+import com.gateway.dicom.test.TCPServer;
 
 public class TestMain {
 
@@ -18,7 +22,10 @@ public class TestMain {
 		boolean connected = false;
 		FileInputStream fileInputStream;
 		String host = null;
-		
+		Server server = null;
+		Socket socket = null;
+		ServerSocket serverSocket;
+        
 		try {
 		
 			host = args[0];
@@ -33,70 +40,72 @@ public class TestMain {
 		}
 		
 		if (host != null) {
-			
-			client = new Client(host, 5678);
-			connected = client.connectToServer();
-			pl("CONNECTION STATUS: " + connected);
-			
-			if (connected) {
+
+			try {
 				
-				pl("CONNECTION SUCCESSFUL");
+				client = new Client(host, 5050);
+				connected = client.connectToServer();
 				
-				try {
+				pl("CONNECTION STATUS: " + connected);
+				
+				if (connected) {
 					
-					boolean result = client.sendAssociateRequest();
-					
-					if (result) {
+					pl("CONNECTION SUCCESSFUL");
 						
-						pl("A-ASSOCIATE-RQ Request Sent");
-						result = client.receive();
+						boolean result = client.sendAssociateRequest();
 						
 						if (result) {
 							
-							pl("GETTING SOMETHING");
+							pl("A-ASSOCIATE-RQ Request Sent");
+							result = client.receive();
+							
+							if (result) {
+								
+								pl("GETTING SOMETHING");
+								
+							}
+							
+							else {
+								
+								pl("NOT GETTING ANYTHING");
+								
+							}
 							
 						}
 						
 						else {
 							
-							pl("NOT GETTING ANYTHING");
+							pl("A-ASSOCIATE-RQ NOT Sent");
 							
 						}
+	
 						
-					}
-					
-					else {
+						/*fileInputStream = new FileInputStream("IMG_2116.JPG");
 						
-						pl("A-ASSOCIATE-RQ NOT Sent");
-						
-					}
-
-					
-					/*fileInputStream = new FileInputStream("IMG_2116.JPG");
-					
-					while (fileInputStream.available() > 0) {
-						
-						pl("" + fileInputStream.read());
-						
-					}*/
+						while (fileInputStream.available() > 0) {
+							
+							pl("" + fileInputStream.read());
+							
+						}*/
 					
 				}
 				
-				catch (Exception exc) {
-					
-					pl("EXCEPTION: " + exc.getMessage());
-					exc.printStackTrace();
+				else {
+				
+					pl ("ERROR CONNECTING");
 					
 				}
 				
+			
 			}
 			
-			else {
-			
-				pl ("ERROR CONNECTING");
+			catch (Exception exc) {
+				
+				pl("EXCEPTION: " + exc.getMessage());
+				exc.printStackTrace();
 				
 			}
-				
+			
 		}
 		
 	}

@@ -1,100 +1,92 @@
 package com.gateway.dicom.server;
 
-import java.io.*;
+
+/*
+ * Based on code provided by David Molloy
+ * 
+ * */
+
 import java.net.*;
+import java.io.*;
 
-public class Server implements Runnable {
+public class Server {
 
-	private ServerSocket serverSocket;
 	private int port;
-	private Socket socket;
-    private Connection[] connections;
-    private boolean active;
-    private int numberOfConnections;
-    
-    public Server(ServerSocket serverSocket, Socket socket, int port, int numberOfConnections) {
-		
-    	super();
-		this.serverSocket = serverSocket;
-		this.socket = socket;
-		this.port = port;
-		//this.active = false;
-		this.numberOfConnections = numberOfConnections;
-		this.connections = new Connection[this.numberOfConnections];
-		
-		try { 
-			
-		    this.serverSocket = new ServerSocket(this.port);
-	        this.port = this.serverSocket.getLocalPort();
-		    this.active = true;
-		    this.run();
-		    
-	    }
-		
-		catch (IOException ioe) {  
+	private String ipAddress;
+	private boolean active;
+	private ServerSocket serverSocket;
+	private Socket clientSocket;
+	private ConnectionHandler connectionHandler;
+	
+	public Server() {}
 
-			pl(ioe.getMessage());
-			this.active = false;
-			
-		}
-		
-	}
-    
-	public Server(ServerSocket serverSocket, Socket socket, int port) {
+	public Server(int port, String ipAddress, boolean active, ServerSocket serverSocket) {
 		
 		super();
-		this.serverSocket = serverSocket;
-		this.socket = socket;
 		this.port = port;
-		this.active = false;
-		this.numberOfConnections = 10;
-		this.connections = new Connection[this.numberOfConnections];
-		
-		try { 
-			
-		    this.serverSocket = new ServerSocket(this.port);
-	        this.port = this.serverSocket.getLocalPort();
-		    this.active = true;
-		    this.run();
-		    
-	    }
-		
-		catch (IOException ioe) {  
-
-			pl(ioe.getMessage());
-			this.active = false;
-			
-		}
-		
+		this.ipAddress = ipAddress;
+		this.active = active;
+		this.serverSocket = serverSocket;
+	
 	}
 	
-	public void run() {
-		// TODO Auto-generated method stub
+	public void activate() {
+		
+		this.active = true;
+		
+		try {
+            
+			this.serverSocket = new ServerSocket(this.port);
+            pl("Server has started listening on port: " + this.port);
+            
+        } 
+		
+        catch (IOException e) {
+        	
+            pl("Cannot listen on port: " + this.port);
+            pl(e.getMessage());
+            System.exit(1);
+            
+        }
+		
 		while (this.active) {
 			
 			try {
-			
-				this.serverSocket.accept();
 				
-			}
+            	pl("**. Listening for a connection...");
+                this.clientSocket = this.serverSocket.accept();
+                pl("00. <- Accepted socket connection from a client: ");
+                pl("    <- with address: " + this.clientSocket.getInetAddress().toString());
+                pl("    <- and port number: " + this.clientSocket.getPort());
+                
+            } 
 			
-			catch (IOException ioe) {  
-
-				pl(ioe.getMessage());
-				this.active = false;
-				
-			}
+            catch (IOException e) {
+            	
+                pl("XX. Accept failed: " + this.port + e);
+                this.active = false;   
+                
+            }
+			
+			this.connectionHandler = new ConnectionHandler(this.clientSocket);
+            this.connectionHandler.start(); 
+            pl("02. -- Finished communicating with client:" + clientSocket.getInetAddress().toString());
 			
 		}
 		
-	}
-
-	public ServerSocket getServerSocket() {
-		return serverSocket;
-	}
-
-	public void setServerSocket(ServerSocket serverSocket) {
-		this.serverSocket = serverSocket;
+		try {
+			
+            pl("04. -- Closing down the server socket gracefully.");
+            this.serverSocket.close();
+            
+        } 
+		
+        catch (IOException e) {
+            
+        	System.err.println("XX. Could not close server socket. " + e.getMessage());
+        
+        }
+		
 	}
 
 	public int getPort() {
@@ -105,20 +97,12 @@ public class Server implements Runnable {
 		this.port = port;
 	}
 
-	public Socket getSocket() {
-		return socket;
+	public String getIpAddress() {
+		return ipAddress;
 	}
 
-	public void setSocket(Socket socket) {
-		this.socket = socket;
-	}
-
-	public Connection[] getConnections() {
-		return connections;
-	}
-
-	public void setConnections(Connection[] connections) {
-		this.connections = connections;
+	public void setIpAddress(String ipAddress) {
+		this.ipAddress = ipAddress;
 	}
 
 	public boolean isActive() {
@@ -129,14 +113,24 @@ public class Server implements Runnable {
 		this.active = active;
 	}
 
-	public int getNumberOfConnections() {
-		return numberOfConnections;
+	public ServerSocket getServerSocket() {
+		return serverSocket;
 	}
 
-	public void setNumberOfConnections(int numberOfConnections) {
-		this.numberOfConnections = numberOfConnections;
+	public void setServerSocket(ServerSocket serverSocket) {
+		this.serverSocket = serverSocket;
 	}
 	
-    private void pl(String s) { System.out.println(s); }
+	private void pl() { System.out.println(); }
+	
+	private void pl(String s) { System.out.println(s); }
+	
+	public static void main(String args []) {
+		
+		Server server = new Server();
+		server.setPort(5050);
+		server.activate();
+		
+	}
 	
 }

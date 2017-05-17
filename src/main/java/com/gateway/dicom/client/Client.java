@@ -3,6 +3,8 @@ package com.gateway.dicom.client;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.net.Socket;
@@ -38,6 +40,8 @@ public class Client {
     private DicomValueRepresentationOutputStream outputStream;
     private ByteArrayOutputStream byteOutputStream;
     private ByteArrayInputStream byteInputStream;
+    private ObjectInputStream objectInputStream;
+    private ObjectOutputStream objectOutputStream;
     private C_ECHO_RQ echoRequest = null;
     private A_ASSOCIATE_RQ associateRequest = null;
     
@@ -70,6 +74,7 @@ public class Client {
 			
 			this.inputStream = new DicomValueRepresentationInputStream(this.socket.getInputStream(), DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
 			pl("Created input stream successfully.");
+			
 			boolean b = this.inputStream.hasMoreData();
 			pl("DOES IT HAVE DATA: " + b);
 			
@@ -427,5 +432,49 @@ public class Client {
     //private void flushInputStream() throws IOException { this.inputStream.flush(); }
     
 	private void pl(String s) { System.out.println(s); }
+	
+	public static void main(String args[]) {
+    	
+    	System.out.println("**. Java Client Application - EE592 DICOM Gateway Project, DCU");
+    	
+    	if (args.length == 1) {
+    	
+    		Client theApp = new Client(args[0], 5050);
+
+    		
+    		
+    	}
+    	
+    	else {
+    		
+    		/*System.out.println("Error: you must provide the address of the server");
+    		System.out.println("Usage is:  java Client x.x.x.x  (e.g. java Client 192.168.7.2)");
+    		System.out.println("      or:  java Client hostname (e.g. java Client localhost)");
+    	*/
+    		
+    		Client client = new Client("localhost", 5050);
+    		
+    		if (client.connectToServer()) {
+    			
+    			if (client.sendAssociateRequest()) {
+    				
+    				System.out.println("Sent ASSOCIATE-RQ");
+    				
+    			}
+    			
+    			else {
+    				
+    				System.out.println("DID NOT SEND ASSOCIATE-RQ");
+    				
+    			}
+    			
+    		}
+
+    		
+    	}    
+    	
+    	System.out.println("**. End of Application.");
+    
+    }
 	
 }

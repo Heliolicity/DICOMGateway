@@ -165,10 +165,21 @@ public class Client {
     	
     	else {
     		
-    		System.out.println("Error: you must provide the address of the server");
+    		/*System.out.println("Error: you must provide the address of the server");
     		System.out.println("Usage is:  java Client x.x.x.x  (e.g. java Client 192.168.7.2)");
     		System.out.println("      or:  java Client hostname (e.g. java Client localhost)");
-    	
+    	*/
+    		
+    		Client theApp = new Client("localhost");
+		    //theApp.getDate();
+    		
+    		while (theApp.listening) {
+    		
+    			C_ECHO_RQ request = (C_ECHO_RQ) theApp.receive();
+    		
+    		}
+
+    		
     	}    
     	
     	System.out.println("**. End of Application.");
