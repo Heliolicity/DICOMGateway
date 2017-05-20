@@ -330,20 +330,21 @@ public class Client {
     	boolean retval = false;
     	Object o;
     	boolean b;
+    	ByteArrayOutputStream stream;
+    	byte[] arr;
+    	int result = 0;
     	
     	try {
     		
     		boolean stop = false;
     		
-            while (! stop) {
+            //while (! stop) {
             
-            	pl("HERE 1");
-            	String response = this.inputStream.readUTF();
-                pl("HERE 2");
-                retval = this.inputStream.hasMoreData();
-                pl("HERE 3");
+            	result = this.inputStream.read();
+            	arr = this.inputStream.getBuffer();
+            	retval = this.inputStream.hasMoreData();
                 
-            }
+            //}
     	
     	} 
     	

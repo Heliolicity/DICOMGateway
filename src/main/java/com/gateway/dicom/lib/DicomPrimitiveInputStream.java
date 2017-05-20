@@ -12,13 +12,32 @@ import java.io.DataInputStream;
 public class DicomPrimitiveInputStream extends DicomByteOrderable {
 
 	//private InputStream inputStream;
+	private InputStream is;
 	private DataInputStream inputStream;
+	private byte[] buffer;
 	
 	public DicomPrimitiveInputStream(InputStream inputStream, int byteOrdering) {
 		super(byteOrdering);
+		this.is = inputStream;
 		this.inputStream = new DataInputStream(inputStream);
 	}
 	
+	public DataInputStream getInputStream() {
+		return inputStream;
+	}
+
+	public void setInputStream(DataInputStream inputStream) {
+		this.inputStream = inputStream;
+	}
+
+	public byte[] getBuffer() {
+		return buffer;
+	}
+
+	public void setBuffer(byte[] buffer) {
+		this.buffer = buffer;
+	}
+
 	public void skip(int numberOfBytes) throws IOException {
 		this.inputStream.skip(numberOfBytes);
 	}
@@ -90,5 +109,38 @@ public class DicomPrimitiveInputStream extends DicomByteOrderable {
 	public String readLine() throws IOException { return this.inputStream.readLine(); }
 	
 	public String readUTF() throws IOException { return this.inputStream.readUTF(); }
+	
+	public int read() { 
+		
+		int i = 0;
+		
+		try {
+		
+			pl("HERE A1");
+			pl("HERE A2");
+			
+			this.buffer = new byte[is.available()];
+			
+			pl("BUFFER LENGTH BEFORE: " + this.buffer.length);
+			pl("HERE A3");
+			i = this.inputStream.read(this.buffer);
+			pl("i: " + i);
+			//return this.inputStream.read(this.buffer); 
+			pl("BUFFER LENGTH AFTER: " + this.buffer.length);
+		
+		}
+		
+		catch (Exception e) {
+			
+			pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+		return i;
+		
+	}
+	
+	private void pl(String s) { System.out.println(s); }
 	
 }
