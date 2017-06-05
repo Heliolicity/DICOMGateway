@@ -13,6 +13,7 @@ public class A_ASSOCIATE_RQ {
 	private byte reserved = 0x00;
 	private int pduLength; //4 bytes in length
 	private int protocolVersion = 0x0000; //2 bytes in length
+	//private int protocolVersion = 0x00; //2 bytes in length
 	private String calledAE; //16 bytes in length
 	private String callingAE; //16 bytes in length
 	private ApplicationContext applicationContext;

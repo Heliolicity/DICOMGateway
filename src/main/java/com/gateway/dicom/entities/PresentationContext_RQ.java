@@ -7,7 +7,7 @@ import java.util.List;
 public class PresentationContext_RQ extends DICOMItem {
 
 	//private byte itemType = 0x20;
-	private int presentationContextID; //This should be an unsigned binary integer - does this need special handling?
+	private int presentationContextID = 1; //This should be an unsigned binary integer - does this need special handling?
 	private List<TransferSyntax> transferSyntaxSubItems;
 	private AbstractSyntax abstractSyntaxSubItem;
 	

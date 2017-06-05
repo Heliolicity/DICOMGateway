@@ -34,8 +34,8 @@ public class Client {
 	private String ipAddress;
 	private int port;
 	private Socket socket = null;
-	private DataOutputStream dos = null;
-    private DataInputStream dis = null;
+	private DataOutputStream dataOutputStream = null;
+    private DataInputStream dataInputStream = null;
     private DicomValueRepresentationInputStream inputStream;
     private DicomValueRepresentationOutputStream outputStream;
     private ByteArrayOutputStream byteOutputStream;
@@ -59,31 +59,31 @@ public class Client {
 			this.socket = new Socket(this.ipAddress, this.port);
 			pl("Created Socket successfully.");
 			
-			/*this.dos = new DataOutputStream(this.socket.getOutputStream());
+			this.dataOutputStream = new DataOutputStream(this.socket.getOutputStream());
     		pl("Created DataOutputStream successfully.");
-    		this.dis = new DataInputStream(this.socket.getInputStream());
+    		this.dataInputStream = new DataInputStream(this.socket.getInputStream());
     		pl("Created DataInputStream successfully.");
     		pl("Connected to Server:" + this.socket.getInetAddress() 
     				+ " on port: " + this.socket.getPort() + " successfully ");
     		pl("    -> from local address: " + this.socket.getLocalAddress() 
     				+ " and port: " + this.socket.getLocalPort());
-    		pl("Connection established.");*/
+    		pl("Connection established.");
 			
-			this.outputStream = new DicomValueRepresentationOutputStream(this.socket.getOutputStream(), DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
-			pl("Created output stream successfully.");
+			/*this.outputStream = new DicomValueRepresentationOutputStream(this.socket.getOutputStream(), DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
+			pl("Created DICOM Output Stream successfully.");
 			
 			this.inputStream = new DicomValueRepresentationInputStream(this.socket.getInputStream(), DicomValueRepresentationOutputStream.BYTE_ORDERING_LITTLE_ENDIAN);
-			pl("Created input stream successfully.");
+			pl("Created DICOM Input Stream successfully.");
 			
 			boolean b = this.inputStream.hasMoreData();
-			pl("DOES IT HAVE DATA: " + b);
+			pl("Does the DICOM Input Stream have data: " + b);
 			
 			pl("Connected to Server:" + this.socket.getInetAddress() 
 				+ " on port: " + this.socket.getPort() + " successfully ");
 			pl("    -> from local address: " + this.socket.getLocalAddress() 
 					+ " and port: " + this.socket.getLocalPort());
 			
-			pl("Connection established.");
+			pl("Connection established.");*/
 			
     	} 
         
@@ -91,6 +91,7 @@ public class Client {
     		
     		pl("Connection to: " + this.ipAddress + " was unsuccessful due to an Exception.");
         	pl("Exception: " + e.toString());
+        	e.printStackTrace();
         	return false;
         
     	}
@@ -138,6 +139,7 @@ public class Client {
     
     public boolean sendAssociateRequest() {
     	
+		byte[] arr;
     	boolean retval = false;
     	
     	try {
@@ -146,80 +148,109 @@ public class Client {
     		
     		if (built) {
     	
-    			this.writeByte(this.associateRequest.getPduType());
-    			this.writeByte(this.associateRequest.getReserved());
-    			this.writeInt(this.associateRequest.getPduLength());
-    			this.writeInt(this.associateRequest.getProtocolVersion());
-    			this.writeByte(this.associateRequest.getReserved());
-    			this.writeByte(this.associateRequest.getReserved());
-    			this.writeString(this.associateRequest.getCalledAE());
-    			this.writeString(this.associateRequest.getCallingAE());
+    			/*this.dataOutputStream.writeByte(this.associateRequest.getPduType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getPduLength());
     			
-    			for (int a = 0; a < 32; a ++) this.writeByte(this.associateRequest.getReserved());
+    			//this.dataOutputStream.writeByte(this.associateRequest.getProtocolVersion());
+    			//For time being hard-code Protocol Version to two bytes of 0x00
+    			this.dataOutputStream.writeByte(this.associateRequest.getReserved());
+    			this.dataOutputStream.writeByte(this.associateRequest.getReserved());
+    			//End of Protocol Version encoding - BUT POSSIBLY CHANGE THIS LATER
     			
-    			this.writeByte(this.associateRequest.getApplicationContext().getItemType());
-    			this.writeByte(this.associateRequest.getApplicationContext().getReserved());
-    			this.writeInt(this.associateRequest.getApplicationContext().getItemLength());
-    			this.writeString(this.associateRequest.getApplicationContext().getApplicationContextName());
+    			this.dataOutputStream.writeByte(this.associateRequest.getReserved());
+    			this.dataOutputStream.writeByte(this.associateRequest.getReserved());
     			
-    			this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
-    			this.writeString(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName());
+    			this.dataOutputStream.write(this.associateRequest.getCalledAE().getBytes());
+    			this.dataOutputStream.write(this.associateRequest.getCallingAE().getBytes());
     			
-    			int tsi = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().size();
+    			for (int a = 0; a < 32; a ++) this.dataOutputStream.writeByte(this.associateRequest.getReserved());
+
+    			//Application Context
+    			this.dataOutputStream.writeByte(this.associateRequest.getApplicationContext().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getApplicationContext().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getApplicationContext().getItemLength());
+    			this.dataOutputStream.write(this.associateRequest.getApplicationContext().getApplicationContextName().getBytes());
+    			*/
     			
-    			for (int b = 0; b < tsi; b ++) {
+    			//Presentation Context
+    			this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getPresentationContext().getItemLength());
+    			this.dataOutputStream.writeInt(this.associateRequest.getPresentationContext().getPresentationContextID());
+    			this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getReserved());
+    			this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getReserved());
+    			this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getReserved());
+    			
+    			
+    				//Abstract Syntax
+    				this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
+    				this.dataOutputStream.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
+    				this.dataOutputStream.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+    				this.dataOutputStream.write(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName().getBytes());
     				
-    				TransferSyntax transferSyntax = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().get(b);
-    				this.writeByte(transferSyntax.getItemType());
-    				this.writeByte(transferSyntax.getReserved());
-    				this.writeInt(transferSyntax.getItemLength());
-    				this.writeString(transferSyntax.getTransferSyntaxName());
+    				//Transfer Syntaxes
+    				int tsi = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().size();
+        			
+        			for (int b = 0; b < tsi; b ++) {
+        				
+        				TransferSyntax transferSyntax = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().get(b);
+        				this.dataOutputStream.writeByte(transferSyntax.getItemType());
+        				this.dataOutputStream.writeByte(transferSyntax.getReserved());
+        				this.dataOutputStream.writeInt(transferSyntax.getItemLength());
+        				this.dataOutputStream.write(transferSyntax.getTransferSyntaxName().getBytes());
+        				
+        			}
     				
-    			}
+    			//User Information
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getItemLength());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getItemLength());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemLength());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemLength());
-    			this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemLength());
+    			this.dataOutputStream.write(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getImplementationClassUID().getBytes());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemLength());
-    			this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getImplementationClassUID());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemLength());
+    			this.dataOutputStream.write(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getImplementationVersionName().getBytes());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemLength());
-    			this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getImplementationVersionName());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemLength());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsInvoked());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsPerformed());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemLength());
-    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsInvoked());
-    			this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsPerformed());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemLength());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getUidLength());
+    			this.dataOutputStream.write((this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getSopClassUID()).getBytes());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScuRole());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScpRole());
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemLength());
-    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getUidLength());
-    			this.writeString(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getSopClassUID());
-    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScuRole());
-    			this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScpRole());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemType());
+    			this.dataOutputStream.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getReserved());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemLength());
+    			this.dataOutputStream.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
+    			this.dataOutputStream.write(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID().getBytes());
+    			this.dataOutputStream.write(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation().getBytes());
+        		
+    			this.dataOutputStream.flush();
     			
-    			this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemType());
-    			this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getReserved());
-    			this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemLength());
-    			this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
-    			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID());
-    			this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation());
-    			
-    			this.flushOutputStream();
+    			this.dataInputStream.close();
+    			pl("Closed Client Data Input Stream");
+    			this.dataOutputStream.close();
+    			pl("Closed Client Data Output Stream");
+    			this.socket.close();
+    			pl("Closed Client Socket");
     			
     			pl("Successfully sent A-ASSOCIATE-RQ");
     			retval = true;
@@ -303,7 +334,8 @@ public class Client {
     		this.associateRequest = new A_ASSOCIATE_RQ();
     		this.associateRequest.setPduType(type);
     		this.associateRequest.setCalledAE("CONQUESTSRV1    ");
-    		this.associateRequest.setCallingAE("1.2.840.10008.3.1.1.1");
+    		//this.associateRequest.setCallingAE("1.2.840.10008.3.1.1.1");
+    		this.associateRequest.setCallingAE("THISCOMPUTER    ");
     		this.associateRequest.setPresentationContext(presentationContext_RQ);
     		this.associateRequest.setApplicationContext(applicationContext);
     		this.associateRequest.setUserInformation(userInformation);
@@ -359,7 +391,84 @@ public class Client {
     	
     }
     
-    public void writeByte(byte val) {
+    private void pl(String s) { System.out.println(s); }
+	
+	/*this.writeByte(this.associateRequest.getPduType());
+	this.writeByte(this.associateRequest.getReserved());
+	this.writeInt(this.associateRequest.getPduLength());
+	this.writeInt(this.associateRequest.getProtocolVersion());
+	this.writeByte(this.associateRequest.getReserved());
+	this.writeByte(this.associateRequest.getReserved());
+	this.writeString(this.associateRequest.getCalledAE());
+	this.writeString(this.associateRequest.getCallingAE());
+	
+	for (int a = 0; a < 32; a ++) this.writeByte(this.associateRequest.getReserved());
+	
+	this.writeByte(this.associateRequest.getApplicationContext().getItemType());
+	this.writeByte(this.associateRequest.getApplicationContext().getReserved());
+	this.writeInt(this.associateRequest.getApplicationContext().getItemLength());
+	this.writeString(this.associateRequest.getApplicationContext().getApplicationContextName());
+	
+	this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
+	this.writeByte(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
+	this.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+	this.writeString(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName());
+	
+	int tsi = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().size();
+	
+	for (int b = 0; b < tsi; b ++) {
+		
+		TransferSyntax transferSyntax = this.associateRequest.getPresentationContext().getTransferSyntaxSubItems().get(b);
+		this.writeByte(transferSyntax.getItemType());
+		this.writeByte(transferSyntax.getReserved());
+		this.writeInt(transferSyntax.getItemLength());
+		this.writeString(transferSyntax.getTransferSyntaxName());
+		
+	}
+	
+	this.writeByte(this.associateRequest.getUserInformation().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getItemLength());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getItemLength());
+	this.writeInt(this.associateRequest.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemLength());
+	this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getImplementationClassUID());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemLength());
+	this.writeString(this.associateRequest.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getImplementationVersionName());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemLength());
+	this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsInvoked());
+	this.writeInt(this.associateRequest.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsPerformed());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemLength());
+	this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getUidLength());
+	this.writeString(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getSopClassUID());
+	this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScuRole());
+	this.writeInt(this.associateRequest.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScpRole());
+	
+	this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemType());
+	this.writeByte(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getReserved());
+	this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getItemLength());
+	this.writeInt(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
+	this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID());
+	this.writeString(this.associateRequest.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation());
+	
+	this.flushOutputStream();*/
+    
+    /*public void writeByte(byte val) {
     	
     	try {
             
@@ -430,54 +539,6 @@ public class Client {
     
     private void flushOutputStream() throws IOException { this.outputStream.flush(); }
     
-    //private void flushInputStream() throws IOException { this.inputStream.flush(); }
+    private void flushInputStream() throws IOException { this.inputStream.flush(); }*/
     
-	private void pl(String s) { System.out.println(s); }
-	
-	public static void main(String args[]) {
-    	
-    	System.out.println("**. Java Client Application - EE592 DICOM Gateway Project, DCU");
-    	
-    	if (args.length == 1) {
-    	
-    		Client client = new Client(args[0], 5678);
-
-    		
-    		
-    	}
-    	
-    	else {
-    		
-    		/*System.out.println("Error: you must provide the address of the server");
-    		System.out.println("Usage is:  java Client x.x.x.x  (e.g. java Client 192.168.7.2)");
-    		System.out.println("      or:  java Client hostname (e.g. java Client localhost)");
-    	*/
-    		
-    		Client client = new Client("localhost", 5678);
-    		
-    		if (client.connectToServer()) {
-    			
-    			if (client.sendAssociateRequest()) {
-    				
-    				System.out.println("Sent ASSOCIATE-RQ");
-    				boolean b = client.receive();
-    				System.out.println("RECEIVED: " + b);
-    				
-    			}
-    			
-    			else {
-    				
-    				System.out.println("DID NOT SEND ASSOCIATE-RQ");
-    				
-    			}
-    			
-    		}
-
-    		
-    	}    
-    	
-    	System.out.println("**. End of Application.");
-    
-    }
-	
 }
