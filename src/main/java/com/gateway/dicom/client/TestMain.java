@@ -43,7 +43,8 @@ public class TestMain {
 
 			try {
 				
-				client = new Client(host, 5050);
+				//client = new Client(host, 5050);
+				client = new Client(host, 5678);
 				connected = client.connectToServer();
 				
 				pl("CONNECTION STATUS: " + connected);
