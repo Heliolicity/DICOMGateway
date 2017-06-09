@@ -65,15 +65,15 @@ public class Engine {
     				
     				if (this.dataReceived) {
     					
-    					if (this.requestAcknowledged) {
-    						
+    					if (this.client.isRequestAcknowledged()) {
+    					
     						//Build the A-ASSOCIATE-AC
     						this.receivedData = this.client.getReceivedData();
     						this.buildAssociateAcknowledgement();
     						
     					}
     					
-    					else if (this.requestRejected) {
+    					else if (this.client.isRequestRejected()) {
     						
     						//Build the A-ASSOCIATE-RJ
     						this.receivedData = this.client.getReceivedData();
@@ -215,11 +215,30 @@ public class Engine {
     	List<TransferSyntax> transferSyntaxes;
     	TransferSyntax transferSyntax;
     	UserInformation userInformation;
+    	MaximumLengthSubItem maximumLengthSubItem;
+    	ImplementationClassUIDSubItem implementationClassUIDSubItem = null;
+    	ImplementationVersionNameSubItem implementationVersionNameSubItem = null;
+    	AsynchronousOperationsWindowSubItem asynchronousOperationsWindowSubItem;
+    	SCPSCURoleSelectionNegotiationSubItem scpSCURoleSelectionNegotiationSubItem;
+    	ExtendedNegotiationSubItem extendedNegotiationSubItem;
+    	ImplementationItem implementationItem;
     	int pos = 0;
     	int length = 0;
     	byte[] arr;
+    	int mlsiPos = 0;
+    	int icsiPos = 0;
+    	int ivsiPos = 0;
+    	int aosiPos = 0;
+    	int srsiPos = 0;
+    	int ensiPos = 0;
+    	byte[] a1;
+    	byte[] a2;
+    	byte[] a3;
+    	byte[] a4;
+    	byte[] a5;
+    	byte[] a6;
     	
-    	if ((this.receivedData != null) && (this.requestAcknowledged == true)) {
+    	if ((this.receivedData != null) && (this.client.isRequestAcknowledged() == true)) {
     	
     		this.associateRequestAC = new A_ASSOCIATE_AC();
     		this.associateRequestAC.setPduType(this.receivedData[0]);
@@ -256,7 +275,6 @@ public class Engine {
     	    	if (this.receivedData[c] == 33) pos = c;
     	    
     	    arr = Arrays.copyOfRange(this.receivedData, 78, pos);
-    	    
     	    s = new String(arr, 0, arr.length);
     	    pl("APPLICATION CONTEXT NAME: " + s);
     	    applicationContext.setApplicationContextName(s);
@@ -295,12 +313,122 @@ public class Engine {
     	    	if (b == 0) {
     	    		
     	    		//Process the Transfer Syntax sub items
+    	    		arr = Arrays.copyOfRange(this.receivedData, pos + 8, pos + 4 + presentationContext.getItemLength());
     	    		
+    	    		//Rewrite this later to handle multiple Transfer Syntaxes
+    	    		transferSyntax = new TransferSyntax();
+    	    		transferSyntax.setItemType(arr[0]);
     	    		
+    	    		b1 = arr[2];
+        	    	b2 = arr[3];
+        	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
+    	    		transferSyntax.setItemLength(i);
+    	    		
+    	    		arr = Arrays.copyOfRange(arr, 4, 4 + i);
+    	    		s = new String(arr, 0, arr.length);
+    	    	    transferSyntax.setTransferSyntaxName(s);
+    	    	    pl("TRANSFER SYNTAX NAME: " + s);
+    	    		
+    	    	    pos = pos + 4 + presentationContext.getItemLength();
+    	    	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
+    	    	    
+    	    	    if (arr.length > 0) {
+    	    	    
+	    	    	    userInformation = new UserInformation();
+	    	    	    userInformation.setItemType(this.receivedData[pos]);
+	    	    	    
+	    	    	    for (int d = 0; d < arr.length; d ++) {
+	    	    	    	
+	    	    	    	switch(arr[d]) {
+	    	    	    	
+	    	    	    		case 0x51: mlsiPos = d; break;
+	    	    	    		case 0x52: icsiPos = d; break;
+	    	    	    		case 0x55: ivsiPos = d; break;
+	    	    	    		case 0x53: aosiPos = d; break;
+	    	    	    		case 0x54: srsiPos = d; break;
+	    	    	    		case 0x56: ensiPos = d; break;
+	    	    	    		
+	    	    	    	}
+	    	    	    	
+	    	    	    }
+	    	    	    
+	    	    	    if (mlsiPos > 0) {
+	    	    	    	
+	    	    	    	a1 = Arrays.copyOfRange(arr, mlsiPos, arr.length);
+	    	    	    	b1 = a1[2];
+	    	    	    	b2 = a1[3];
+	    	    	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
+	    	    	    	a1 = Arrays.copyOfRange(a1, 0, i + 4);
+	    	    	    	
+	    	    	    	maximumLengthSubItem = new MaximumLengthSubItem();
+	            	    	maximumLengthSubItem.setItemType(a1[0]);
+	            	    	maximumLengthSubItem.setItemLength(i);
+	            	    	
+	            	    	b1 = a1[4];
+	                	    b2 = a1[5];
+	                	    b3 = a1[6];
+	                	    b4 = a1[7];
+	                	    i = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
+	                	            ((0xFF & b3) << 8) | (0xFF & b4);
+	    	    	    	
+	                	    maximumLengthSubItem.setMaxPDULengthReceive(i);
+	            	    	userInformation.setMaximumLengthSubItem(maximumLengthSubItem);
+	    	    	    	
+	    	    	    }
+	    	    	    
+	    	    	    if (icsiPos > 0) {
+	    	    	    	
+	    	    	    	a2 = Arrays.copyOfRange(arr, icsiPos, arr.length);
+	    	    	    	b1 = a2[2];
+	            	    	b2 = a2[3];
+	            	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
+	            	    	a2 = Arrays.copyOfRange(a2, 0, i + 4);
+	            	    	
+	            	    	implementationClassUIDSubItem = new ImplementationClassUIDSubItem();
+	            	    	implementationClassUIDSubItem.setItemType(a2[0]);
+	            	    	implementationClassUIDSubItem.setItemLength(i);
+	            	    	
+	            	    	s = new String(a2, 0, a2.length);
+	            	    	
+	            	    	implementationClassUIDSubItem.setImplementationClassUID(s);
+	            	    	
+	    	    	    }
+    	    	    
+	    	    	    if (ivsiPos > 0) {
+	    	    	    	
+	    	    	    	a3 = Arrays.copyOfRange(arr, ivsiPos, arr.length);
+	    	    	    	b1 = a3[2];
+	    	    	    	b2 = a3[3];
+	            	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
+	            	    	a3 = Arrays.copyOfRange(a3, 0, i + 4);
+	    	    	    	
+	            	    	implementationVersionNameSubItem = new ImplementationVersionNameSubItem();
+	            	    	implementationVersionNameSubItem.setItemType(a3[0]);
+	            	    	implementationVersionNameSubItem.setItemLength(i);
+	            	    	
+	            	    	s = new String(a3, 0, a3.length);
+	            	    	
+	            	    	implementationVersionNameSubItem.setImplementationVersionName(s);
+	            	    	
+	    	    	    }
+	    	    	    
+	    	    	    if ((implementationClassUIDSubItem != null) && (implementationVersionNameSubItem != null)) {
+	    	    	    	
+	    	    	    	implementationItem = new ImplementationItem();
+	    	    	    	implementationItem.setImplementationClassUIDSubItem(implementationClassUIDSubItem);
+	    	    	    	implementationItem.setImplementationVersionNameSubItem(implementationVersionNameSubItem);
+	    	    	    	userInformation.setImplementationItem(implementationItem);
+	    	    	    	
+	    	    	    }
+	    	    	    
+	    	    	    
+	    	    	    
+    	    	    }
+    	    	    
     	    	}
     	    	
     	    	else {
-    	    	
+    	    		
     	    		//The Transfer Syntax sub-items aren't significant in the case of non-acceptance
     	    		pl(this.response(b));
     	    		retval = false;

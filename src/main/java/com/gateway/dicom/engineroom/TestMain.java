@@ -7,7 +7,7 @@ import java.net.Socket;
 import com.gateway.dicom.client.Client;
 import com.gateway.dicom.server.Server;
 
-public class Test {
+public class TestMain {
 
 	public static void main(String args[]) {
 		
