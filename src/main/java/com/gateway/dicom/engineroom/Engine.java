@@ -328,7 +328,12 @@ public class Engine {
     	    		s = new String(arr, 0, arr.length);
     	    	    transferSyntax.setTransferSyntaxName(s);
     	    	    pl("TRANSFER SYNTAX NAME: " + s);
-    	    		
+    	    	    
+    	    	    transferSyntaxes = new ArrayList<TransferSyntax>();
+    	    	    transferSyntaxes.add(transferSyntax);
+    	    	    presentationContext.setTransferSyntaxSubItem(transferSyntaxes);
+    	    		this.associateRequestAC.setPresentationContext(presentationContext);
+    	    	    
     	    	    pos = pos + 4 + presentationContext.getItemLength();
     	    	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
     	    	    
@@ -421,7 +426,25 @@ public class Engine {
 	    	    	    	
 	    	    	    }
 	    	    	    
+	    	    	    if (aosiPos > 0) {
+	    	    	    	
+	    	    	    	
+	    	    	    	
+	    	    	    }
 	    	    	    
+	    	    	    if (srsiPos > 0) {
+	    	    	    	
+	    	    	    	
+	    	    	    	
+	    	    	    }
+	    	    	    
+	    	    	    if (ensiPos > 0) {
+	    	    	    	
+	    	    	    	
+	    	    	    	
+	    	    	    }
+	    	    	    
+	    	    	    this.associateRequestAC.setUserInformation(userInformation);
 	    	    	    
     	    	    }
     	    	    
@@ -458,6 +481,45 @@ public class Engine {
     	
     }
 
+    public boolean buildAssociationRejection() {
+    	
+    	boolean retval = true;
+    	byte b1;
+    	byte b2;
+    	byte b3;
+    	byte b4;
+    	int i;
+    	
+    	if ((this.receivedData != null) && (this.client.isRequestRejected() == true)) {
+    		
+    		this.associateRequestRJ = new A_ASSOCIATE_RJ();
+    		this.associateRequestRJ.setPduType(this.receivedData[0]);
+    		
+    		b1 = this.receivedData[2];
+    		b2 = this.receivedData[3];
+    		b3 = this.receivedData[4];
+    		b4 = this.receivedData[5];
+    		i = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
+    	            ((0xFF & b3) << 8) | (0xFF & b4);
+    		
+    		this.associateRequestRJ.setPduLength(i);
+    		this.associateRequestRJ.setResult(this.receivedData[7]);
+    		this.associateRequestRJ.setSource(this.receivedData[8]);
+    		this.associateRequestRJ.setReasonDiag(this.receivedData[9]);
+    		
+    	}
+    	
+    	else {
+    		
+    		pl("Either no data was received or the Association Request was not Rejected");
+    		retval = false;
+    		
+    	}
+    	
+    	return retval;
+    	
+    }
+    
 	private String response(int i) {
 		
 		String response = "";
