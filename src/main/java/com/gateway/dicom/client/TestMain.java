@@ -53,7 +53,7 @@ public class TestMain {
 					
 					pl("CONNECTION SUCCESSFUL");
 						
-						boolean result = client.sendAssociateRequest();
+						/*boolean result = client.sendAssociateRequest();
 						
 						if (result) {
 							
@@ -78,7 +78,7 @@ public class TestMain {
 							
 							pl("A-ASSOCIATE-RQ NOT Sent");
 							
-						}
+						}*/
 	
 						
 						/*fileInputStream = new FileInputStream("IMG_2116.JPG");

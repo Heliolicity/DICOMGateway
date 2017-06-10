@@ -47,6 +47,7 @@ public class Engine {
     public void run() {
     	
     	this.connected = this.client.connectToServer();
+    	byte status;
     	
     	if (this.connected) {
     		
@@ -56,8 +57,9 @@ public class Engine {
     		if (this.requestBuilt) {
     			
     			//Send the A-ASSOCIATE-RQ
-    			this.client.setAssociateRequestRQ(this.associateRequestRQ);
-    			this.requestSent = this.client.sendAssociateRequest();
+    			//this.client.setAssociateRequestRQ(this.associateRequestRQ);
+    			//this.requestSent = this.client.sendAssociateRequest();
+    			this.requestSent = this.sendAssociateRequest();
     			
     			if (this.requestSent) {
     				
@@ -65,7 +67,37 @@ public class Engine {
     				
     				if (this.dataReceived) {
     					
-    					if (this.client.isRequestAcknowledged()) {
+    					this.receivedData = this.client.getReceivedData();
+    					status = this.receivedData[0];
+    		        	
+    		        	if (status == 2) {
+    		        		
+    		        		//Build the A-ASSOCIATE-AC
+    						pl("REQUEST ACKNOWLEDGED");
+    		        		this.requestAcknowledged = true;
+    		        		this.requestRejected = false;
+    		        		this.buildAssociateAcknowledgement();
+    		        		
+    		        	}
+    		        	
+    		        	else if (status == 3) {
+    		        		
+    		        		pl("REQUEST REJECTED");
+    		        		this.requestAcknowledged = false;
+    		        		this.requestRejected = true;
+    		        		this.buildAssociateRejection();
+    		        		
+    		        	}
+    		        	
+    		        	else {
+    		        		
+    		        		pl("REQUEST NEITHER ACKNOWLEDGED NOR REJECTED");
+    		        		this.requestAcknowledged = false;
+    		        		this.requestRejected = false;
+    		        		
+    		        	}
+    					
+    					/*if (this.client.isRequestAcknowledged()) {
     					
     						//Build the A-ASSOCIATE-AC
     						this.receivedData = this.client.getReceivedData();
@@ -84,7 +116,7 @@ public class Engine {
     					else {
     						
     						
-    					}
+    					}*/
     					
     				}
     				
@@ -238,7 +270,8 @@ public class Engine {
     	byte[] a5;
     	byte[] a6;
     	
-    	if ((this.receivedData != null) && (this.client.isRequestAcknowledged() == true)) {
+    	//if ((this.receivedData != null) && (this.client.isRequestAcknowledged() == true)) {
+    	if ((this.receivedData != null) && (this.isRequestAcknowledged() == true)) {
     	
     		this.associateRequestAC = new A_ASSOCIATE_AC();
     		this.associateRequestAC.setPduType(this.receivedData[0]);
@@ -453,7 +486,7 @@ public class Engine {
     	    	else {
     	    		
     	    		//The Transfer Syntax sub-items aren't significant in the case of non-acceptance
-    	    		pl(this.response(b));
+    	    		pl(presentationContext.response());
     	    		retval = false;
     	    		
     	    	}
@@ -481,7 +514,7 @@ public class Engine {
     	
     }
 
-    public boolean buildAssociationRejection() {
+    public boolean buildAssociateRejection() {
     	
     	boolean retval = true;
     	byte b1;
@@ -490,7 +523,8 @@ public class Engine {
     	byte b4;
     	int i;
     	
-    	if ((this.receivedData != null) && (this.client.isRequestRejected() == true)) {
+    	//if ((this.receivedData != null) && (this.client.isRequestRejected() == true)) {
+    	if ((this.receivedData != null) && (this.isRequestRejected() == true)) {
     		
     		this.associateRequestRJ = new A_ASSOCIATE_RJ();
     		this.associateRequestRJ.setPduType(this.receivedData[0]);
@@ -520,24 +554,234 @@ public class Engine {
     	
     }
     
-	private String response(int i) {
-		
-		String response = "";
-		
-		switch(i) {
-		
-			case 0: response = "Association Request was accepted - acceptance"; break;
-			case 1: response = "Association Request was rejected - user rejection"; break;
-			case 2: response = "Association Request was rejected - no reason (provider rejection)"; break;
-			case 3: response = "Association Request was rejected - abstract syntax not supporter (provider rejection)"; break;
-			case 4: response = "Association Request was rejected - transfer syntaxes not supporter (provider rejection)"; break;
-	
-		}
-		
-		return response;
-		
+    public boolean sendAssociateRequest() {
+    	
+    	byte[] arr;
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		this.client.writeByte(this.associateRequestRQ.getPduType());
+    		this.client.writeByte(this.associateRequestRQ.getReserved());
+			this.client.writeInt(this.associateRequestRQ.getPduLength());
+			
+			//this.client.writeByte(this.associateRequest.getProtocolVersion());
+			//For time being hard-code Protocol Version to two bytes of 0x00
+			this.client.writeByte(this.associateRequestRQ.getReserved());
+			this.client.writeByte(this.associateRequestRQ.getReserved());
+			//End of Protocol Version encoding - BUT POSSIBLY CHANGE THIS LATER
+			
+			this.client.writeByte(this.associateRequestRQ.getReserved());
+			this.client.writeByte(this.associateRequestRQ.getReserved());
+			
+			this.client.write(this.associateRequestRQ.getCalledAE().getBytes());
+			this.client.write(this.associateRequestRQ.getCallingAE().getBytes());
+			
+			for (int a = 0; a < 32; a ++) this.client.writeByte(this.associateRequestRQ.getReserved());
+			
+			//Application Context
+			this.client.writeByte(this.associateRequestRQ.getApplicationContext().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getApplicationContext().getReserved());
+			//this.client.writeInt(this.associateRequest.getApplicationContext().getItemLength());
+			this.client.writeUInt16(this.associateRequestRQ.getApplicationContext().getItemLength());
+			this.client.write(this.associateRequestRQ.getApplicationContext().getApplicationContextName().getBytes());
+    		
+			//Presentation Context
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getReserved());
+			//this.client.writeInt(this.associateRequest.getPresentationContext().getItemLength());
+			this.client.writeUInt16(this.associateRequestRQ.getPresentationContext().getItemLength());
+			//this.client.writeInt(this.associateRequest.getPresentationContext().getPresentationContextID());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getPresentationContextID());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getReserved());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getReserved());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getReserved());
+			
+			//Abstract Syntax
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getAbstractSyntaxSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getAbstractSyntaxSubItem().getReserved());
+			//this.client.writeInt(this.associateRequest.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+			this.client.writeUInt16(this.associateRequestRQ.getPresentationContext().getAbstractSyntaxSubItem().getItemLength());
+			this.client.write(this.associateRequestRQ.getPresentationContext().getAbstractSyntaxSubItem().getAbstractSyntaxName().getBytes());
+			
+			//Transfer Syntaxes
+			int tsi = this.associateRequestRQ.getPresentationContext().getTransferSyntaxSubItems().size();
+			
+			for (int b = 0; b < tsi; b ++) {
+				
+				TransferSyntax transferSyntax = this.associateRequestRQ.getPresentationContext().getTransferSyntaxSubItems().get(b);
+				this.client.writeByte(transferSyntax.getItemType());
+				this.client.writeByte(transferSyntax.getReserved());
+				//this.client.writeInt(transferSyntax.getItemLength());
+				this.client.writeUInt16(transferSyntax.getItemLength());
+				this.client.write(transferSyntax.getTransferSyntaxName().getBytes());
+				
+			}
+			
+			//User Information
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getItemLength());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getItemLength());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getItemLength());
+			this.client.write(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationClassUIDSubItem().getImplementationClassUID().getBytes());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getItemLength());
+			this.client.write(this.associateRequestRQ.getUserInformation().getImplementationItem().getImplementationVersionNameSubItem().getImplementationVersionName().getBytes());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getAsynchronousOperationsWindowSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getAsynchronousOperationsWindowSubItem().getItemLength());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsInvoked());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getAsynchronousOperationsWindowSubItem().getMaximumNumberOperationsPerformed());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getItemLength());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getUidLength());
+			this.client.write((this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getSopClassUID()).getBytes());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScuRole());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getScpSCURoleSelectionNegotiationSubItem().getScpRole());
+			
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getItemType());
+			this.client.writeByte(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getReserved());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getItemLength());
+			this.client.writeInt(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
+			this.client.write(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID().getBytes());
+			this.client.write(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation().getBytes());
+
+			this.client.flush();
+			
+    		pl("Successfully sent A-ASSOCIATE-RQ");
+			retval = true;
+    	
+        } 
+    	
+        catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    		
+    	return retval;
+    	
+    }
+        
+	public C_ECHO_RQ getEchoRequest() {
+		return echoRequest;
 	}
-    
+
+	public void setEchoRequest(C_ECHO_RQ echoRequest) {
+		this.echoRequest = echoRequest;
+	}
+
+	public C_ECHO_RSP getEchoResponse() {
+		return echoResponse;
+	}
+
+	public void setEchoResponse(C_ECHO_RSP echoResponse) {
+		this.echoResponse = echoResponse;
+	}
+
+	public A_ASSOCIATE_RQ getAssociateRequestRQ() {
+		return associateRequestRQ;
+	}
+
+	public void setAssociateRequestRQ(A_ASSOCIATE_RQ associateRequestRQ) {
+		this.associateRequestRQ = associateRequestRQ;
+	}
+
+	public A_ASSOCIATE_AC getAssociateRequestAC() {
+		return associateRequestAC;
+	}
+
+	public void setAssociateRequestAC(A_ASSOCIATE_AC associateRequestAC) {
+		this.associateRequestAC = associateRequestAC;
+	}
+
+	public A_ASSOCIATE_RJ getAssociateRequestRJ() {
+		return associateRequestRJ;
+	}
+
+	public void setAssociateRequestRJ(A_ASSOCIATE_RJ associateRequestRJ) {
+		this.associateRequestRJ = associateRequestRJ;
+	}
+
+	public byte[] getReceivedData() {
+		return receivedData;
+	}
+
+	public void setReceivedData(byte[] receivedData) {
+		this.receivedData = receivedData;
+	}
+
+	public boolean isRequestAcknowledged() {
+		return requestAcknowledged;
+	}
+
+	public void setRequestAcknowledged(boolean requestAcknowledged) {
+		this.requestAcknowledged = requestAcknowledged;
+	}
+
+	public boolean isRequestRejected() {
+		return requestRejected;
+	}
+
+	public void setRequestRejected(boolean requestRejected) {
+		this.requestRejected = requestRejected;
+	}
+
+	public Client getClient() {
+		return client;
+	}
+
+	public void setClient(Client client) {
+		this.client = client;
+	}
+
+	public boolean isConnected() {
+		return connected;
+	}
+
+	public void setConnected(boolean connected) {
+		this.connected = connected;
+	}
+
+	public boolean isRequestBuilt() {
+		return requestBuilt;
+	}
+
+	public void setRequestBuilt(boolean requestBuilt) {
+		this.requestBuilt = requestBuilt;
+	}
+
+	public boolean isRequestSent() {
+		return requestSent;
+	}
+
+	public void setRequestSent(boolean requestSent) {
+		this.requestSent = requestSent;
+	}
+
+	public boolean isDataReceived() {
+		return dataReceived;
+	}
+
+	public void setDataReceived(boolean dataReceived) {
+		this.dataReceived = dataReceived;
+	}
+
 	private void pl() { System.out.println(); }
 	
 	private void pl(String s) { System.out.println(s); }

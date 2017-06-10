@@ -43,6 +43,25 @@ public class PresentationContext_AC extends DICOMItem {
 	
 	public PresentationContext_AC() { super(); }
 	
+	public String response() {
+		
+		String response = "";
+		
+		switch(this.result) {
+		
+			case 0: response = "Association Request was accepted - acceptance"; break;
+			case 1: response = "Association Request was rejected - user rejection"; break;
+			case 2: response = "Association Request was rejected - no reason (provider rejection)"; break;
+			case 3: response = "Association Request was rejected - abstract syntax not supporter (provider rejection)"; break;
+			case 4: response = "Association Request was rejected - transfer syntaxes not supporter (provider rejection)"; break;
+
+		}
+		
+		return response;
+		
+	}
+
+	
 	public int getPresentationContextID() {
 		return presentationContextID;
 	}
