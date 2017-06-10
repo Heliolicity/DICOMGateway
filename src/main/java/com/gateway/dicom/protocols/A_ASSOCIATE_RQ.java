@@ -6,11 +6,11 @@ import com.gateway.dicom.entities.ApplicationContext;
 import com.gateway.dicom.entities.PresentationContext_RQ;
 import com.gateway.dicom.entities.UserInformation;
 
-public class A_ASSOCIATE_RQ {
+public class A_ASSOCIATE_RQ extends PDU {
 
-	private byte pduType;
-	private byte reserved = 0x00;
-	private int pduLength; //4 bytes in length
+	//private byte pduType;
+	//private byte reserved = 0x00;
+	//private int pduLength; //4 bytes in length
 	private int protocolVersion = 0x0000; //2 bytes in length
 	private String calledAE; //16 bytes in length
 	private String callingAE; //16 bytes in length
@@ -38,7 +38,7 @@ public class A_ASSOCIATE_RQ {
 		
 	public A_ASSOCIATE_RQ() { super(); }
 
-	public byte getPduType() {
+	/*public byte getPduType() {
 		return pduType;
 	}
 
@@ -60,7 +60,7 @@ public class A_ASSOCIATE_RQ {
 
 	public void setPduLength(int pduLength) {
 		this.pduLength = pduLength;
-	}
+	}*/
 
 	public int getProtocolVersion() {
 		return protocolVersion;

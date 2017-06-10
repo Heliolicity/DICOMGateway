@@ -1,10 +1,10 @@
 package com.gateway.dicom.protocols;
 
-public class A_ASSOCIATE_RJ {
+public class A_ASSOCIATE_RJ extends PDU {
 
-	private byte pduType;
-	private byte reserved = 0x00;
-	private int pduLength; //4 bytes in length
+	//private byte pduType;
+	//private byte reserved = 0x00;
+	//private int pduLength; //4 bytes in length
 	private byte result;
 	private byte source;
 	private byte reasonDiag;
@@ -20,7 +20,7 @@ public class A_ASSOCIATE_RJ {
 	
 	public A_ASSOCIATE_RJ() {}
 
-	public byte getPduType() {
+	/*public byte getPduType() {
 		return pduType;
 	}
 
@@ -42,7 +42,7 @@ public class A_ASSOCIATE_RJ {
 
 	public void setPduLength(int pduLength) {
 		this.pduLength = pduLength;
-	}
+	}*/
 
 	public byte getResult() {
 		return result;

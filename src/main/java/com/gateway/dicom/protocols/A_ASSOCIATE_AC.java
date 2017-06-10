@@ -6,11 +6,11 @@ import com.gateway.dicom.entities.ApplicationContext;
 import com.gateway.dicom.entities.PresentationContext_AC;
 import com.gateway.dicom.entities.UserInformation;
 
-public class A_ASSOCIATE_AC {
+public class A_ASSOCIATE_AC extends PDU {
 
-	private byte pduType;
-	private byte reserved = 0x00;
-	private int pduLength; //4 bytes in length
+	//private byte pduType;
+	//private byte reserved = 0x00;
+	//private int pduLength; //4 bytes in length
 	private int protocolVersion = 0x0000; //2 bytes in length
 	private ApplicationContext applicationContext;
 	private PresentationContext_AC presentationContext;
@@ -28,7 +28,7 @@ public class A_ASSOCIATE_AC {
 		this.userInformation = userInformation;
 	}
 
-	public byte getPduType() {
+	/*public byte getPduType() {
 		return pduType;
 	}
 
@@ -50,7 +50,7 @@ public class A_ASSOCIATE_AC {
 
 	public void setPduLength(int pduLength) {
 		this.pduLength = pduLength;
-	}
+	}*/
 
 	public int getProtocolVersion() {
 		return protocolVersion;
