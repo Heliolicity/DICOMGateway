@@ -32,7 +32,7 @@ public class CTImageGenerator extends DicomImageGenerator {
 	
 	public List<DataElement> getMetaInfoAttributes() {
 		
-		this.metaInfoAttributes = new ArrayList<DataElement>();
+		/*this.metaInfoAttributes = new ArrayList<DataElement>();
 		int numberOfBytes = 0;
 		
 		//0x0002, 0x0000, metaInfoVersionLength
@@ -74,7 +74,7 @@ public class CTImageGenerator extends DicomImageGenerator {
 		this.metaInfoAttributes.add(3, sopInstanceUID);
 		this.metaInfoAttributes.add(4, transferSyntaxUID);
 		this.metaInfoAttributes.add(5, implementationClassUID);
-		
+		*/
 		return this.metaInfoAttributes;
 		
 	}
@@ -287,6 +287,6 @@ public class CTImageGenerator extends DicomImageGenerator {
 		
 	}
 	
-	//private void pl(String s) { System.out.println(s); }
+	private void pl(String s) { System.out.println(s); }
 	
 }

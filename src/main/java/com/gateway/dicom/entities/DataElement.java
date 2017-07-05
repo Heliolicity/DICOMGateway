@@ -4,7 +4,7 @@ import java.util.Date;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
-public class DataElement implements Serializable {
+public class DataElement extends DICOMItem implements Serializable {
 
 	/**
 	 * 
@@ -88,7 +88,7 @@ public class DataElement implements Serializable {
 		
 	}
 	
-	public int determineElementLength(int c) {
+	/*public int determineElementLength(int c) {
 		
 		int totalLength = 0;
 		int glen = 2;	// Length of group number - 2 bytes
@@ -195,7 +195,7 @@ public class DataElement implements Serializable {
 		
 		return totalLength;
 		
-	}
+	}*/
 
 	public int getGroupNumber() {
 		return groupNumber;

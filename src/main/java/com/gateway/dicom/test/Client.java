@@ -108,7 +108,7 @@ public class Client {
 
     	Object o = null;
 		
-    	try {
+    	/*try {
 
     		System.out.println("03. -- About to receive an object...");
 		    o = is.readObject();
@@ -132,7 +132,7 @@ public class Client {
 		
     		System.out.println("XX. Exception Occurred on Receiving:" + e.toString());
 		
-    	}
+    	}*/
 		
     	return o;
     

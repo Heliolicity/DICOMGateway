@@ -53,41 +53,14 @@ public class TestMain {
 					
 					pl("CONNECTION SUCCESSFUL");
 						
-						/*boolean result = client.sendAssociateRequest();
+												
+						//fileInputStream = new FileInputStream("IMG_2116.JPG");
 						
-						if (result) {
+						//while (fileInputStream.available() > 0) {
 							
-							pl("A-ASSOCIATE-RQ Request Sent");
-							result = client.receive();
+							//pl("" + fileInputStream.read());
 							
-							if (result) {
-								
-								pl("GETTING SOMETHING");
-								
-							}
-							
-							else {
-								
-								pl("NOT GETTING ANYTHING");
-								
-							}
-							
-						}
-						
-						else {
-							
-							pl("A-ASSOCIATE-RQ NOT Sent");
-							
-						}*/
-	
-						
-						/*fileInputStream = new FileInputStream("IMG_2116.JPG");
-						
-						while (fileInputStream.available() > 0) {
-							
-							pl("" + fileInputStream.read());
-							
-						}*/
+						//}
 					
 				}
 				

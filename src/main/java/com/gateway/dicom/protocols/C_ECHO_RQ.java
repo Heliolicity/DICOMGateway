@@ -1,48 +1,79 @@
 package com.gateway.dicom.protocols;
 
+import java.io.ByteArrayOutputStream;
 import java.io.Serializable;
 import java.util.Random;
-
-/*
- * 
- * */
-
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gateway.dicom.entities.DataElement;
 
-public class C_ECHO_RQ implements Serializable {
+public class C_ECHO_RQ extends PDU implements Serializable {
 
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = -3427299234912651720L;
 	private DataElement commandGroupLength;
-	private DataElement affectedSOPClassUID;
+	private DataElement affectedServiceClassUID;
 	private DataElement commandField;
 	private DataElement messageID;
-	private DataElement commandDataSetType;
-	private int elementLength = 0;
+	private DataElement dataSetType;
+	private ByteArrayOutputStream stream;
+	private int length;
 	
-	public C_ECHO_RQ() { 
+	public C_ECHO_RQ(short id) {
 		
-		super();
-		//this.commandGroupLength = new DataElement(0x0000, 0x0000, "UL", 1, "");
-		this.affectedSOPClassUID = new DataElement(0x0000, 0x0002, "UI", 1, "1.2.840.10008.1.1");
-		this.elementLength = this.affectedSOPClassUID.getElementLength();
-		//this.commandField = new DataElement(0x0000, 0x0100, "US", 1, "0030H");
-		this.commandField = new DataElement(0x0000, 0x0100, "US", 1, "0030");
-		this.elementLength += this.commandField.getElementLength();
-		short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
-		this.messageID = new DataElement(0x0000, 0x0110, "US", 1, "" + randomNum);
-		this.elementLength += this.messageID.getElementLength();
-		//this.commandDataSetType = new DataElement(0x0800, 0x0100, "US", 1, "0101H");
-		this.commandDataSetType = new DataElement(0x0800, 0x0100, "US", 1, "0101");
-		this.elementLength += this.commandDataSetType.getElementLength();
-		this.commandGroupLength = new DataElement(0x0000, 0x0000, "UL", 1, "" + this.elementLength);
+		this.affectedServiceClassUID = new DataElement();
+		this.affectedServiceClassUID.setGroupNumber(0x0000);
+		this.affectedServiceClassUID.setElementNumber(0x0002);
+		this.affectedServiceClassUID.setValueRepresentation("UI");
+		this.affectedServiceClassUID.setElementData("1.2.840.10008.1.1");
 		
-	}
-
+		this.commandField = new DataElement();
+		this.commandField.setGroupNumber(0x0000);
+		this.commandField.setElementNumber(0x0100);
+		this.commandField.setValueRepresentation("US");
+		this.commandField.setElementData("0030");
+		
+		this.messageID = new DataElement();
+		this.messageID.setGroupNumber(0x0000);
+		this.messageID.setElementNumber(0x0110);
+		this.messageID.setValueRepresentation("US");
+		this.messageID.setElementData("" + id);
+		
+		this.dataSetType = new DataElement();
+		this.dataSetType.setGroupNumber(0x0000);
+		this.dataSetType.setElementNumber(0x0800);
+		this.dataSetType.setValueRepresentation("US");
+		this.dataSetType.setElementData("0101");
+		
+		this.writeToBuffer();
+		this.length = this.stream.size();
+		this.clearBuffer();
+		
+		this.commandGroupLength = new DataElement();
+		this.commandGroupLength.setGroupNumber(0x0000);
+		this.commandGroupLength.setElementNumber(0x0000);
+		this.commandGroupLength.setValueRepresentation("UL");
+		
+		try {
+		
+			this.stream.write(this.commandGroupLength.getValueRepresentation().getBytes());
+			this.stream.write(this.length);
+			this.length += this.stream.size();
+			this.commandGroupLength.setElementData("" + this.length);
+			this.clearBuffer();
+			
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	} 
+	
+	public C_ECHO_RQ() {}
+	
 	public DataElement getCommandGroupLength() {
 		return commandGroupLength;
 	}
@@ -51,12 +82,12 @@ public class C_ECHO_RQ implements Serializable {
 		this.commandGroupLength = commandGroupLength;
 	}
 
-	public DataElement getAffectedSOPClassUID() {
-		return affectedSOPClassUID;
+	public DataElement getAffectedServiceClassUID() {
+		return affectedServiceClassUID;
 	}
 
-	public void setAffectedSOPClassUID(DataElement affectedSOPClassUID) {
-		this.affectedSOPClassUID = affectedSOPClassUID;
+	public void setAffectedServiceClassUID(DataElement affectedServiceClassUID) {
+		this.affectedServiceClassUID = affectedServiceClassUID;
 	}
 
 	public DataElement getCommandField() {
@@ -75,31 +106,75 @@ public class C_ECHO_RQ implements Serializable {
 		this.messageID = messageID;
 	}
 
-	public DataElement getCommandDataSetType() {
-		return commandDataSetType;
+	public DataElement getDataSetType() {
+		return dataSetType;
 	}
 
-	public void setCommandDataSetType(DataElement commandDataSetType) {
-		this.commandDataSetType = commandDataSetType;
-	}
-	
-	public int getElementLength() {
-		return elementLength;
+	public void setDataSetType(DataElement dataSetType) {
+		this.dataSetType = dataSetType;
 	}
 
-	public void setElementLength(int elementLength) {
-		this.elementLength = elementLength;
+	public ByteArrayOutputStream getStream() {
+		return stream;
 	}
 
-	@Override
-	public String toString() {
+	public void setStream(ByteArrayOutputStream stream) {
+		this.stream = stream;
+	}
+
+	public int getLength() {
+		return length;
+	}
+
+	public void setLength(int length) {
+		this.length = length;
+	}
+
+	public static long getSerialversionuid() {
+		return serialVersionUID;
+	}
+
+	public void writeToBuffer() {
 		
-		return this.commandGroupLength.toString() + 
-				this.affectedSOPClassUID.toString() + 
-				this.commandField.toString() + 
-				this.messageID.toString() + 
-				this.commandDataSetType.toString();
-	
+		try {
+		
+			this.stream = new ByteArrayOutputStream();
+			
+			this.stream.write(this.affectedServiceClassUID.getGroupNumber());
+			this.stream.write(this.affectedServiceClassUID.getElementNumber());
+			this.stream.write(this.affectedServiceClassUID.getValueRepresentation().getBytes());
+			this.stream.write(this.affectedServiceClassUID.getElementData().getBytes());
+			
+			this.stream.write(this.commandField.getGroupNumber());
+			this.stream.write(this.commandField.getElementNumber());
+			this.stream.write(this.commandField.getValueRepresentation().getBytes());
+			this.stream.write(this.commandField.getElementData().getBytes());
+			
+			this.stream.write(this.messageID.getGroupNumber());
+			this.stream.write(this.messageID.getElementNumber());
+			this.stream.write(this.messageID.getValueRepresentation().getBytes());
+			this.stream.write(this.messageID.getElementData().getBytes());
+			
+			this.stream.write(this.dataSetType.getGroupNumber());
+			this.stream.write(this.dataSetType.getElementNumber());
+			this.stream.write(this.dataSetType.getValueRepresentation().getBytes());
+			this.stream.write(this.dataSetType.getElementData().getBytes());
+			
+			
+			
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
 	}
+	
+	public void clearBuffer() { if (! this.stream.equals(null)) this.stream.reset(); }
+	
+	private void pl(String s) { System.out.print(s); }
 	
 }

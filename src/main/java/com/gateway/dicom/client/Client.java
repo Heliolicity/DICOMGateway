@@ -332,6 +332,33 @@ public class Client extends DicomByteOrderable {
 		
 	}
     
+	public void writeUInt32(int value) throws IOException {
+		
+		int b0 = value & 0x000000ff; //masking out 24 bits
+		int b1 = (value & 0x0000ff00) >> 8;
+		int b2 = (value & 0x00ff0000) >> 16;
+		int b3 = (value & 0xff000000) >> 24;
+		
+		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
+			
+			this.dataOutputStream.write(b0);
+			this.dataOutputStream.write(b1);
+			this.dataOutputStream.write(b2);
+			this.dataOutputStream.write(b3);
+			
+		}
+		
+		else {
+			
+			this.dataOutputStream.write(b3);
+			this.dataOutputStream.write(b2);
+			this.dataOutputStream.write(b1);
+			this.dataOutputStream.write(b0);
+			
+		}
+		
+	}
+    
     public String readString(int length) throws IOException {
 		
     	byte[] byteArray = readByteArray(length);

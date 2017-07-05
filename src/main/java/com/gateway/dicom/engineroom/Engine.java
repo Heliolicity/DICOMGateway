@@ -3,9 +3,12 @@ package com.gateway.dicom.engineroom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RSP;
+import com.gateway.dicom.protocols.PDU;
+import com.gateway.dicom.protocols.P_DATA_TF;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
 import com.gateway.dicom.protocols.A_ASSOCIATE_AC;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RJ;
@@ -13,13 +16,16 @@ import com.gateway.dicom.client.Client;
 import com.gateway.dicom.entities.AbstractSyntax;
 import com.gateway.dicom.entities.ApplicationContext;
 import com.gateway.dicom.entities.AsynchronousOperationsWindowSubItem;
+import com.gateway.dicom.entities.DataElement;
 import com.gateway.dicom.entities.ExtendedNegotiationSubItem;
 import com.gateway.dicom.entities.ImplementationClassUIDSubItem;
 import com.gateway.dicom.entities.ImplementationItem;
 import com.gateway.dicom.entities.ImplementationVersionNameSubItem;
 import com.gateway.dicom.entities.MaximumLengthSubItem;
+import com.gateway.dicom.entities.MessageControlHeader;
 import com.gateway.dicom.entities.PresentationContext_AC;
 import com.gateway.dicom.entities.PresentationContext_RQ;
+import com.gateway.dicom.entities.PresentationDataValue;
 import com.gateway.dicom.entities.SCPSCURoleSelectionNegotiationSubItem;
 import com.gateway.dicom.entities.TransferSyntax;
 import com.gateway.dicom.entities.UserInformation;
@@ -31,6 +37,7 @@ public class Engine {
     private A_ASSOCIATE_RQ associateRequestRQ = null;
     private A_ASSOCIATE_AC associateRequestAC = null;
     private A_ASSOCIATE_RJ associateRequestRJ = null;
+    private P_DATA_TF dataTF = null;
     private byte[] receivedData = null;
     private boolean requestAcknowledged;
     private boolean requestRejected;
@@ -46,107 +53,123 @@ public class Engine {
     
     public void run() {
     	
-    	this.connected = this.client.connectToServer();
-    	byte status;
+    	try {
     	
-    	if (this.connected) {
-    		
-    		//Build an A-ASSOCIATE-RQ
-    		this.requestBuilt = this.buildAssociateRequest();
-    		
-    		if (this.requestBuilt) {
-    			
-    			//Send the A-ASSOCIATE-RQ
-    			//this.client.setAssociateRequestRQ(this.associateRequestRQ);
-    			//this.requestSent = this.client.sendAssociateRequest();
-    			this.requestSent = this.sendAssociateRequest();
-    			
-    			if (this.requestSent) {
-    				
-    				this.dataReceived = this.client.receive();
-    				
-    				if (this.dataReceived) {
-    					
-    					this.receivedData = this.client.getReceivedData();
-    					status = this.receivedData[0];
-    		        	
-    		        	if (status == 2) {
-    		        		
-    		        		//Build the A-ASSOCIATE-AC
-    						pl("REQUEST ACKNOWLEDGED");
-    		        		this.requestAcknowledged = true;
-    		        		this.requestRejected = false;
-    		        		this.buildAssociateAcknowledgement();
-    		        		
-    		        	}
-    		        	
-    		        	else if (status == 3) {
-    		        		
-    		        		pl("REQUEST REJECTED");
-    		        		this.requestAcknowledged = false;
-    		        		this.requestRejected = true;
-    		        		this.buildAssociateRejection();
-    		        		
-    		        	}
-    		        	
-    		        	else {
-    		        		
-    		        		pl("REQUEST NEITHER ACKNOWLEDGED NOR REJECTED");
-    		        		this.requestAcknowledged = false;
-    		        		this.requestRejected = false;
-    		        		
-    		        	}
-    					
-    					/*if (this.client.isRequestAcknowledged()) {
-    					
-    						//Build the A-ASSOCIATE-AC
-    						this.receivedData = this.client.getReceivedData();
-    						this.buildAssociateAcknowledgement();
-    						
-    					}
-    					
-    					else if (this.client.isRequestRejected()) {
-    						
-    						//Build the A-ASSOCIATE-RJ
-    						this.receivedData = this.client.getReceivedData();
-    						
-    						
-    					}
-    					
-    					else {
-    						
-    						
-    					}*/
-    					
-    				}
-    				
-    				else {
-    					
-    					
-    					
-    				}
-    				
-    			}
-    			
-    			else {
-    				
-    				
-    				
-    			}
-    			
-    		}
-    		
-    		else {
-    			
-    			
-    			
-    		}
-    		
-    	}
+	    	this.connected = this.client.connectToServer();
+	    	byte status;
+	    	
+	    	if (this.connected) {
+	    		
+	    		//Build an A-ASSOCIATE-RQ
+	    		this.requestBuilt = this.buildAssociateRequest();
+	    		
+	    		if (this.requestBuilt) {
+	    			
+	    			//Send the A-ASSOCIATE-RQ
+	    			//this.client.setAssociateRequestRQ(this.associateRequestRQ);
+	    			//this.requestSent = this.client.sendAssociateRequest();
+	    			this.requestSent = this.sendAssociateRequest();
+	    			
+	    			if (this.requestSent) {
+	    				
+	    				this.dataReceived = this.client.receive();
+	    				
+	    				if (this.dataReceived) {
+	    					
+	    					this.receivedData = this.client.getReceivedData();
+	    					status = this.receivedData[0];
+	    		        	
+	    		        	if (status == 2) {
+	    		        		
+	    		        		//Build the A-ASSOCIATE-AC
+	    						pl("REQUEST ACKNOWLEDGED");
+	    		        		this.requestAcknowledged = true;
+	    		        		this.requestRejected = false;
+	    		        		this.buildAssociateAcknowledgement();
+	    		        		
+	    		        		Thread.sleep(30000);
+	    		        		
+	    		        		//Build the P-DATA-TF
+	    		        		if (this.buildDataTF()) {
+	    		        			
+	    		        			if (this.sendDataTF()) {
+	    		        				
+	    		        				pl("SUCCESSFULLY SENT DATA REQUEST");
+	    		        				this.dataReceived = this.client.receive();
+	    		        				
+	    		        			}
+	    		        			
+	    		        			else {
+	    		        				
+	    		        				pl("PROBLEM SENDDING DATA REQUEST");
+	    		        				
+	    		        			}
+	    		        			
+	    		        		}
+	    		        		
+	    		        		else {
+	    		        			
+	    		        			pl("PROBLEM BUILDING DATA REQUEST");
+	    		        		
+	    		        		}
+	    		        		
+	    		        	}
+	    		        	
+	    		        	else if (status == 3) {
+	    		        		
+	    		        		pl("REQUEST REJECTED");
+	    		        		this.requestAcknowledged = false;
+	    		        		this.requestRejected = true;
+	    		        		this.buildAssociateRejection();
+	    		        		
+	    		        	}
+	    		        	
+	    		        	else {
+	    		        		
+	    		        		pl("REQUEST NEITHER ACKNOWLEDGED NOR REJECTED");
+	    		        		this.requestAcknowledged = false;
+	    		        		this.requestRejected = false;
+	    		        		
+	    		        	}
+	    					
+	    				}
+	    				
+	    				else {
+	    					
+	    					pl("NO DATA WAS RECEIVED");
+	    					
+	    				}
+	    				
+	    			}
+	    			
+	    			else {
+	    				
+	    				pl("THE REQUEST WASN'T SUCCESSFULLY SENT");
+	    				
+	    			}
+	    			
+	    		}
+	    		
+	    		else {
+	    			
+	    			pl("THE REQUEST WASN'T SUCCESSFULLY BUILT");
+	    			
+	    		}
+	    		
+	    	}
+	    	
+	    	else {
+	    		
+	    		pl("PROBLEM WITH THE CONNECTION IN ENGINE RUN METHOD");
+	    		
+	    	}
     	
-    	else {
+    	} 
+    	
+    	catch (Exception e) {
     		
-    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
     		
     	}
     	
@@ -674,6 +697,156 @@ public class Engine {
             
         }	
     		
+    	return retval;
+    	
+    }
+    
+    public boolean sendDataTF() {
+    	
+    	byte[] arr;
+    	boolean retval = false;
+    	
+    	try {
+    		
+    		pl("HERE 1");
+    		this.client.writeByte(this.dataTF.getPduType());
+    		pl("HERE 2");
+    		this.client.writeByte(this.dataTF.getReserved());
+    		pl("HERE 3");
+    		this.client.writeInt(this.dataTF.getPduLength());
+    		pl("HERE 4");
+    		
+    		
+    		/*
+    		for (PresentationDataValue item: this.dataTF.getPresentationDataValueItems()) {
+    			
+    			this.client.writeInt(item.getItemLength());
+    			this.client.writeByte(item.getPresentationContextID());
+    			
+    			//Will need a for loop here for multiple PDV Iteams
+    			this.client.writeByte(item.getMessageControlHeader().getHeader());
+    			
+    			PDU pdu = item.getPdvData();
+    			//Need some way of telling what kind of PDU it is
+    			//For now assume C-ECHO-RQ
+    			
+    			C_ECHO_RQ echo = (C_ECHO_RQ) pdu;
+    			
+    			DataElement element = echo.getCommandGroupLength();
+    			this.client.writeUInt16(element.getGroupNumber());
+    			this.client.writeUInt16(element.getElementNumber());
+    			this.client.write(element.getValueRepresentation().getBytes());
+    			String data = element.getElementData();
+    			int length = Integer.valueOf(data);
+    			this.client.writeUInt32(length);
+    			
+    			element = echo.getAffectedServiceClassUID();
+    			this.client.writeUInt16(element.getGroupNumber());
+    			this.client.writeUInt16(element.getElementNumber());
+    			this.client.write(element.getValueRepresentation().getBytes());
+    			data = element.getElementData();
+    			this.client.write(data.getBytes());
+    			
+    			element = echo.getCommandField();
+    			this.client.writeUInt16(element.getGroupNumber());
+    			this.client.writeUInt16(element.getElementNumber());
+    			this.client.write(element.getValueRepresentation().getBytes());
+    			data = element.getElementData();
+    			this.client.write(data.getBytes());
+    			
+    			element = echo.getMessageID();
+    			this.client.writeUInt16(element.getGroupNumber());
+    			this.client.writeUInt16(element.getElementNumber());
+    			this.client.write(element.getValueRepresentation().getBytes());
+    			data = element.getElementData();
+    			this.client.write(data.getBytes());
+    			
+    			element = echo.getDataSetType();
+    			this.client.writeUInt16(element.getGroupNumber());
+    			this.client.writeUInt16(element.getElementNumber());
+    			this.client.write(element.getValueRepresentation().getBytes());
+    			data = element.getElementData();
+    			this.client.write(data.getBytes());
+    			
+    			
+    		}*/
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    	
+    	return retval;
+    	
+    }
+    
+    public boolean buildEchoRequest() {
+    	
+    	boolean retval = false;
+    	short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
+    	this.echoRequest = new C_ECHO_RQ(randomNum);
+    	retval = true;
+    	return retval;
+    	
+    }
+    
+    public boolean buildDataTF() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		byte type;
+    		
+    		//FOR NOW JUST USE C-ECHO REQUEST 
+    		//CHANGE THIS LATER SO DIFFERENT PDVS CAN BE SENT
+    		
+    		type = 0x04;
+    		
+    		PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
+    		int pcID = presentationContext.getPresentationContextID();
+    		
+    		MessageControlHeader header = new MessageControlHeader();
+    		header.setIntHeader(192); //This will give the header a binary value of 11000000
+    		
+    		this.dataTF = new P_DATA_TF();
+    		this.dataTF.setPduType(type);
+    		
+    		if (this.buildEchoRequest()) {
+    		
+    			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest);
+    			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
+    			pdValueItems.add(pdValue);
+    			this.dataTF.setPresentationDataValueItems(pdValueItems);
+    			retval = true;
+    			
+    		}
+    		
+    		else {
+    			
+    			//Problem building Echo Request
+    			pl("THERE WAS A PROBLEM BUILDING THE ECHO REQUEST");
+    			retval = false;
+    			
+    		}
+    		
+    	}
+    	
+    	catch (Exception e) {
+
+        	pl(e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+    		
+    	}
+    	
     	return retval;
     	
     }
