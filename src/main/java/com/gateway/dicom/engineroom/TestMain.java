@@ -3,22 +3,27 @@ package com.gateway.dicom.engineroom;
 import java.io.FileInputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Scanner;
 
 import com.gateway.dicom.client.Client;
 import com.gateway.dicom.server.Server;
 
 public class TestMain {
 
+	private static Client client = null;
+	private static Engine engine = null;
+	
 	public static void main(String args[]) {
 		
-		Client client = null;
-		Engine engine = null;
 		boolean connected = false;
 		FileInputStream fileInputStream;
 		String host = null;
 		Server server = null;
 		Socket socket = null;
 		ServerSocket serverSocket;
+        Scanner keyboard = null;
+		String input = "";
+		int num = 0;
         
 		try {
 		
@@ -37,10 +42,32 @@ public class TestMain {
 
 			try {
 				
+				keyboard = new Scanner(System.in);
+				
 				//client = new Client(host, 5050);
 				client = new Client(host, 5678);
+				//host = "192.168.1.81";
+				//client = new Client(host, 4242);
 				engine = new Engine(client);
 				engine.run();
+				
+				/*pl("Do you wish to connect?");
+				input = keyboard.nextLine();
+				
+				if (input.equals("Y")) {
+				
+					engine.connect();
+				
+					sendCommands();
+					
+				}*/
+				
+				
+				/*
+				engine.connect();
+				engine.buildAbortRequest();
+				engine.sendAbortRequest();
+				*/
 			
 			}
 			
@@ -51,6 +78,46 @@ public class TestMain {
 				
 			}
 			
+		}
+		
+	}
+	
+	private static void sendCommands() {
+		
+		Scanner keyboard;
+		String input = "";
+		int num = 0;
+		byte[] receivedData = null;
+		
+		keyboard = new Scanner(System.in);
+		
+		pl("What DICOM PDU do you wish to send?");
+		num = keyboard.nextInt();
+		
+		switch(num) {
+		
+			case 1: engine.buildAssociateRequest();
+			engine.sendAssociateRequest();
+			engine.receive();
+			receivedData = engine.getReceivedData();
+			
+			for (int a = 0; a < receivedData.length; a ++) pl("arr[" + a + "]: " + receivedData[a]);
+			
+			sendCommands(); 
+			break;
+			
+			case 2: engine.buildReleaseRequest();
+			engine.sendReleaseRequest();
+			engine.receive();
+			receivedData = engine.getReceivedData();
+			
+			for (int a = 0; a < receivedData.length; a ++) pl("arr[" + a + "]: " + receivedData[a]);
+			
+			sendCommands(); 
+			break;
+			
+			default: break;
+		
 		}
 		
 	}

@@ -54,6 +54,7 @@ public class Client extends DicomByteOrderable {
     private byte[] receivedData = null;
     private boolean requestAcknowledged;
     private boolean requestRejected;
+    private int bytesTransferred;
     
     public Client(String ipAddress, int port) {
     	this.ipAddress = ipAddress;
@@ -151,6 +152,7 @@ public class Client extends DicomByteOrderable {
     		
     		if (size > 0) {
     		
+    			pl("DATA RECEIVED FROM CLIENT");
     			retval = true;
 	        	arr = new byte[size];
 	        	this.dataInputStream.readFully(arr);
@@ -160,72 +162,11 @@ public class Client extends DicomByteOrderable {
 	        	this.receivedData = arr;
 	        
     		}
-            
-    	} 
-    	
-        catch (Exception e) {   
-        	
-        	retval = false;
-        	pl(e.getMessage());
-        	e.printStackTrace();
-            return retval;
-            
-        }
-    
-    	return retval;
-    	
-    }
-    
-    /*public boolean receive() {
-    	
-    	boolean retval = false;
-    	ByteArrayOutputStream stream;
-    	byte[] arr;
-    	int result = 0;
-    	byte rec;
-    	int size = 0;
-    	byte status = 0;
-    	
-    	try {
     		
-    		size = this.dataInputStream.available();
-    		pl("AVAILABLE: " + this.dataInputStream.available());
-    		
-    		if (size > 0) {
-    		
-    			retval = true;
-	        	arr = new byte[size];
-	        	this.dataInputStream.readFully(arr);
-	        	
-	        	for (int a = 0; a < arr.length; a ++) pl("arr[" + a + "]: " + arr[a]);
-	        	
-	        	this.receivedData = arr;
-	        	status = arr[0];
-	        	
-	        	if (status == 2) {
-	        		
-	        		pl("REQUEST ACKNOWLEDGED");
-	        		this.requestAcknowledged = true;
-	        		this.requestRejected = false;
-	        		
-	        	}
-	        	
-	        	else if (status == 3) {
-	        		
-	        		pl("REQUEST REJECTED");
-	        		this.requestAcknowledged = false;
-	        		this.requestRejected = true;
-	        		
-	        	}
-	        	
-	        	else {
-	        		
-	        		pl("REQUEST NEITHER ACKNOWLEDGED NOR REJECTED");
-	        		this.requestAcknowledged = false;
-	        		this.requestRejected = false;
-	        		
-	        	}
-    		
+    		else {
+    			
+    			pl("NO DATA RECEIVED FROM CLIENT");
+    			
     		}
             
     	} 
@@ -238,16 +179,19 @@ public class Client extends DicomByteOrderable {
             return retval;
             
         }
-    
+    	
     	return retval;
     	
-    }*/
+    }
 
     public void writeByte(byte b) {
     	
     	try { 
     	
+    		//pl("Writing Byte: " + b);
+    		pl("" + b);
     		this.dataOutputStream.writeByte(b);
+    		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
     	
@@ -255,6 +199,7 @@ public class Client extends DicomByteOrderable {
     		
     		pl(e.getMessage());
     		e.printStackTrace();
+    		System.exit(0);
     		
     	}
     	
@@ -264,7 +209,10 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
         	
+    		//pl("Writing Byte: " + i);
+    		pl("" + i);
     		this.dataOutputStream.writeByte(i);
+    		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
     	
@@ -281,7 +229,10 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
         	
+    		//pl("Writing Integer: " + i);
+    		pl("" + i);
     		this.dataOutputStream.writeInt(i);
+    		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
     	
@@ -289,6 +240,7 @@ public class Client extends DicomByteOrderable {
     		
     		pl(e.getMessage());
     		e.printStackTrace();
+    		System.exit(0);
     		
     	}
     	
@@ -298,7 +250,15 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
         
+    		//p("Writing Bytes:");
+    		
+    		for (int i = 0; i < b.length ; i ++) 
+    			
+    			p(b[i] + " ");
+
     		this.dataOutputStream.write(b);
+    		pl("");
+    		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
     	
@@ -306,6 +266,7 @@ public class Client extends DicomByteOrderable {
     		
     		pl(e.getMessage());
     		e.printStackTrace();
+    		System.exit(0);
     		
     	}
     	
@@ -318,17 +279,27 @@ public class Client extends DicomByteOrderable {
 		
 		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
 			
+			//pl("Writing Integer: " + b0);
+			pl("" + b0);
 			this.dataOutputStream.write(b0);
+			//pl("Writing Integer: " + b1);
+			pl("" + b1);
 			this.dataOutputStream.write(b1);
 			
 		}
 		
 		else {
 		
+			//pl("Writing Integer: " + b1);
+			pl("" + b1);
 			this.dataOutputStream.write(b1);
+			//pl("Writing Integer: " + b0);
+			pl("" + b0);
 			this.dataOutputStream.write(b0);
 			
 		}
+		
+		//pl("Size: " + this.dataOutputStream.size());
 		
 	}
     
@@ -341,21 +312,39 @@ public class Client extends DicomByteOrderable {
 		
 		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
 			
+			//pl("Writing Integer: " + b0);
+			pl("" + b0);
 			this.dataOutputStream.write(b0);
+			//pl("Writing Integer: " + b1);
+			pl("" + b1);
 			this.dataOutputStream.write(b1);
+			//pl("Writing Integer: " + b2);
+			pl("" + b2);
 			this.dataOutputStream.write(b2);
+			//pl("Writing Integer: " + b3);
+			pl("" + b3);
 			this.dataOutputStream.write(b3);
 			
 		}
 		
 		else {
 			
+			//pl("Writing Integer: " + b3);
+			pl("" + b3);
 			this.dataOutputStream.write(b3);
+			//pl("Writing Integer: " + b2);
+			pl("" + b2);
 			this.dataOutputStream.write(b2);
+			//pl("Writing Integer: " + b1);
+			pl("" + b1);
 			this.dataOutputStream.write(b1);
+			//pl("Writing Integer: " + b0);
+			pl("" + b0);
 			this.dataOutputStream.write(b0);
 			
 		}
+		
+		//pl("Size: " + this.dataOutputStream.size());
 		
 	}
     
@@ -557,5 +546,7 @@ public class Client extends DicomByteOrderable {
 	}
 
 	private void pl(String s) { System.out.println(s); }
+	
+	private void p(String s) { System.out.print(s); }
     
 }

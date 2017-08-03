@@ -10,6 +10,9 @@ import com.gateway.dicom.protocols.C_ECHO_RSP;
 import com.gateway.dicom.protocols.PDU;
 import com.gateway.dicom.protocols.P_DATA_TF;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
+import com.gateway.dicom.protocols.A_RELEASE_RP;
+import com.gateway.dicom.protocols.A_RELEASE_RQ;
+import com.gateway.dicom.protocols.A_ABORT;
 import com.gateway.dicom.protocols.A_ASSOCIATE_AC;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RJ;
 import com.gateway.dicom.client.Client;
@@ -37,6 +40,9 @@ public class Engine {
     private A_ASSOCIATE_RQ associateRequestRQ = null;
     private A_ASSOCIATE_AC associateRequestAC = null;
     private A_ASSOCIATE_RJ associateRequestRJ = null;
+    private A_RELEASE_RQ releaseRequestRQ = null;
+    private A_RELEASE_RP releaseRequestRP = null;
+    private A_ABORT abortRQ = null;
     private P_DATA_TF dataTF = null;
     private byte[] receivedData = null;
     private boolean requestAcknowledged;
@@ -66,8 +72,6 @@ public class Engine {
 	    		if (this.requestBuilt) {
 	    			
 	    			//Send the A-ASSOCIATE-RQ
-	    			//this.client.setAssociateRequestRQ(this.associateRequestRQ);
-	    			//this.requestSent = this.client.sendAssociateRequest();
 	    			this.requestSent = this.sendAssociateRequest();
 	    			
 	    			if (this.requestSent) {
@@ -78,7 +82,8 @@ public class Engine {
 	    					
 	    					this.receivedData = this.client.getReceivedData();
 	    					status = this.receivedData[0];
-	    		        	
+	    		        	pl("STATUS: " + status);
+	    					
 	    		        	if (status == 2) {
 	    		        		
 	    		        		//Build the A-ASSOCIATE-AC
@@ -86,9 +91,46 @@ public class Engine {
 	    		        		this.requestAcknowledged = true;
 	    		        		this.requestRejected = false;
 	    		        		this.buildAssociateAcknowledgement();
+	    	        		
+	    		        		//Send the A_RELEASE-RQ
+	    		        		if (this.buildReleaseRequest()) {
+	    		        			
+	    		        			if (this.sendReleaseRequest()) {
+	    		        				
+	    		        				pl("SUCCESSFULLY SENT RELEASE REQUEST");
+	    		        				this.dataReceived = this.client.receive();
+	    		        				
+	    		        				if (this.dataReceived) {
+	    		        					
+	    		        					pl("GETTING DATA");
+	    		        					
+	    		        					
+	    		        				}
+	    		        				
+	    		        				else {
+	    		        					
+	    		        					pl("PROBLEM RECEIVING RELEASE RESPONSE");
+	    		        					
+	    		        					
+	    		        				}
+	    		        				
+	    		        			}
+	    		        			
+	    		        			else {
+	    		        				
+	    		        				pl("PROBLEM SENDING RELEASE REQUEST");
+	    		        				
+	    		        			}
+	    		        			
+	    		        		}
 	    		        		
-	    		        		Thread.sleep(30000);
+	    		        		else {
+	    		        			
+	    		        			pl("PROBLEM BUILDING RELEASE REQUEST");
+	    		        			
+	    		        		}
 	    		        		
+	    		        		/*
 	    		        		//Build the P-DATA-TF
 	    		        		if (this.buildDataTF()) {
 	    		        			
@@ -101,7 +143,7 @@ public class Engine {
 	    		        			
 	    		        			else {
 	    		        				
-	    		        				pl("PROBLEM SENDDING DATA REQUEST");
+	    		        				pl("PROBLEM SENDING DATA REQUEST");
 	    		        				
 	    		        			}
 	    		        			
@@ -112,6 +154,7 @@ public class Engine {
 	    		        			pl("PROBLEM BUILDING DATA REQUEST");
 	    		        		
 	    		        		}
+	    		        		*/
 	    		        		
 	    		        	}
 	    		        	
@@ -175,6 +218,40 @@ public class Engine {
     	
     }
     
+    public void connect() {
+    	
+    	try {
+    		
+    		this.connected = this.client.connectToServer();
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		
+    	}
+    	
+    }
+    
+    public void close() {
+    	
+    	try {
+    		
+    		this.connected = (! this.client.closeConnections());
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		
+    	}
+    	
+    }
+    
     public boolean buildAssociateRequest() {
     	
     	boolean retval = false;
@@ -204,7 +281,7 @@ public class Engine {
     		
     		//User Information
     		type = 0x51;
-    		MaximumLengthSubItem maximumLengthSubItem = new MaximumLengthSubItem(type, 4000);
+    		MaximumLengthSubItem maximumLengthSubItem = new MaximumLengthSubItem(type, 0);
     		
     		type = 0x52;
     		ImplementationClassUIDSubItem implementationClassUIDSubItem = new ImplementationClassUIDSubItem(type, "TEST"); 
@@ -231,8 +308,9 @@ public class Engine {
     		this.associateRequestRQ = new A_ASSOCIATE_RQ();
     		this.associateRequestRQ.setPduType(type);
     		this.associateRequestRQ.setCalledAE("CONQUESTSRV1    ");
-    		//this.associateRequest.setCallingAE("1.2.840.10008.3.1.1.1");
+    		//this.associateRequestRQ.setCalledAE("ORTHANC");
     		this.associateRequestRQ.setCallingAE("THISCOMPUTER    ");
+    		//this.associateRequestRQ.setCallingAE("THISCOMPUTER");
     		this.associateRequestRQ.setPresentationContext(presentationContext_RQ);
     		this.associateRequestRQ.setApplicationContext(applicationContext);
     		this.associateRequestRQ.setUserInformation(userInformation);
@@ -509,7 +587,7 @@ public class Engine {
     	    	else {
     	    		
     	    		//The Transfer Syntax sub-items aren't significant in the case of non-acceptance
-    	    		pl(presentationContext.response());
+    	    		pl("RESPONSE: " + presentationContext.response());
     	    		retval = false;
     	    		
     	    	}
@@ -588,7 +666,7 @@ public class Engine {
     		this.client.writeByte(this.associateRequestRQ.getReserved());
 			this.client.writeInt(this.associateRequestRQ.getPduLength());
 			
-			//this.client.writeByte(this.associateRequest.getProtocolVersion());
+			//this.client.writeByte(this.associateRequestRQ.getProtocolVersion());
 			//For time being hard-code Protocol Version to two bytes of 0x00
 			this.client.writeByte(this.associateRequestRQ.getReserved());
 			this.client.writeByte(this.associateRequestRQ.getReserved());
@@ -610,9 +688,13 @@ public class Engine {
 			this.client.write(this.associateRequestRQ.getApplicationContext().getApplicationContextName().getBytes());
     		
 			//Presentation Context
+			pl("Writing Presentation Context");
+			pl("Presentation Context Item Type: " + this.associateRequestRQ.getPresentationContext().getItemType());
 			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getItemType());
+			pl("Presentation Context Reserved: " + this.associateRequestRQ.getPresentationContext().getReserved());
 			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getReserved());
 			//this.client.writeInt(this.associateRequest.getPresentationContext().getItemLength());
+			pl("Presentation Context Item Length: " + this.associateRequestRQ.getPresentationContext().getItemLength());
 			this.client.writeUInt16(this.associateRequestRQ.getPresentationContext().getItemLength());
 			//this.client.writeInt(this.associateRequest.getPresentationContext().getPresentationContextID());
 			this.client.writeByte(this.associateRequestRQ.getPresentationContext().getPresentationContextID());
@@ -640,7 +722,7 @@ public class Engine {
 				this.client.write(transferSyntax.getTransferSyntaxName().getBytes());
 				
 			}
-			
+			/*
 			//User Information
 			this.client.writeByte(this.associateRequestRQ.getUserInformation().getItemType());
 			this.client.writeByte(this.associateRequestRQ.getUserInformation().getReserved());
@@ -681,7 +763,7 @@ public class Engine {
 			this.client.writeInt(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getSopClassUIDLength());
 			this.client.write(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getSopClassUID().getBytes());
 			this.client.write(this.associateRequestRQ.getUserInformation().getExtendedNegotiationSubItem().getServiceClassApplicationInformation().getBytes());
-
+			/**/
 			this.client.flush();
 			
     		pl("Successfully sent A-ASSOCIATE-RQ");
@@ -701,6 +783,36 @@ public class Engine {
     	
     }
     
+    public boolean sendReleaseRequest() { 
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		this.client.writeByte(this.releaseRequestRQ.getPduType());
+    		this.client.writeByte(this.releaseRequestRQ.getReserved());
+    		this.client.writeInt(this.releaseRequestRQ.getPduLength());
+    		
+    		for (int i = 0; i < 4; i ++) this.client.writeByte(this.releaseRequestRQ.getReserved());
+    		
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }
+    	
+    	return retval;
+    	
+    }
+    
     public boolean sendDataTF() {
     	
     	byte[] arr;
@@ -708,16 +820,12 @@ public class Engine {
     	
     	try {
     		
-    		pl("HERE 1");
     		this.client.writeByte(this.dataTF.getPduType());
-    		pl("HERE 2");
+    		pl("HERE 1");
     		this.client.writeByte(this.dataTF.getReserved());
-    		pl("HERE 3");
+    		pl("HERE 2");
     		this.client.writeInt(this.dataTF.getPduLength());
-    		pl("HERE 4");
     		
-    		
-    		/*
     		for (PresentationDataValue item: this.dataTF.getPresentationDataValueItems()) {
     			
     			this.client.writeInt(item.getItemLength());
@@ -769,7 +877,41 @@ public class Engine {
     			this.client.write(data.getBytes());
     			
     			
-    		}*/
+    		}
+    		
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    	
+    	return retval;
+    	
+    }
+    
+    public boolean sendAbortRequest() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		this.client.writeByte(this.abortRQ.getPduType());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeInt(this.abortRQ.getPduLength());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeByte(this.abortRQ.getSource());
+    		this.client.writeByte(this.abortRQ.getReason());
+    		
+    		this.client.flush();
     		
     		retval = true;
     		
@@ -792,6 +934,17 @@ public class Engine {
     	boolean retval = false;
     	short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
     	this.echoRequest = new C_ECHO_RQ(randomNum);
+    	retval = true;
+    	return retval;
+    	
+    }
+    
+    public boolean buildReleaseRequest() {
+    	
+    	boolean retval = false;
+    	byte type = 0x05;
+    	this.releaseRequestRQ = new A_RELEASE_RQ();
+    	this.releaseRequestRQ.setPduType(type);
     	retval = true;
     	return retval;
     	
@@ -848,6 +1001,29 @@ public class Engine {
     	}
     	
     	return retval;
+    	
+    }
+    
+    public boolean buildAbortRequest() {
+    	
+    	boolean retval = false;
+    	byte type;
+    	byte source;
+    	byte reason;
+    	
+    	type = 0x07;
+    	source = 0;
+    	reason = 0;
+    	this.abortRQ = new A_ABORT(type, source, reason);
+    	
+    	retval = true;
+    	return retval;
+    	
+    }
+    
+    public void receive() {
+    	
+    	if (this.client.receive()) this.receivedData = this.client.getReceivedData();
     	
     }
         
