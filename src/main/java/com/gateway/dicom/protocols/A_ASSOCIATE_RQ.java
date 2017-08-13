@@ -193,14 +193,6 @@ public class A_ASSOCIATE_RQ extends PDU {
 		
 			this.pduLength = this.buffer.size();
 			
-			/*DicomOutputBuffer test = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
-			test = this.buffer;
-			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
-			this.buffer.writeUInt8(this.pduType);
-			this.buffer.writeUInt8(this.reserved);
-			this.buffer.writeUInt32(this.pduLength);
-			this.buffer.write(test.toByteArray());*/
-			
 		}
 		
 		catch (Exception e) {

@@ -6,6 +6,7 @@ import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.gateway.dicom.entities.DataElement;
+import com.gateway.dicom.lib.DicomOutputBuffer;
 
 public class C_ECHO_RQ extends PDU implements Serializable {
 
@@ -17,6 +18,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 	private DataElement dataSetType;
 	private ByteArrayOutputStream stream;
 	private int length;
+	private DicomOutputBuffer buffer;
 	
 	public C_ECHO_RQ(short id) {
 		
@@ -134,7 +136,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		return serialVersionUID;
 	}
 
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 		
@@ -173,7 +175,30 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		
 	}
 	
-	public void clearBuffer() { if (! this.stream.equals(null)) this.stream.reset(); }
+	public void clearStream() { if (! this.stream.equals(null)) this.stream.reset(); }
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			
+				
+		}
+		
+		catch (Exception e) {
+			
+			pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+
+		
+	}
+	
+	public void clearBuffer() {
+		
+	}
 	
 	private void pl(String s) { System.out.print(s); }
 	

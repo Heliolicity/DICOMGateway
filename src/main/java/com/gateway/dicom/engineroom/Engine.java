@@ -52,6 +52,10 @@ public class Engine {
     private int targetAssociateRQDataLen;
     private byte[] targetAssociateRQData2;
     
+    private byte[] targetPDataTFData1;
+    private int targetPDataTFDataLen;
+    private byte[] targetPDataTFData2;
+    
     private byte[] receivedData = null;
     private boolean requestAcknowledged;
     private boolean requestRejected;
@@ -85,7 +89,7 @@ public class Engine {
 	    		this.requestBuilt = this.buildAssociateRequest();
 	    		
 	    		if (this.requestBuilt) {
-	    			/*
+	    			
 	    			//Send the A-ASSOCIATE-RQ
 	    			this.requestSent = this.sendAssociateRequest();
 	    			
@@ -97,30 +101,31 @@ public class Engine {
 	    					
 	    					this.receivedData = this.client.getReceivedData();
 	    					status = this.receivedData[0];
-	    		        	pl("STATUS: " + status);
-	    					
+	    		        	
 	    		        	if (status == 2) {
 	    		        		
 	    		        		//Build the A-ASSOCIATE-AC
-	    						pl("REQUEST ACKNOWLEDGED");
+	    						pl("Request succesfully acknowledged");
 	    		        		this.requestAcknowledged = true;
 	    		        		this.requestRejected = false;
 	    		        		this.buildAssociateAcknowledgement();
 	    	        		
+	    		        		
+	    		        		
 	    		        		//Send the A_RELEASE-RQ
-	    		        		if (this.buildReleaseRequest()) {
+	    		        		/*if (this.buildReleaseRequest()) {
 	    		        			
 	    		        			if (this.sendReleaseRequest()) {
 	    		        				
-	    		        				pl("SUCCESSFULLY SENT RELEASE REQUEST");
+	    		        				pl("Successfully sent A-RELEASE-RQ");
 	    		        				this.dataReceived = this.client.receive();
 	    		        				
 	    		        				if (this.dataReceived) {
 	    		        					
-	    		        					pl("SUCCESSFULLY RECEIVED DATA IN RESPONSE TO RELEASE REQUEST");
+	    		        					pl("Received data in response to A-RELEASE-RQ");
 	    		        					this.receivedData = this.client.getReceivedData();
 	    		        					status = this.receivedData[0];
-	    			    		        	pl("STATUS: " + status);
+	    			    		        	pl("Release status: " + status);
 	    			    		        	
 	    			    		        	this.processData(this.receivedData);
 	    			    		        	
@@ -129,8 +134,7 @@ public class Engine {
 	    		        				
 	    		        				else {
 	    		        					
-	    		        					pl("PROBLEM RECEIVING RELEASE RESPONSE");
-	    		        					
+	    		        					pl("Did not receive data in response to A-RELEASE-RQ");
 	    		        					
 	    		        				}
 	    		        				
@@ -138,7 +142,7 @@ public class Engine {
 	    		        			
 	    		        			else {
 	    		        				
-	    		        				pl("PROBLEM SENDING RELEASE REQUEST");
+	    		        				pl("Problem sending A-RELEASE-RQ");
 	    		        				
 	    		        			}
 	    		        			
@@ -146,16 +150,15 @@ public class Engine {
 	    		        		
 	    		        		else {
 	    		        			
-	    		        			pl("PROBLEM BUILDING RELEASE REQUEST");
+	    		        			pl("Problem building A-RELEASE-RQ");
 	    		        			
-	    		        		}
-	    		        		
+	    		        		}*/
 	    		        		
 	    		        	}
 	    		        	
 	    		        	else if (status == 3) {
 	    		        		
-	    		        		pl("REQUEST REJECTED");
+	    		        		pl("A-ASSOCIATE-RQ was rejected");
 	    		        		this.requestAcknowledged = false;
 	    		        		this.requestRejected = true;
 	    		        		this.buildAssociateRejection();
@@ -164,7 +167,7 @@ public class Engine {
 	    		        	
 	    		        	else {
 	    		        		
-	    		        		pl("REQUEST NEITHER ACKNOWLEDGED NOR REJECTED");
+	    		        		pl("A-ASSOCIATE-RQ neither acknowledged nor rejected");
 	    		        		this.requestAcknowledged = false;
 	    		        		this.requestRejected = false;
 	    		        		
@@ -174,7 +177,7 @@ public class Engine {
 	    				
 	    				else {
 	    					
-	    					pl("NO DATA WAS RECEIVED");
+	    					pl("No data was received from PACS");
 	    					
 	    				}
 	    				
@@ -185,7 +188,7 @@ public class Engine {
 	    				pl("THE REQUEST WASN'T SUCCESSFULLY SENT");
 	    				
 	    			}
-	    			*/
+	    			
 	    		}
 	    		
 	    		else {
@@ -510,14 +513,15 @@ public class Engine {
     		
     		//User Information
     		type = 0x51;
-    		MaximumLengthSubItem maximumLengthSubItem = new MaximumLengthSubItem(type, 0);
+    		MaximumLengthSubItem maximumLengthSubItem = new MaximumLengthSubItem(type, 16384);
     		
     		type = 0x52;
-    		ImplementationClassUIDSubItem implementationClassUIDSubItem = new ImplementationClassUIDSubItem(type, "TEST"); 
+    		ImplementationClassUIDSubItem implementationClassUIDSubItem = new ImplementationClassUIDSubItem(type, "1.2.826.0.1.3680043.2.1396.999"); 
     		
     		type = 0x55;
-    		ImplementationVersionNameSubItem implementationVersionNameSubItem = new ImplementationVersionNameSubItem(type, "TEST");
+    		ImplementationVersionNameSubItem implementationVersionNameSubItem = new ImplementationVersionNameSubItem(type, "CharruaSoft");
     		
+    		/*
     		type = 0x53;
     		AsynchronousOperationsWindowSubItem asynchronousOperationsWindowSubItem = new AsynchronousOperationsWindowSubItem(type, 50, 50);
     		
@@ -526,11 +530,16 @@ public class Engine {
     		
     		type = 0x56;
     		ExtendedNegotiationSubItem extendedNegotiationSubItem = new ExtendedNegotiationSubItem(type, "TEST", "TEST");
+    		*/
     		
     		ImplementationItem implementationItem = new ImplementationItem(implementationClassUIDSubItem, implementationVersionNameSubItem);
     		
     		type = 0x50;
-    		UserInformation userInformation = new UserInformation(type, maximumLengthSubItem, implementationItem, asynchronousOperationsWindowSubItem, scpSCURoleSelectionNegotiationSubItem, extendedNegotiationSubItem);
+    		//UserInformation userInformation = new UserInformation(type, maximumLengthSubItem, implementationItem, asynchronousOperationsWindowSubItem, scpSCURoleSelectionNegotiationSubItem, extendedNegotiationSubItem);
+    		UserInformation userInformation = new UserInformation();
+    		userInformation.setItemType(type);
+    		userInformation.setMaximumLengthSubItem(maximumLengthSubItem);
+    		userInformation.setImplementationItem(implementationItem);
     		
     		//A-ASSOCIATE-RQ
     		type = 0x01;
@@ -546,7 +555,7 @@ public class Engine {
     		this.associateRequestRQ.setUserInformation(userInformation);
     		//this.associateRequestRQ.calculateLength();
     		
-    		for (int a = 0; a < this.targetAssociateRQData1.length; a ++)
+    		/*for (int a = 0; a < this.targetAssociateRQData1.length; a ++)
     			
     			p("" + this.targetAssociateRQData1[a]);
     		
@@ -556,7 +565,7 @@ public class Engine {
     			
     			p("" + this.targetAssociateRQData2[b]);
     		
-    		pl();
+    		pl();*/
     		
     		this.associateRequestRQ.writeToBuffer();
     		//pl("SIZE: " + this.associateRequestRQ.getPduLength());
@@ -566,7 +575,7 @@ public class Engine {
     		len = this.associateRequestRQ.getPduLength();
     		byte[] arr4 = test;
     		
-    		for (int c = 0; c < arr3.length; c ++)
+    		/*for (int c = 0; c < arr3.length; c ++)
     		
     			p("" + arr3[c]);
     		
@@ -575,6 +584,7 @@ public class Engine {
     		for (int d = 0; d < arr4.length; d ++)
         		
     			p("" + arr4[d]);
+    		*/
     		
     		retval = true;
     		
@@ -593,6 +603,17 @@ public class Engine {
     }
 	
     public boolean buildAssociateAcknowledgement() {
+    	
+    	/*0 - acceptance
+    	
+		1 - user-rejection
+		
+		2 - no-reason (provider rejection)
+		
+		3 - abstract-syntax-not-supported (provider rejection)
+		
+		4 - transfer-syntaxes-not-supported (provider rejection)
+    	*/
     	
     	boolean retval = true;
     	byte b;
@@ -643,7 +664,7 @@ public class Engine {
     	    b4 = this.receivedData[5];
     	    i = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
     	            ((0xFF & b3) << 8) | (0xFF & b4);
-    		
+    		/*
     	    //Change this - the PDU Length should indicate the number of bytes to take from the array
     	    this.associateRequestAC.setPduLength(i);
     	    
@@ -655,7 +676,6 @@ public class Engine {
     	    this.associateRequestAC.setProtocolVersion(i);
     	    
     	    applicationContext = new ApplicationContext();
-    	    pl("LENGTH AT THIS POINT: " + this.receivedData.length);
     	    
     	    if (this.receivedData.length > 74) {
     	    
@@ -678,7 +698,6 @@ public class Engine {
 	    	    	
 		    	    arr = Arrays.copyOfRange(this.receivedData, 78, pos);
 		    	    s = new String(arr, 0, arr.length);
-		    	    pl("APPLICATION CONTEXT NAME: " + s);
 		    	    applicationContext.setApplicationContextName(s);
 		    	    this.associateRequestAC.setApplicationContext(applicationContext);
 		    	    b = this.receivedData[pos];
@@ -697,17 +716,7 @@ public class Engine {
 		    	    	i = (int) b;
 		    	    	presentationContext.setPresentationContextID(i);
 		    	    	
-		    	    	/*0 - acceptance
-	
-						1 - user-rejection
-						
-						2 - no-reason (provider rejection)
-						
-						3 - abstract-syntax-not-supported (provider rejection)
-						
-						4 - transfer-syntaxes-not-supported (provider rejection)
-		    	    	*/
-		    	    	
+		    		    	    	
 		    	    	b = this.receivedData[pos + 6];
 		    	    	presentationContext.setResult(b);
 		    	    	
@@ -879,7 +888,7 @@ public class Engine {
     	    	pl("No Application Context received");
     	    	
     	    }
-    	    
+    	    */
     	} 
     	
     	else {
@@ -944,6 +953,10 @@ public class Engine {
     		//this.client.write(arr1);
     		//this.client.writeUInt32(len);
     		//this.client.write(arr2);
+    		this.client.writeByte(this.associateRequestRQ.getPduType());
+    		this.client.writeByte(this.associateRequestRQ.getReserved());
+    		this.client.writeUInt32(this.associateRequestRQ.getPduLength());
+    		this.client.write(this.associateRequestRQ.getBuffer().toByteArray());
     		
 			this.client.flush();
 			
@@ -1133,10 +1146,97 @@ public class Engine {
     
     public boolean buildDataTF() {
     	
+    	byte[] arr1 = {0x04, 0x00};
+    	
+    	int len = 74;
+    	
+    	byte[] arr2 = {0x00,
+    			0x00,
+    			0x00,
+    			0x46,
+    			0x01,
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x04,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x38,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x02,
+    			0x00,
+    			0x12,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x2e,
+
+    			0x38,
+    			0x34,
+    			0x30,
+    			0x2e,
+    			0x31,
+    			0x30,
+    			0x30,
+    			0x30,
+    			0x38,
+    			0x2e,
+    			0x21,
+    			0x2e,
+    			0x31,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x00,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x30,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x10,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x08,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x01,
+    			0x01};
+    	
     	boolean retval = false;
     	
     	try {
     	
+    		this.targetPDataTFData1 = arr1;
+    		this.targetAssociateRQDataLen = len;
+    		this.targetAssociateRQData2 = arr2;
+    		
     		byte type;
     		
     		//FOR NOW JUST USE C-ECHO REQUEST 
@@ -1161,6 +1261,16 @@ public class Engine {
     			this.dataTF.setPresentationDataValueItems(pdValueItems);
     			retval = true;
     			
+    			for (int a = 0; a < this.targetPDataTFData1.length; a ++)
+    				
+    				p("" + this.targetAssociateRQData1[a]);
+    			
+    			p("" + this.targetPDataTFDataLen);
+    			
+    			for (int b = 0; b < this.targetPDataTFData2.length; b ++)
+    			
+    				p("" + this.targetAssociateRQData2[b]);
+    				
     		}
     		
     		else {

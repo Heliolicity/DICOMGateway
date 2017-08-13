@@ -148,16 +148,16 @@ public class Client extends DicomByteOrderable {
     	try {
     		
     		size = this.dataInputStream.available();
-    		pl("AVAILABLE: " + this.dataInputStream.available());
+    		//pl("AVAILABLE: " + this.dataInputStream.available());
     		
     		if (size > 0) {
     		
-    			pl("DATA RECEIVED FROM CLIENT");
+    			pl("Data received from PACS");
     			retval = true;
 	        	arr = new byte[size];
 	        	this.dataInputStream.readFully(arr);
 	        	
-	        	for (int a = 0; a < arr.length; a ++) pl("arr[" + a + "]: " + arr[a]);
+	        	//for (int a = 0; a < arr.length; a ++) pl("arr[" + a + "]: " + arr[a]);
 	        	
 	        	this.receivedData = arr;
 	        
@@ -165,7 +165,7 @@ public class Client extends DicomByteOrderable {
     		
     		else {
     			
-    			pl("NO DATA RECEIVED FROM CLIENT");
+    			pl("No data received from PACS");
     			
     		}
             
@@ -188,8 +188,7 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
     	
-    		//pl("Writing Byte: " + b);
-    		pl("" + b);
+    		//pl("" + b);
     		this.dataOutputStream.writeByte(b);
     		//pl("Size: " + this.dataOutputStream.size());
     		
@@ -209,8 +208,7 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
         	
-    		//pl("Writing Byte: " + i);
-    		pl("" + i);
+    		//pl("" + i);
     		this.dataOutputStream.writeByte(i);
     		//pl("Size: " + this.dataOutputStream.size());
     		
@@ -229,8 +227,7 @@ public class Client extends DicomByteOrderable {
     	
     	try { 
         	
-    		//pl("Writing Integer: " + i);
-    		pl("" + i);
+    		//pl("" + i);
     		this.dataOutputStream.writeInt(i);
     		//pl("Size: " + this.dataOutputStream.size());
     		
@@ -252,12 +249,13 @@ public class Client extends DicomByteOrderable {
         
     		//p("Writing Bytes:");
     		
-    		for (int i = 0; i < b.length ; i ++) 
+    		/*for (int i = 0; i < b.length ; i ++) 
     			
     			p(b[i] + " ");
-
+			*/
+    		
     		this.dataOutputStream.write(b);
-    		pl("");
+    		//pl("");
     		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
@@ -279,22 +277,18 @@ public class Client extends DicomByteOrderable {
 		
 		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
 			
-			//pl("Writing Integer: " + b0);
-			pl("" + b0);
+			//pl("" + b0);
 			this.dataOutputStream.write(b0);
-			//pl("Writing Integer: " + b1);
-			pl("" + b1);
+			//pl("" + b1);
 			this.dataOutputStream.write(b1);
 			
 		}
 		
 		else {
 		
-			//pl("Writing Integer: " + b1);
-			pl("" + b1);
+			//pl("" + b1);
 			this.dataOutputStream.write(b1);
-			//pl("Writing Integer: " + b0);
-			pl("" + b0);
+			//pl("" + b0);
 			this.dataOutputStream.write(b0);
 			
 		}
@@ -312,34 +306,26 @@ public class Client extends DicomByteOrderable {
 		
 		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
 			
-			//pl("Writing Integer: " + b0);
-			pl("" + b0);
+			//pl("" + b0);
 			this.dataOutputStream.write(b0);
-			//pl("Writing Integer: " + b1);
-			pl("" + b1);
+			//pl("" + b1);
 			this.dataOutputStream.write(b1);
-			//pl("Writing Integer: " + b2);
-			pl("" + b2);
+			//pl("" + b2);
 			this.dataOutputStream.write(b2);
-			//pl("Writing Integer: " + b3);
-			pl("" + b3);
+			//pl("" + b3);
 			this.dataOutputStream.write(b3);
 			
 		}
 		
 		else {
 			
-			//pl("Writing Integer: " + b3);
-			pl("" + b3);
+			//pl("" + b3);
 			this.dataOutputStream.write(b3);
-			//pl("Writing Integer: " + b2);
-			pl("" + b2);
+			//pl("" + b2);
 			this.dataOutputStream.write(b2);
-			//pl("Writing Integer: " + b1);
-			pl("" + b1);
+			//pl("" + b1);
 			this.dataOutputStream.write(b1);
-			//pl("Writing Integer: " + b0);
-			pl("" + b0);
+			//pl("" + b0);
 			this.dataOutputStream.write(b0);
 			
 		}

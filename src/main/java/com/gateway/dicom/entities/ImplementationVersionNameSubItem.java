@@ -14,8 +14,6 @@ public class ImplementationVersionNameSubItem extends DICOMItem {
 		this.implementationVersionName = implementationVersionName;
 		byte[] bytes = this.implementationVersionName.getBytes();
 		this.itemLength = bytes.length;
-		//this.itemLength = this.convertDecToHex(bytes.length);
-		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 
 	public ImplementationVersionNameSubItem() { super(); }
@@ -56,7 +54,8 @@ public class ImplementationVersionNameSubItem extends DICOMItem {
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			this.buffer.writeUInt8(this.itemType);
 			this.buffer.writeUInt8(this.reserved);
-			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
 			this.buffer.write(this.implementationVersionName.getBytes());
 		
 		}

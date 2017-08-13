@@ -55,7 +55,8 @@ public class MaximumLengthSubItem extends DICOMItem {
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			this.buffer.writeUInt8(this.itemType);
 			this.buffer.writeUInt8(this.reserved);
-			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
 			this.buffer.writeUInt32(this.maxPDULengthReceive);
 		
 		}

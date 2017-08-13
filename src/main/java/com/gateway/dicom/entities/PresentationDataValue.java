@@ -1,5 +1,6 @@
 package com.gateway.dicom.entities;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
 import com.gateway.dicom.protocols.PDU;
 
 public class PresentationDataValue extends DICOMItem {
@@ -7,6 +8,7 @@ public class PresentationDataValue extends DICOMItem {
 	private MessageControlHeader messageControlHeader;
 	private int presentationContextID;
 	private PDU pdvData;
+	private DicomOutputBuffer buffer;
 	
 	public PresentationDataValue(MessageControlHeader messageControlHeader, int presentationContextID, PDU pdvData) {
 		super();
@@ -41,4 +43,24 @@ public class PresentationDataValue extends DICOMItem {
 		this.pdvData = pdvData;
 	}
 	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.presentationContextID);
+			
+			
+		}
+		
+		catch (Exception e) {
+			
+			pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+
+
 }

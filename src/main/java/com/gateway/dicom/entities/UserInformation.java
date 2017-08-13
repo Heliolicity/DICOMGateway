@@ -27,27 +27,6 @@ public class UserInformation extends DICOMItem {
 		this.asynchronousOperationsWindowSubItem = asynchronousOperationsWindowSubItem;
 		this.scpSCURoleSelectionNegotiationSubItem = scpSCURoleSelectionNegotiationSubItem;
 		this.extendedNegotiationSubItem = extendedNegotiationSubItem;
-		
-		this.maximumLengthSubItem.writeToBuffer();
-		int a = this.maximumLengthSubItem.getBuffer().size();
-		
-		this.implementationItem.implementationClassUIDSubItem.writeToBuffer();
-		int b = this.implementationItem.implementationClassUIDSubItem.getBuffer().size();
-		
-		this.implementationItem.implementationVersionNameSubItem.writeToBuffer();
-		int c = this.implementationItem.implementationVersionNameSubItem.getBuffer().size();
-		
-		this.asynchronousOperationsWindowSubItem.writeToBuffer();
-		int d = this.asynchronousOperationsWindowSubItem.getBuffer().size();
-		
-		this.scpSCURoleSelectionNegotiationSubItem.writeToBuffer();
-		int e = this.scpSCURoleSelectionNegotiationSubItem.getBuffer().size();
-		
-		this.extendedNegotiationSubItem.writeToBuffer();
-		int f = this.extendedNegotiationSubItem.getBuffer().size();
-		
-		this.itemLength = a + b + c + d + e + f;
-		
 	}
 
 	public UserInformation() { super(); }
@@ -124,23 +103,65 @@ public class UserInformation extends DICOMItem {
 		
 		try {
 			
+			this.maximumLengthSubItem.writeToBuffer();
+			int a = this.maximumLengthSubItem.getBuffer().size();
+			
+			this.implementationItem.implementationClassUIDSubItem.writeToBuffer();
+			int b = this.implementationItem.implementationClassUIDSubItem.getBuffer().size();
+			
+			this.implementationItem.implementationVersionNameSubItem.writeToBuffer();
+			int c = this.implementationItem.implementationVersionNameSubItem.getBuffer().size();
+			
+			int d = 0;
+			int e = 0;
+			int f = 0;
+			
+			if (! (this.asynchronousOperationsWindowSubItem == null)) {
+				
+				this.asynchronousOperationsWindowSubItem.writeToBuffer();
+				d = this.asynchronousOperationsWindowSubItem.getBuffer().size();
+				//this.buffer.write(this.asynchronousOperationsWindowSubItem.getBuffer().toByteArray());
+				
+			}
+			
+			if (! (this.scpSCURoleSelectionNegotiationSubItem == null)) {
+			
+				this.scpSCURoleSelectionNegotiationSubItem.writeToBuffer();
+				e = this.scpSCURoleSelectionNegotiationSubItem.getBuffer().size();
+				//this.buffer.write(this.scpSCURoleSelectionNegotiationSubItem.getBuffer().toByteArray());
+			
+			}
+			
+			if (! (this.extendedNegotiationSubItem == null)) {
+			
+				this.extendedNegotiationSubItem.writeToBuffer();
+				f = this.extendedNegotiationSubItem.getBuffer().size();
+				//this.buffer.write(this.extendedNegotiationSubItem.getBuffer().toByteArray());
+			
+			}
+			
+			this.itemLength = a + b + c + d + e + f;
+			
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			this.buffer.writeUInt8(this.itemType);
 			this.buffer.writeUInt8(this.reserved);
 			this.buffer.writeUInt8(this.reserved);
 			this.buffer.writeUInt8(this.itemLength);
-			this.maximumLengthSubItem.writeToBuffer();
 			this.buffer.write(this.maximumLengthSubItem.getBuffer().toByteArray());
-			this.implementationItem.implementationClassUIDSubItem.writeToBuffer();
 			this.buffer.write(this.implementationItem.implementationClassUIDSubItem.getBuffer().toByteArray());
-			this.implementationItem.implementationVersionNameSubItem.writeToBuffer();
 			this.buffer.write(this.implementationItem.implementationVersionNameSubItem.getBuffer().toByteArray());
-			this.asynchronousOperationsWindowSubItem.writeToBuffer();
-			this.buffer.write(this.asynchronousOperationsWindowSubItem.getBuffer().toByteArray());
-			this.scpSCURoleSelectionNegotiationSubItem.writeToBuffer();
-			this.buffer.write(this.scpSCURoleSelectionNegotiationSubItem.getBuffer().toByteArray());
-			this.extendedNegotiationSubItem.writeToBuffer();
-			this.buffer.write(this.extendedNegotiationSubItem.getBuffer().toByteArray());
+			
+			if (! (this.asynchronousOperationsWindowSubItem == null)) 
+				
+				this.buffer.write(this.asynchronousOperationsWindowSubItem.getBuffer().toByteArray());
+			
+			if (! (this.scpSCURoleSelectionNegotiationSubItem == null)) 
+			
+				this.buffer.write(this.scpSCURoleSelectionNegotiationSubItem.getBuffer().toByteArray());
+			
+			if (! (this.extendedNegotiationSubItem == null)) 
+			
+				this.buffer.write(this.extendedNegotiationSubItem.getBuffer().toByteArray());
 			
 		}
 		
