@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 
 	protected int uidLength;
@@ -20,8 +22,6 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 		this.scpRole = scpRole;
 		this.scuRole = scuRole;
 		this.itemLength = 2 + this.uidLength + 2 + 2;
-		//this.itemLength = this.convertDecToHex(this.itemLength);
-		//this.itemLength = this.convertDecToBin(this.itemLength);
 		
 	}
 	
@@ -59,7 +59,7 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 		this.scuRole = scuRole;
 	}
 
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -71,6 +71,30 @@ public class SCPSCURoleSelectionNegotiationSubItem extends DICOMItem {
 			this.stream.write(this.sopClassUID.getBytes());
 			this.stream.write(this.scuRole);
 			this.stream.write(this.scpRole);
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt16(this.uidLength);
+			this.buffer.write(this.sopClassUID.getBytes());
+			this.buffer.writeUInt16(this.scuRole);
+			this.buffer.writeUInt16(this.scpRole);
 		
 		}
 		

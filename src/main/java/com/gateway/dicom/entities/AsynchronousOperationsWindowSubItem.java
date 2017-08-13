@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class AsynchronousOperationsWindowSubItem extends DICOMItem {
 
 	protected int maximumNumberOperationsInvoked;
@@ -38,7 +40,7 @@ public class AsynchronousOperationsWindowSubItem extends DICOMItem {
 		this.maximumNumberOperationsPerformed = maximumNumberOperationsPerformed;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -48,6 +50,28 @@ public class AsynchronousOperationsWindowSubItem extends DICOMItem {
 			this.stream.write(this.itemLength);
 			this.stream.write(this.maximumNumberOperationsInvoked);
 			this.stream.write(this.maximumNumberOperationsPerformed);
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt16(this.maximumNumberOperationsInvoked);
+			this.buffer.writeUInt16(this.maximumNumberOperationsPerformed);
 		
 		}
 		

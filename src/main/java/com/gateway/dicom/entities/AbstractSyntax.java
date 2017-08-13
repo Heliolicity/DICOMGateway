@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class AbstractSyntax extends DICOMItem {
 
 	protected String abstractSyntaxName;
@@ -11,9 +13,7 @@ public class AbstractSyntax extends DICOMItem {
 		this.itemType = itemType;
 		this.abstractSyntaxName = abstractSyntaxName;
 		byte[] bytes = this.abstractSyntaxName.getBytes();
-		this.itemLength = bytes.length;
-		//this.itemLength = this.convertDecToHex(bytes.length);
-		//this.itemLength = this.convertDecToBin(this.itemLength);
+		this.itemLength = bytes.length;		
 	}
 	
 	public AbstractSyntax() { super(); }
@@ -26,7 +26,7 @@ public class AbstractSyntax extends DICOMItem {
 		this.abstractSyntaxName = abstractSyntaxName;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -35,6 +35,28 @@ public class AbstractSyntax extends DICOMItem {
 			this.stream.write(this.reserved);
 			this.stream.write(this.itemLength);
 			this.stream.write(this.abstractSyntaxName.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
+			this.buffer.write(this.abstractSyntaxName.getBytes());
 		
 		}
 		

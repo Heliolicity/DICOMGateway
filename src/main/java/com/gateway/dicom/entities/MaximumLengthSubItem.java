@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class MaximumLengthSubItem extends DICOMItem {
 
 	//private byte itemType = 0x51;
@@ -25,7 +27,7 @@ public class MaximumLengthSubItem extends DICOMItem {
 		this.maxPDULengthReceive = maxPDULengthReceive;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -34,6 +36,27 @@ public class MaximumLengthSubItem extends DICOMItem {
 			this.stream.write(this.reserved);
 			this.stream.write(this.itemLength);
 			this.stream.write(this.maxPDULengthReceive);
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt32(this.maxPDULengthReceive);
 		
 		}
 		

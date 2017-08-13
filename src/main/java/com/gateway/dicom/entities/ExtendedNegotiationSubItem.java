@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class ExtendedNegotiationSubItem extends DICOMItem {
 
 	protected int sopClassUIDLength;
@@ -50,7 +52,7 @@ public class ExtendedNegotiationSubItem extends DICOMItem {
 		this.serviceClassApplicationInformation = serviceClassApplicationInformation;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -61,6 +63,29 @@ public class ExtendedNegotiationSubItem extends DICOMItem {
 			this.stream.write(this.sopClassUIDLength);
 			this.stream.write(this.sopClassUID.getBytes());
 			this.stream.write(this.serviceClassApplicationInformation.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.writeUInt16(this.sopClassUIDLength);
+			this.buffer.write(this.sopClassUID.getBytes());
+			this.buffer.write(this.serviceClassApplicationInformation.getBytes());
 		
 		}
 		

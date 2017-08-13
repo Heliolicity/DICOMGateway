@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class ImplementationClassUIDSubItem extends DICOMItem {
 
 	protected String implementationClassUID;
@@ -26,7 +28,7 @@ public class ImplementationClassUIDSubItem extends DICOMItem {
 		this.implementationClassUID = implementationClassUID;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -45,6 +47,26 @@ public class ImplementationClassUIDSubItem extends DICOMItem {
 			
 		}
 		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.write(this.implementationClassUID.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}		
 	}
 	
 }

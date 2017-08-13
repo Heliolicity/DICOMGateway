@@ -46,6 +46,7 @@ public class TestMain {
 				
 				//client = new Client(host, 5050);
 				client = new Client(host, 5678);
+				//client = new Client(host, 104);
 				//host = "192.168.1.81";
 				//client = new Client(host, 4242);
 				engine = new Engine(client);

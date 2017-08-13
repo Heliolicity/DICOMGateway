@@ -1,6 +1,9 @@
 package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import com.gateway.dicom.lib.DicomOutputBuffer;
 
 public class DICOMItem {
 
@@ -8,6 +11,7 @@ public class DICOMItem {
 	protected byte reserved = 0x00;
 	protected int itemLength;
 	protected ByteArrayOutputStream stream;
+	protected DicomOutputBuffer buffer;
 	
 	public DICOMItem(byte itemType, byte reserved, int itemLength) {
 		super();
@@ -52,6 +56,14 @@ public class DICOMItem {
 		this.stream = stream;
 	}
 
+	public DicomOutputBuffer getBuffer() {
+		return buffer;
+	}
+
+	public void setBuffer(DicomOutputBuffer buffer) {
+		this.buffer = buffer;
+	}
+
 	public int convertDecToHex(int dec) {
 		
 		String hex = Integer.toHexString(dec);
@@ -66,7 +78,7 @@ public class DICOMItem {
 		
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		this.stream = new ByteArrayOutputStream();
 		this.stream.write(this.itemType);
@@ -74,7 +86,23 @@ public class DICOMItem {
 		
 	}
 	
-	public void clearBuffer() { if (! this.stream.equals(null)) this.stream.reset(); }
+	public void clearStream() { if (! this.stream.equals(null)) this.stream.reset(); }
+	
+	public void writeToBuffer() throws IOException {
+		
+		this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+		this.buffer.writeUInt8(this.itemType);
+		this.buffer.writeUInt8(this.reserved);
+		
+	}
+	
+	public void clearBuffer() {
+		
+		if (! (this.buffer.equals(null)))
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+		
+	}
 	
 	protected void pl(String s) { System.out.println(s); }
 	

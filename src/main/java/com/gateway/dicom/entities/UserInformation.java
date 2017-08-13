@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class UserInformation extends DICOMItem {
 
 	//private byte itemType = 0x50;
@@ -27,22 +29,22 @@ public class UserInformation extends DICOMItem {
 		this.extendedNegotiationSubItem = extendedNegotiationSubItem;
 		
 		this.maximumLengthSubItem.writeToBuffer();
-		int a = this.maximumLengthSubItem.getStream().size();
+		int a = this.maximumLengthSubItem.getBuffer().size();
 		
 		this.implementationItem.implementationClassUIDSubItem.writeToBuffer();
-		int b = this.implementationItem.implementationClassUIDSubItem.getStream().size();
+		int b = this.implementationItem.implementationClassUIDSubItem.getBuffer().size();
 		
 		this.implementationItem.implementationVersionNameSubItem.writeToBuffer();
-		int c = this.implementationItem.implementationVersionNameSubItem.getStream().size();
+		int c = this.implementationItem.implementationVersionNameSubItem.getBuffer().size();
 		
 		this.asynchronousOperationsWindowSubItem.writeToBuffer();
-		int d = this.asynchronousOperationsWindowSubItem.getStream().size();
+		int d = this.asynchronousOperationsWindowSubItem.getBuffer().size();
 		
 		this.scpSCURoleSelectionNegotiationSubItem.writeToBuffer();
-		int e = this.scpSCURoleSelectionNegotiationSubItem.getStream().size();
+		int e = this.scpSCURoleSelectionNegotiationSubItem.getBuffer().size();
 		
 		this.extendedNegotiationSubItem.writeToBuffer();
-		int f = this.extendedNegotiationSubItem.getStream().size();
+		int f = this.extendedNegotiationSubItem.getBuffer().size();
 		
 		this.itemLength = a + b + c + d + e + f;
 		
@@ -92,7 +94,7 @@ public class UserInformation extends DICOMItem {
 		this.extendedNegotiationSubItem = extendedNegotiationSubItem;
 	}
 
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -106,6 +108,39 @@ public class UserInformation extends DICOMItem {
 			this.stream.writeTo(this.asynchronousOperationsWindowSubItem.getStream());
 			this.stream.writeTo(this.scpSCURoleSelectionNegotiationSubItem.getStream());
 			this.stream.writeTo(this.extendedNegotiationSubItem.getStream());
+			
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
+			this.maximumLengthSubItem.writeToBuffer();
+			this.buffer.write(this.maximumLengthSubItem.getBuffer().toByteArray());
+			this.implementationItem.implementationClassUIDSubItem.writeToBuffer();
+			this.buffer.write(this.implementationItem.implementationClassUIDSubItem.getBuffer().toByteArray());
+			this.implementationItem.implementationVersionNameSubItem.writeToBuffer();
+			this.buffer.write(this.implementationItem.implementationVersionNameSubItem.getBuffer().toByteArray());
+			this.asynchronousOperationsWindowSubItem.writeToBuffer();
+			this.buffer.write(this.asynchronousOperationsWindowSubItem.getBuffer().toByteArray());
+			this.scpSCURoleSelectionNegotiationSubItem.writeToBuffer();
+			this.buffer.write(this.scpSCURoleSelectionNegotiationSubItem.getBuffer().toByteArray());
+			this.extendedNegotiationSubItem.writeToBuffer();
+			this.buffer.write(this.extendedNegotiationSubItem.getBuffer().toByteArray());
 			
 		}
 		

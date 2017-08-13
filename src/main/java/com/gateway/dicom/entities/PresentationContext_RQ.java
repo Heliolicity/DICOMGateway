@@ -4,6 +4,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class PresentationContext_RQ extends DICOMItem {
 
 	//private byte itemType = 0x20;
@@ -18,21 +20,18 @@ public class PresentationContext_RQ extends DICOMItem {
 		
 		super();
 		this.itemType = itemType;
-		//this.presentationContextID = this.convertDecToBin(presentationContextID);
 		this.presentationContextID = presentationContextID;
 		this.transferSyntaxSubItems = transferSyntaxSubItems;		
 		this.abstractSyntaxSubItem = abstractSyntaxSubItem;
-		//this.determineLength();
-		
 		this.abstractSyntaxSubItem.writeToBuffer();
-		int a = this.abstractSyntaxSubItem.getStream().size();
+		int a = this.abstractSyntaxSubItem.getBuffer().size();
 		
 		int b = 0;
 		
 		for (TransferSyntax transferSyntax : this.transferSyntaxSubItems)  {
 			
 			transferSyntax.writeToBuffer();
-			b += transferSyntax.getStream().size();
+			b += transferSyntax.getBuffer().size();
 			
 		}
 		
@@ -66,21 +65,7 @@ public class PresentationContext_RQ extends DICOMItem {
 		this.abstractSyntaxSubItem = abstractSyntaxSubItem;
 	}
 	
-	public void determineLength() {
-		
-		int length = 1 + 1 + 2 + this.abstractSyntaxSubItem.getItemLength();
-		
-		for (TransferSyntax transferSyntax : this.transferSyntaxSubItems) 
-			
-			length += 1 + 1 + 2 + transferSyntax.getItemLength();
-		
-		length += 1 + 1 + 1 + 1;
-		
-		this.itemLength = length;
-		
-	}
-	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -107,6 +92,42 @@ public class PresentationContext_RQ extends DICOMItem {
 			e.printStackTrace();
 			
 		}
+		
+	}
+	
+	public void writeToBuffer() {
+
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
+			this.buffer.writeUInt8(this.presentationContextID);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			
+			this.abstractSyntaxSubItem.writeToBuffer();
+			
+			this.buffer.write(this.abstractSyntaxSubItem.getBuffer().toByteArray());
+			
+			for (TransferSyntax transferSyntax : this.transferSyntaxSubItems) {
+				
+				transferSyntax.writeToBuffer();
+				this.buffer.write(transferSyntax.getBuffer().toByteArray());
+			
+			}
+			
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}		
 		
 	}
 	

@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class TransferSyntax extends DICOMItem {
 
 	//private byte itemType = 0x40;
@@ -13,8 +15,6 @@ public class TransferSyntax extends DICOMItem {
 		this.transferSyntaxName = transferSyntaxName;
 		byte[] bytes = this.transferSyntaxName.getBytes();
 		this.itemLength = bytes.length;
-		//this.itemLength = this.convertDecToHex(bytes.length);
-		//this.itemLength = this.convertDecToBin(this.itemLength);
 	}
 	
 	public TransferSyntax() { super(); }
@@ -27,7 +27,7 @@ public class TransferSyntax extends DICOMItem {
 		this.transferSyntaxName = transferSyntaxName;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -36,6 +36,28 @@ public class TransferSyntax extends DICOMItem {
 			this.stream.write(this.reserved);
 			this.stream.write(this.itemLength);
 			this.stream.write(this.transferSyntaxName.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.itemLength);
+			this.buffer.write(this.transferSyntaxName.getBytes());
 		
 		}
 		

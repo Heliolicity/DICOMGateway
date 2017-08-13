@@ -271,7 +271,7 @@ public class Client extends DicomByteOrderable {
     	}
     	
     }
-    
+
     public void writeUInt16(int value) throws IOException {
     	
 		int b0 = value & 0x00ff;

@@ -2,6 +2,8 @@ package com.gateway.dicom.entities;
 
 import java.io.ByteArrayOutputStream;
 
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 public class ImplementationVersionNameSubItem extends DICOMItem {
 
 	protected String implementationVersionName;
@@ -26,7 +28,7 @@ public class ImplementationVersionNameSubItem extends DICOMItem {
 		this.implementationVersionName = implementationVersionName;
 	}
 	
-	public void writeToBuffer() {
+	public void writeToStream() {
 		
 		try {
 			
@@ -44,6 +46,27 @@ public class ImplementationVersionNameSubItem extends DICOMItem {
 			e.printStackTrace();
 			
 		}
+		
+	}
+	
+	public void writeToBuffer() {
+		
+		try {
+			
+			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			this.buffer.writeUInt8(this.itemType);
+			this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt16(this.itemLength);
+			this.buffer.write(this.implementationVersionName.getBytes());
+		
+		}
+		
+		catch (Exception e) {
+			
+			this.pl(e.getMessage());
+			e.printStackTrace();
+			
+		}		
 		
 	}
 	
