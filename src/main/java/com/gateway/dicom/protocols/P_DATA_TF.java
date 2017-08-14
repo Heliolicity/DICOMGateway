@@ -11,6 +11,15 @@ public class P_DATA_TF extends PDU {
 
 	private List<PresentationDataValue> presentationDataValueItems;
 	private DicomOutputBuffer buffer;
+	private String dimse;
+	private int byteOrder;
+	
+	public P_DATA_TF(byte pduType, List<PresentationDataValue> presentationDataValueItems, String dimse) {
+		super();
+		this.pduType = pduType;
+		this.presentationDataValueItems = presentationDataValueItems;
+		this.dimse = dimse;
+	}
 	
 	public P_DATA_TF(byte pduType, List<PresentationDataValue> presentationDataValueItems) {
 		super();
@@ -33,6 +42,22 @@ public class P_DATA_TF extends PDU {
 		this.presentationDataValueItems = presentationDataValueItems;
 	}
 
+	public String getDimse() {
+		return dimse;
+	}
+
+	public void setDimse(String dimse) {
+		this.dimse = dimse;
+	}
+
+	public int getByteOrder() {
+		return byteOrder;
+	}
+
+	public void setByteOrder(int byteOrder) {
+		this.byteOrder = byteOrder;
+	}
+
 	public DicomOutputBuffer getBuffer() {
 		return buffer;
 	}
@@ -43,11 +68,27 @@ public class P_DATA_TF extends PDU {
 	
 	public void writeToBuffer() {
 		
+		this.pduLength = 0;
+		
 		try {
 			
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			//this.buffer.writeUInt8(this.pduType);
+			//this.buffer.writeUInt8(this.reserved);
 			
+			for (PresentationDataValue pdv : this.presentationDataValueItems) {
+				
+				pdv.writeToBuffer();
+				this.pduLength += pdv.getBuffer().size();
+				
+			}
 			
+			this.buffer.writeUInt32(this.pduLength);
+			
+			for (PresentationDataValue pdv : this.presentationDataValueItems) 
+				
+				this.buffer.write(pdv.getBuffer().toByteArray());
+				
 		}
 		
 		catch (Exception e) {

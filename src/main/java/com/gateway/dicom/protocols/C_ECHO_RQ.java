@@ -19,6 +19,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 	private ByteArrayOutputStream stream;
 	private int length;
 	private DicomOutputBuffer buffer;
+	private int byteOrdering;
 	
 	public C_ECHO_RQ(short id) {
 		
@@ -46,31 +47,10 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.dataSetType.setValueRepresentation("US");
 		this.dataSetType.setElementData("0101");
 		
-		this.writeToBuffer();
-		this.length = this.stream.size();
-		this.clearBuffer();
-		
 		this.commandGroupLength = new DataElement();
 		this.commandGroupLength.setGroupNumber(0x0000);
 		this.commandGroupLength.setElementNumber(0x0000);
 		this.commandGroupLength.setValueRepresentation("UL");
-		
-		try {
-		
-			this.stream.write(this.commandGroupLength.getValueRepresentation().getBytes());
-			this.stream.write(this.length);
-			this.length += this.stream.size();
-			this.commandGroupLength.setElementData("" + this.length);
-			this.clearBuffer();
-			
-		}
-		
-		catch (Exception e) {
-			
-			this.pl(e.getMessage());
-			e.printStackTrace();
-			
-		}
 		
 	} 
 	
@@ -132,6 +112,22 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.length = length;
 	}
 
+	public DicomOutputBuffer getBuffer() {
+		return buffer;
+	}
+
+	public void setBuffer(DicomOutputBuffer buffer) {
+		this.buffer = buffer;
+	}
+
+	public int getByteOrdering() {
+		return byteOrdering;
+	}
+
+	public void setByteOrdering(int byteOrdering) {
+		this.byteOrdering = byteOrdering;
+	}
+
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
@@ -181,7 +177,39 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		
 		try {
 			
-			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			if (this.byteOrdering == 1) this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			else this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN);
+			
+			try {
+			
+				this.buffer.writeUInt16(this.affectedServiceClassUID.getGroupNumber());
+				this.buffer.writeUInt16(this.affectedServiceClassUID.getElementNumber());
+				this.buffer.write(this.affectedServiceClassUID.getElementData().getBytes());
+				
+				this.buffer.writeUInt16(this.commandField.getGroupNumber());
+				this.buffer.writeUInt16(this.commandField.getElementNumber());
+				this.buffer.write(this.commandField.getElementData().getBytes());
+				
+				this.buffer.writeUInt16(this.messageID.getGroupNumber());
+				this.buffer.writeUInt16(this.messageID.getElementNumber());
+				int a = Integer.parseInt(this.messageID.getElementData());
+				this.buffer.writeUInt16(a);
+				
+				this.buffer.writeUInt16(this.dataSetType.getGroupNumber());
+				this.buffer.writeUInt16(this.dataSetType.getElementNumber());
+				int b = Integer.parseInt(this.dataSetType.getElementData());
+				this.buffer.writeUInt16(b);
+				
+				this.commandGroupLength.setElementData("" + this.buffer.size());
+				
+			}
+			
+			catch (Exception e) {
+				
+				this.pl(e.getMessage());
+				e.printStackTrace();
+				
+			}
 			
 				
 		}

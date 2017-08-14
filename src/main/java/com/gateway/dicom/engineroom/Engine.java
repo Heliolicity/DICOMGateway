@@ -25,7 +25,6 @@ import com.gateway.dicom.entities.ImplementationClassUIDSubItem;
 import com.gateway.dicom.entities.ImplementationItem;
 import com.gateway.dicom.entities.ImplementationVersionNameSubItem;
 import com.gateway.dicom.entities.MaximumLengthSubItem;
-import com.gateway.dicom.entities.MessageControlHeader;
 import com.gateway.dicom.entities.PresentationContext_AC;
 import com.gateway.dicom.entities.PresentationContext_RQ;
 import com.gateway.dicom.entities.PresentationDataValue;
@@ -110,7 +109,7 @@ public class Engine {
 	    		        		this.requestRejected = false;
 	    		        		this.buildAssociateAcknowledgement();
 	    	        		
-	    		        		
+	    		        		this.buildDataTF();
 	    		        		
 	    		        		//Send the A_RELEASE-RQ
 	    		        		/*if (this.buildReleaseRequest()) {
@@ -1026,7 +1025,7 @@ public class Engine {
     			this.client.writeByte(item.getPresentationContextID());
     			
     			//Will need a for loop here for multiple PDV Iteams
-    			this.client.writeByte(item.getMessageControlHeader().getHeader());
+    			this.client.writeByte(item.getMessageControlHeader());
     			
     			PDU pdu = item.getPdvData();
     			//Need some way of telling what kind of PDU it is
@@ -1234,8 +1233,8 @@ public class Engine {
     	try {
     	
     		this.targetPDataTFData1 = arr1;
-    		this.targetAssociateRQDataLen = len;
-    		this.targetAssociateRQData2 = arr2;
+    		this.targetPDataTFDataLen = len;
+    		this.targetPDataTFData2 = arr2;
     		
     		byte type;
     		
@@ -1244,18 +1243,17 @@ public class Engine {
     		
     		type = 0x04;
     		
-    		PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
+    		//PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
+    		PresentationContext_RQ presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
     		int pcID = presentationContext.getPresentationContextID();
-    		
-    		MessageControlHeader header = new MessageControlHeader();
-    		header.setIntHeader(192); //This will give the header a binary value of 11000000
+    		int header = 0x03;
     		
     		this.dataTF = new P_DATA_TF();
     		this.dataTF.setPduType(type);
     		
     		if (this.buildEchoRequest()) {
     		
-    			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest);
+    			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest, "C-ECHO");
     			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
     			pdValueItems.add(pdValue);
     			this.dataTF.setPresentationDataValueItems(pdValueItems);
@@ -1263,14 +1261,32 @@ public class Engine {
     			
     			for (int a = 0; a < this.targetPDataTFData1.length; a ++)
     				
-    				p("" + this.targetAssociateRQData1[a]);
+    				p("" + this.targetPDataTFData1[a]);
     			
     			p("" + this.targetPDataTFDataLen);
     			
     			for (int b = 0; b < this.targetPDataTFData2.length; b ++)
     			
-    				p("" + this.targetAssociateRQData2[b]);
+    				p("" + this.targetPDataTFData2[b]);
     				
+    			pl();
+    			
+    			this.dataTF.writeToBuffer();
+    			
+    			byte[] arr3 = {0x04, 0x00};
+    			len = this.dataTF.getPduLength();
+    			byte[] arr4 = this.dataTF.getBuffer().toByteArray();
+    			
+    			for (int c = 0; c < arr3.length; c ++)
+    				
+    				p("" + arr3[c]);
+    			
+    			p("" + len);
+    			
+    			for (int d = 0; d < arr4.length; d ++) 
+    				
+    				p("" + arr4[d]);
+    			
     		}
     		
     		else {
