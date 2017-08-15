@@ -1,6 +1,9 @@
 package com.gateway.dicom.entities;
 
 import java.util.Date;
+
+import com.gateway.dicom.lib.DicomOutputBuffer;
+
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
 
@@ -16,10 +19,13 @@ public class DataElement extends DICOMItem implements Serializable {
 	private int valueLength;
 	private String elementData;
 	private short shrElementData;
+	private int intElementData;
 	private int[] metaInfo;
 	private String uniqueIdentifier;
 	private int elementLength;
 	private Date theDate;
+	private DicomOutputBuffer buffer;
+	private int byteOrder;
 	
 	public DataElement() { super(); }
 
@@ -59,6 +65,15 @@ public class DataElement extends DICOMItem implements Serializable {
 		this.valueRepresentation = valueRepresentation;
 		this.valueLength = valueLength;
 		this.shrElementData = shrElementData;
+	}
+	
+	public DataElement(int groupNumber, int elementNumber, String valueRepresentation, int valueLength, int intElementData) {
+		super();
+		this.groupNumber = groupNumber;
+		this.elementNumber = elementNumber;
+		this.valueRepresentation = valueRepresentation;
+		this.valueLength = valueLength;
+		this.intElementData = intElementData;
 	}
 	
 	public String generateUniqueIdentifier(String uid) {
@@ -245,6 +260,14 @@ public class DataElement extends DICOMItem implements Serializable {
 		this.shrElementData = shrElementData;
 	}
 
+	public int getIntElementData() {
+		return intElementData;
+	}
+
+	public void setIntElementData(int intElementData) {
+		this.intElementData = intElementData;
+	}
+
 	public int[] getMetaInfo() {
 		return metaInfo;
 	}
@@ -275,6 +298,47 @@ public class DataElement extends DICOMItem implements Serializable {
 
 	public void setUniqueIdentifier(String uniqueIdentifier) {
 		this.uniqueIdentifier = uniqueIdentifier;
+	}
+
+	public DicomOutputBuffer getBuffer() {
+		return buffer;
+	}
+
+	public void setBuffer(DicomOutputBuffer buffer) {
+		this.buffer = buffer;
+	}
+	
+	public int getByteOrder() {
+		return byteOrder;
+	}
+
+	public void setByteOrder(int byteOrder) {
+		this.byteOrder = byteOrder;
+	}
+
+	public void writeToBuffer() {
+		
+		try {
+			
+			if (this.byteOrder == 1) this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			else this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN);
+			
+			if (! (this.elementData == null)) {
+			
+				this.buffer.write(this.elementData.getBytes());
+				this.elementLength = this.buffer.size();
+			
+			}
+			
+		}
+		
+		catch (Exception e) {
+			
+			System.out.println(e.getMessage());
+			e.printStackTrace();
+			
+		}
+		
 	}
 	
 }

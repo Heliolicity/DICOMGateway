@@ -82,8 +82,9 @@ public class P_DATA_TF extends PDU {
 				this.pduLength += pdv.getBuffer().size();
 				
 			}
-			
-			this.buffer.writeUInt32(this.pduLength);
+
+			pl("HEHEHE: " + this.pduLength);
+			//this.buffer.writeUInt32(this.pduLength);
 			
 			for (PresentationDataValue pdv : this.presentationDataValueItems) 
 				

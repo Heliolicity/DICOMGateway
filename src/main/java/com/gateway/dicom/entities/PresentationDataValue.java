@@ -75,6 +75,7 @@ public class PresentationDataValue extends DICOMItem {
 		try {
 			
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			pl("PRESENTATION CONTEXT ID: " + this.presentationContextID);
 			this.buffer.writeUInt8(this.presentationContextID);
 			
 			C_ECHO_RQ echo;
@@ -82,15 +83,23 @@ public class PresentationDataValue extends DICOMItem {
 			
 			switch(this.dimse) {
 			
-				case "C-ECHO" : echo = (C_ECHO_RQ) this.pdvData; 
-					this.buffer.writeUInt16(echo.getCommandField().getGroupNumber());
-					this.buffer.writeUInt16(echo.getCommandField().getGroupNumber());
-					int a = Integer.parseInt(echo.getCommandField().getElementData());
-					this.buffer.writeUInt32(a);
+				case "C-ECHO" : echo = (C_ECHO_RQ) this.pdvData;
+					pl("COMMAND: " + echo.getCommand());
+					this.buffer.writeUInt8(echo.getCommand());
+					pl(this.dimse);
+					pl("GROUP NUMBER");
+					this.buffer.writeUInt16(echo.getCommandGroupLength().getGroupNumber());
+					pl("ELEMENT NUMBER");
+					this.buffer.writeUInt16(echo.getCommandGroupLength().getElementNumber());
+					//int a = Integer.parseInt(echo.getCommandField().getElementData());
+					//this.buffer.writeUInt32(a);
+					pl("ELEMENT LENGTH");
 					echo.writeToBuffer();
+					pl("SHOULD BE: " + echo.getCommandGroupLength().getIntElementData());
+					//this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, echo.getCommandGroupLength().getIntElementData());
 					this.buffer.write(echo.getBuffer().toByteArray());
 					this.itemLength = this.buffer.size();
-					this.buffer.writeUInt32(this.itemLength);
+					//this.buffer.writeUInt32(this.itemLength);
 					break;
 				case "C-STORE" : break;
 				case "C-FIND" : break;
