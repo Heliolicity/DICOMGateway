@@ -69,27 +69,31 @@ public class P_DATA_TF extends PDU {
 	public void writeToBuffer() {
 		
 		this.pduLength = 0;
+		int iLen = 0;
 		
 		try {
 			
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
-			//this.buffer.writeUInt8(this.pduType);
-			//this.buffer.writeUInt8(this.reserved);
+			this.buffer.writeUInt8(this.pduType);
+			this.buffer.writeUInt8(this.reserved);
 			
 			for (PresentationDataValue pdv : this.presentationDataValueItems) {
 				
 				pdv.writeToBuffer();
-				this.pduLength += pdv.getBuffer().size();
+				iLen = pdv.getBuffer().size();
+				iLen += 4; //Item Length
+				this.pduLength += iLen;
 				
 			}
 
-			pl("HEHEHE: " + this.pduLength);
-			//this.buffer.writeUInt32(this.pduLength);
+			this.buffer.writeUInt32(this.pduLength);
 			
-			for (PresentationDataValue pdv : this.presentationDataValueItems) 
-				
+			for (PresentationDataValue pdv : this.presentationDataValueItems) { 
+			
+				this.buffer.writeUInt32(pdv.getItemLength());
 				this.buffer.write(pdv.getBuffer().toByteArray());
 				
+			}
 		}
 		
 		catch (Exception e) {

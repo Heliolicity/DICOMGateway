@@ -72,6 +72,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.commandGroupLength.setGroupNumber(0x0000);
 		this.commandGroupLength.setElementNumber(0x0000);
 		this.commandGroupLength.setValueRepresentation("UL");
+		this.commandGroupLength.setElementLength(4);
 		
 	} 
 
@@ -123,6 +124,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.commandGroupLength.setGroupNumber(0x0000);
 		this.commandGroupLength.setElementNumber(0x0000);
 		this.commandGroupLength.setValueRepresentation("UL");
+		this.commandGroupLength.setElementLength(4);
 		
 	} 
 	
@@ -275,14 +277,6 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 				
 				this.buffer.writeUInt32(a);
 				this.buffer.write(arr);
-				
-			}
-			
-			
-			
-			for (int i = 0; i < this.affectedServiceClassUID.getElementData().getBytes().length; i ++) {
-				
-				p("" + this.affectedServiceClassUID.getElementData().getBytes()[i]);
 				
 			}
 			

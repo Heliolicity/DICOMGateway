@@ -1273,8 +1273,9 @@ public class Engine {
     			
     			this.dataTF.writeToBuffer();
     			
-    			byte[] arr3 = {0x04, 0x00};
+    			/*byte[] arr3 = {0x04, 0x00};
     			len = this.dataTF.getPduLength();
+    			pl("LEN: " + len);
     			byte[] arr4 = this.dataTF.getBuffer().toByteArray();
     			
     			for (int c = 0; c < arr3.length; c ++)
@@ -1286,6 +1287,13 @@ public class Engine {
     			for (int d = 0; d < arr4.length; d ++) 
     				
     				p("" + arr4[d]);
+    			*/
+    			
+    			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
+    			
+    			for (int e = 0; e < arr5.length; e ++)
+    				
+    				p("" + arr5[e]);
     			
     		}
     		
