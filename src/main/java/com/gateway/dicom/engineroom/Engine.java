@@ -71,7 +71,7 @@ public class Engine {
     
     private final byte A_ASSOCIATE_AC_PDU_TYPE = 0x02;
     private final byte A_ASSOCIATE_RJ_PDU_TYPE = 0x03;
-    //private final byte C_ECHO_RSP_PDU_TYPE = 0x02;
+    private final byte C_ECHO_RSP_PDU_TYPE = 0x04;
     
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
@@ -119,7 +119,138 @@ public class Engine {
     							length = this.client.readInt();
     							pl("PDU length: " + length);
     							this.receivedData = this.client.readByteArray(length);
-    							this.buildAssociateAcknowledgement();
+    							this.requestBuilt = this.buildAssociateAcknowledgement();
+    							
+    							if (! this.requestBuilt) {
+    								
+    								pl("There was a problem building the A-ASSOCIATE-AC\nDo you wish to continue Y/N?");
+    				    			input = this.keyboard.nextLine().toUpperCase();
+    								
+    				    			if (input.equals("Y")) {
+    				    				
+    				    				pl("Select from the following options\n\n1 - Send C-ECHO-RQ\n2 - Send C-STORE-RQ");
+        				    			input = this.keyboard.nextLine().toUpperCase();
+        				    			
+        				    			if (input.equals("1")) {
+        				    				
+        				    				this.requestBuilt = this.buildDataTF(1);
+        				    				
+        				    				if (this.requestBuilt) {
+        				    					
+        				    					this.requestSent = this.sendDataTF();
+        				    					
+        				    					if (this.requestSent) {
+        				    						
+        				    						pl("Successfully sent P-DATA-TF C-ECHO-RQ");
+        				    						
+        				    						type = this.client.readByte();
+        				    						pl("PDU type received: " + type);
+
+        				    						
+        				    					}
+        				    					
+        				    					else {
+        				    						
+        				    						pl("There was a problem sending P-DATA-TF C-ECHO-RQ");
+        				    						
+        				    					}
+        				    					
+        				    				}
+        				    				
+        				    				else {
+        				    					
+        				    					pl("There was a problem building P-DATA-TF C-ECHO-RQ - Exiting");
+        				    					System.exit(0);
+        				    					
+        				    				}
+        				    				
+        				    			}
+        				    			
+        				    			else if (input.equals("2")) {
+        				    				
+        				    			}
+        				    			
+        				    			else {
+        				    				
+        				    				pl("Not a valid choice - Exiting programme");
+        				    				System.exit(0);
+        				    				
+        				    			}
+    				    				
+    				    			}
+    				    			
+    				    			else {
+    				    				
+    				    				pl("Exiting");
+    				    				System.exit(0);
+    				    				
+    				    			}
+    				    			
+    							}
+    							
+    							else {
+    								
+    								pl("Select from the following options\n\n1 - Send C-ECHO-RQ\n2 - Send C-STORE-RQ");
+    				    			input = this.keyboard.nextLine().toUpperCase();
+    				    			
+    				    			if (input.equals("1")) {
+    				    				
+    				    				this.requestBuilt = this.buildDataTF(1);
+    				    				
+    				    				if (this.requestBuilt) {
+    				    					
+    				    					this.requestSent = this.sendDataTF();
+    				    					
+    				    					if (this.requestSent) {
+    				    						
+    				    						pl("Successfully sent P-DATA-TF C-ECHO-RQ");
+    				    						type = this.client.readByte();
+    				    						pl("PDU type received: " + type);
+    				    						
+    				    						if (type == this.C_ECHO_RSP_PDU_TYPE) {
+    				    							
+    				    							pl("C-ECHO-RQ acknowledged");
+    				    							this.dataReceived = true;
+    				    							this.requestAcknowledged = true;
+    				    							this.client.skip(1);
+    				    							length = this.client.readInt();
+    				    							pl("PDU length: " + length);
+    				    							this.receivedData = this.client.readByteArray(length);
+    				    							this.requestBuilt = this.buildEchoResponse();
+    				    							
+    				    						}
+    				    						
+    				    					}
+    				    					
+    				    					else {
+    				    						
+    				    						pl("There was a problem sending P-DATA-TF C-ECHO-RQ");
+    				    						
+    				    					}
+    				    					
+    				    				}
+    				    				
+    				    				else {
+    				    					
+    				    					pl("There was a problem building the P-DATA-TF C-ECHO-RQ - Exiting");
+    				    					System.exit(0);
+    				    					
+    				    				}
+    				    				
+    				    			}
+    				    			
+    				    			else if (input.equals("2")) {
+    				    				
+    				    			}
+    				    			
+    				    			else {
+    				    				
+    				    				pl("Not a valid choice - Exiting programme");
+    				    				System.exit(0);
+    				    				
+    				    			}
+    								
+    							}
     							
     						}
     						
@@ -1147,8 +1278,23 @@ public class Engine {
     public boolean buildEchoResponse() {
     	
     	boolean retval = false;
-    	this.echoResponse = new C_ECHO_RSP();
-    	retval = true;
+    	
+    	if ((this.receivedData != null) && (this.isRequestAcknowledged() == true)) {
+    		
+    		this.echoResponse = new C_ECHO_RSP();
+    		
+    		
+    	}
+    	
+    	else {
+    		
+    		pl("Problem building C-ECHO-RSP");
+    		retval = false;
+    		
+    	}
+    	
+    	//this.echoResponse = new C_ECHO_RSP();
+    	//retval = true;
     	return retval;
     	
     }
@@ -1164,7 +1310,7 @@ public class Engine {
     	
     }
     
-    public boolean buildDataTF() {
+    public boolean buildDataTF(int n) {
     	
     	byte[] arr1 = {0x04, 0x00};
     	
@@ -1262,71 +1408,82 @@ public class Engine {
     		//FOR NOW JUST USE C-ECHO REQUEST 
     		//CHANGE THIS LATER SO DIFFERENT PDVS CAN BE SENT
     		
-    		type = 0x04;
+    		switch (n) {
     		
-    		//PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
-    		PresentationContext_RQ presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
-    		int pcID = presentationContext.getPresentationContextID();
-    		int header = 0x03;
+	    		case 1 : //C-ECHO-RQ
+	    			
+	    			type = 0x04;
+	        		
+	        		//PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
+	        		PresentationContext_RQ presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
+	        		int pcID = presentationContext.getPresentationContextID();
+	        		int header = 0x03;
+	        		
+	        		this.dataTF = new P_DATA_TF();
+	        		this.dataTF.setPduType(type);
+	        		
+	        		if (this.buildEchoRequest()) {
+	        		
+	        			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest, "C-ECHO");
+	        			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
+	        			pdValueItems.add(pdValue);
+	        			this.dataTF.setPresentationDataValueItems(pdValueItems);
+	        			this.dataTF.writeToBuffer();
+	        			retval = true;
+	        			
+	        			/*for (int a = 0; a < this.targetPDataTFData1.length; a ++)
+	        				
+	        				p("" + this.targetPDataTFData1[a]);
+	        			
+	        			p("" + this.targetPDataTFDataLen);
+	        			
+	        			for (int b = 0; b < this.targetPDataTFData2.length; b ++)
+	        			
+	        				p("" + this.targetPDataTFData2[b]);
+	        				
+	        			pl();*/
+	        			
+	        			/*byte[] arr3 = {0x04, 0x00};
+	        			len = this.dataTF.getPduLength();
+	        			pl("LEN: " + len);
+	        			byte[] arr4 = this.dataTF.getBuffer().toByteArray();
+	        			
+	        			for (int c = 0; c < arr3.length; c ++)
+	        				
+	        				p("" + arr3[c]);
+	        			
+	        			p("" + len);
+	        			
+	        			for (int d = 0; d < arr4.length; d ++) 
+	        				
+	        				p("" + arr4[d]);
+	        			
+	        			
+	        			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
+	        			
+	        			for (int e = 0; e < arr5.length; e ++)
+	        				
+	        				p("" + arr5[e]);
+	        			*/
+	        			
+	        			
+	        		}
+	        		
+	        		else {
+	        			
+	        			//Problem building Echo Request
+	        			pl("C-ECHO-RQ was not built successfully");
+	        			retval = false;
+	        			
+	        		}
+
+	    			
+	    			break;
+	    			
+	    		case 2 : break;
     		
-    		this.dataTF = new P_DATA_TF();
-    		this.dataTF.setPduType(type);
-    		
-    		if (this.buildEchoRequest()) {
-    		
-    			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest, "C-ECHO");
-    			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
-    			pdValueItems.add(pdValue);
-    			this.dataTF.setPresentationDataValueItems(pdValueItems);
-    			this.dataTF.writeToBuffer();
-    			retval = true;
-    			
-    			/*for (int a = 0; a < this.targetPDataTFData1.length; a ++)
-    				
-    				p("" + this.targetPDataTFData1[a]);
-    			
-    			p("" + this.targetPDataTFDataLen);
-    			
-    			for (int b = 0; b < this.targetPDataTFData2.length; b ++)
-    			
-    				p("" + this.targetPDataTFData2[b]);
-    				
-    			pl();*/
-    			
-    			/*byte[] arr3 = {0x04, 0x00};
-    			len = this.dataTF.getPduLength();
-    			pl("LEN: " + len);
-    			byte[] arr4 = this.dataTF.getBuffer().toByteArray();
-    			
-    			for (int c = 0; c < arr3.length; c ++)
-    				
-    				p("" + arr3[c]);
-    			
-    			p("" + len);
-    			
-    			for (int d = 0; d < arr4.length; d ++) 
-    				
-    				p("" + arr4[d]);
-    			
-    			
-    			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
-    			
-    			for (int e = 0; e < arr5.length; e ++)
-    				
-    				p("" + arr5[e]);
-    			*/
-    			
-    			
     		}
-    		
-    		else {
-    			
-    			//Problem building Echo Request
-    			pl("THERE WAS A PROBLEM BUILDING THE ECHO REQUEST");
-    			retval = false;
-    			
-    		}
-    		
+    		    		
     	}
     	
     	catch (Exception e) {
