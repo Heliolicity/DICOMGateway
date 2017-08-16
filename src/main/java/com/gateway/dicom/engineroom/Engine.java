@@ -1,9 +1,12 @@
 package com.gateway.dicom.engineroom;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.Scanner;
 
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RSP;
@@ -64,11 +67,111 @@ public class Engine {
     private boolean requestSent;
     private boolean dataReceived;
     
+    private Scanner keyboard;
+    
+    private final byte A_ASSOCIATE_AC_PDU_TYPE = 0x02;
+    private final byte A_ASSOCIATE_RJ_PDU_TYPE = 0x03;
+    //private final byte C_ECHO_RSP_PDU_TYPE = 0x02;
+    
+    private DataInputStream dataInputStream;
+    private DataOutputStream dataOutputStream;
+    
     public Engine() {}
     
     public Engine(Client client) { this.client = client; }
     
     public void run() {
+    	
+    	String input = "";
+    	byte[] arr;
+    	int length = 0;
+    	byte type;
+    	
+    	try {
+    	
+    		this.keyboard = new Scanner(System.in);
+    		this.connected = this.client.connectToServer();
+    		
+    		if (this.connected) {
+    			
+    			pl("Send A-ASSOCIATE-RQ Y/N?");
+    			input = this.keyboard.nextLine().toUpperCase();
+    			
+    			if (input.equals("Y")) {
+    				
+    				this.requestBuilt = this.buildAssociateRequest();
+    				
+    				if (this.requestBuilt) {
+    					
+    					this.requestSent = this.sendAssociateRequest();
+    					
+    					if (this.requestSent) {
+    						
+    						type = this.client.readByte();
+    						pl("PDU type received: " + type);
+    						
+    						if (type == this.A_ASSOCIATE_AC_PDU_TYPE) {
+    							
+    							pl("A-ASSOCIATE-RQ acknowledged");
+    							this.dataReceived = true;
+    							this.requestAcknowledged = true;
+    							this.client.skip(1);
+    							length = this.client.readInt();
+    							pl("PDU length: " + length);
+    							this.receivedData = this.client.readByteArray(length);
+    							this.buildAssociateAcknowledgement();
+    							
+    						}
+    						
+    						else if (type == this.A_ASSOCIATE_RJ_PDU_TYPE){
+    							
+    							pl("A-ASSOCIATE-RQ rejected");
+    							
+    						}
+    						
+    						
+    					}
+    					
+    					else {
+    						
+    						pl("Error sending A-ASSOCIATE-RQ");
+        					System.exit(0);
+    						
+    					}
+    					
+    				}
+    				
+    				else {
+    					
+    					pl("Error building A-ASSOCIATE-RQ");
+    					System.exit(0);
+    					
+    				}
+    				
+    			}
+    			
+    		}
+    		
+    		else {
+    			
+    			pl("Could not connect to the PACS");
+    			System.exit(0);
+    			
+    		}
+    		
+    		
+    	}
+		
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		
+    	}
+    		
+    }
+    
+    /*public void run() {
     	
     	try {
     	
@@ -109,10 +212,54 @@ public class Engine {
 	    		        		this.requestRejected = false;
 	    		        		this.buildAssociateAcknowledgement();
 	    	        		
-	    		        		this.buildDataTF();
+	    		        		if (this.buildDataTF()) {
+	    		        			
+	    		        			this.requestSent = this.sendDataTF();
+	    		        			
+	    		        			if (this.requestSent) {
+	    		        				
+	    		        				pl("P-DATA-TF sent successfully");
+	    		        				//this.client.setSkip(120);
+	    		        				this.dataReceived = this.client.receive();
+	    		        				
+	    		        				if (this.dataReceived) {
+	    		        					
+	    		        					pl("Data received from PACS");
+	    		        					this.receivedData = this.client.getReceivedData();
+	    		        					   		        					
+	    		        				}
+	    		        				
+	    		        				else {
+	    		        				
+	    		        					pl("No data received from PACS");
+	    		        					this.requestAcknowledged = true;
+		    	    		        		this.requestRejected = false;
+	    		        					
+	    		        				}
+	    		        				
+	    		        				
+	    		        				
+	    		        			}
+	    		        			
+	    		        			else {
+	    		        				
+	    		        				pl("P-DATA-TF not sent successfully");
+	    		        				this.requestAcknowledged = false;
+	    	    		        		this.requestRejected = true;
+	    		        				
+	    		        			}
+	    		        			
+	    		        		}
+	    		        		
+	    		        		else {
+	    		        		
+	    		        			pl("P-DATA-TF was not successfully built");
+		    		        		
+	    		        			
+	    		        		}
 	    		        		
 	    		        		//Send the A_RELEASE-RQ
-	    		        		/*if (this.buildReleaseRequest()) {
+	    		        		if (this.buildReleaseRequest()) {
 	    		        			
 	    		        			if (this.sendReleaseRequest()) {
 	    		        				
@@ -151,7 +298,7 @@ public class Engine {
 	    		        			
 	    		        			pl("Problem building A-RELEASE-RQ");
 	    		        			
-	    		        		}*/
+	    		        		}
 	    		        		
 	    		        	}
 	    		        	
@@ -184,7 +331,7 @@ public class Engine {
 	    			
 	    			else {
 	    				
-	    				pl("THE REQUEST WASN'T SUCCESSFULLY SENT");
+	    				pl("A-ASSOCIATE-RQ was not successfully sent");
 	    				
 	    			}
 	    			
@@ -192,7 +339,7 @@ public class Engine {
 	    		
 	    		else {
 	    			
-	    			pl("THE REQUEST WASN'T SUCCESSFULLY BUILT");
+	    			pl("A-ASSOCIATE-RQ was not successfully built");
 	    			
 	    		}
 	    		
@@ -213,7 +360,7 @@ public class Engine {
     		
     	}
     	
-    }
+    }*/
     
     public void connect() {
     	
@@ -624,8 +771,9 @@ public class Engine {
     	String s;
     	ApplicationContext applicationContext;
     	PresentationContext_AC presentationContext;
+    	List<PresentationContext_AC> presentationContexts = new ArrayList<PresentationContext_AC>();
     	AbstractSyntax abstractSyntax;
-    	List<TransferSyntax> transferSyntaxes;
+    	List<TransferSyntax> transferSyntaxes = new ArrayList<TransferSyntax>();
     	TransferSyntax transferSyntax;
     	UserInformation userInformation;
     	MaximumLengthSubItem maximumLengthSubItem;
@@ -636,8 +784,10 @@ public class Engine {
     	ExtendedNegotiationSubItem extendedNegotiationSubItem;
     	ImplementationItem implementationItem;
     	int pos = 0;
+    	int count = 0;
     	int length = 0;
     	byte[] arr;
+    	byte[] subData;
     	int mlsiPos = 0;
     	int icsiPos = 0;
     	int ivsiPos = 0;
@@ -651,243 +801,165 @@ public class Engine {
     	byte[] a5;
     	byte[] a6;
     	
-    	//if ((this.receivedData != null) && (this.client.isRequestAcknowledged() == true)) {
     	if ((this.receivedData != null) && (this.isRequestAcknowledged() == true)) {
-    	
-    		this.associateRequestAC = new A_ASSOCIATE_AC();
-    		this.associateRequestAC.setPduType(this.receivedData[0]);
     		
-    		b1 = this.receivedData[2];
-    	    b2 = this.receivedData[3];
-    	    b3 = this.receivedData[4];
-    	    b4 = this.receivedData[5];
-    	    i = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
-    	            ((0xFF & b3) << 8) | (0xFF & b4);
-    		/*
-    	    //Change this - the PDU Length should indicate the number of bytes to take from the array
-    	    this.associateRequestAC.setPduLength(i);
+    		this.associateRequestAC = new A_ASSOCIATE_AC();
+    		this.associateRequestAC.setPduType(this.A_ASSOCIATE_AC_PDU_TYPE);
+    	    this.associateRequestAC.setPduLength(this.receivedData.length);
     	    
-    	    b1 = this.receivedData[6];
-    	    b2 = this.receivedData[7];
+    	    b1 = this.receivedData[0];
+    	    b2 = this.receivedData[1];
     	    
     	    i = ((0xFF & b1) << 8) | (0xFF & b2);
     	    
     	    this.associateRequestAC.setProtocolVersion(i);
+    	    pl("Protocol Version: " + i);
     	    
-    	    applicationContext = new ApplicationContext();
+    	    //Next two positions in the array are reserved and can be ignored
     	    
-    	    if (this.receivedData.length > 74) {
+    	    arr = Arrays.copyOfRange(this.receivedData, 4, 20);
+    	    s = new String(arr);
+    	    this.associateRequestRQ.setCalledAE(s);
+    	    pl("Called AE: " + s);
     	    
-	    	    b = this.receivedData[74];
-	    	    applicationContext.setItemType(b);
-	    	    b1 = this.receivedData[76];
-	    	    b2 = this.receivedData[77];
-	    	    i = ((0xFF & b1) << 8) | (0xFF & b2);
-	    	    applicationContext.setItemLength(i);
-	    	    length = i;
-	    	    
-	    	    //Look for the number 33 - this will signify the end of the Application Context Name
-	    	    for (int c = 78; c < this.receivedData.length; c ++) 
-	    	    
-	    	    	if (this.receivedData[c] == 33) 
-	    	    		
-	    	    		pos = c;
-	    	    
-	    	    if (pos > 0) {
-	    	    	
-		    	    arr = Arrays.copyOfRange(this.receivedData, 78, pos);
-		    	    s = new String(arr, 0, arr.length);
-		    	    applicationContext.setApplicationContextName(s);
-		    	    this.associateRequestAC.setApplicationContext(applicationContext);
-		    	    b = this.receivedData[pos];
-		    	
-		    	    if (b == 33) {
-		    	    	
-		    	    	presentationContext = new PresentationContext_AC();
-		    	    	presentationContext.setItemType(b);
-		    	    	
-		    	    	b1 = this.receivedData[pos + 2];
-		    	    	b2 = this.receivedData[pos + 3];
-		    	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
-		    	    	presentationContext.setItemLength(i);
-		    	    	
-		    	    	b = this.receivedData[pos + 4];
-		    	    	i = (int) b;
-		    	    	presentationContext.setPresentationContextID(i);
-		    	    	
-		    		    	    	
-		    	    	b = this.receivedData[pos + 6];
-		    	    	presentationContext.setResult(b);
-		    	    	
-		    	    	if (b == 0) {
-		    	    		
-		    	    		//Process the Transfer Syntax sub items
-		    	    		arr = Arrays.copyOfRange(this.receivedData, pos + 8, pos + 4 + presentationContext.getItemLength());
-		    	    		
-		    	    		//Rewrite this later to handle multiple Transfer Syntaxes
-		    	    		transferSyntax = new TransferSyntax();
-		    	    		transferSyntax.setItemType(arr[0]);
-		    	    		
-		    	    		b1 = arr[2];
-		        	    	b2 = arr[3];
-		        	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
-		    	    		transferSyntax.setItemLength(i);
-		    	    		
-		    	    		arr = Arrays.copyOfRange(arr, 4, 4 + i);
-		    	    		s = new String(arr, 0, arr.length);
-		    	    	    transferSyntax.setTransferSyntaxName(s);
-		    	    	    pl("TRANSFER SYNTAX NAME: " + s);
-		    	    	    
-		    	    	    transferSyntaxes = new ArrayList<TransferSyntax>();
-		    	    	    transferSyntaxes.add(transferSyntax);
-		    	    	    presentationContext.setTransferSyntaxSubItem(transferSyntaxes);
-		    	    		this.associateRequestAC.setPresentationContext(presentationContext);
-		    	    	    
-		    	    	    pos = pos + 4 + presentationContext.getItemLength();
-		    	    	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
-		    	    	    
-		    	    	    if (arr.length > 0) {
-		    	    	    
-			    	    	    userInformation = new UserInformation();
-			    	    	    userInformation.setItemType(this.receivedData[pos]);
-			    	    	    
-			    	    	    for (int d = 0; d < arr.length; d ++) {
-			    	    	    	
-			    	    	    	switch(arr[d]) {
-			    	    	    	
-			    	    	    		case 0x51: mlsiPos = d; break;
-			    	    	    		case 0x52: icsiPos = d; break;
-			    	    	    		case 0x55: ivsiPos = d; break;
-			    	    	    		case 0x53: aosiPos = d; break;
-			    	    	    		case 0x54: srsiPos = d; break;
-			    	    	    		case 0x56: ensiPos = d; break;
-			    	    	    		
-			    	    	    	}
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    if (mlsiPos > 0) {
-			    	    	    	
-			    	    	    	a1 = Arrays.copyOfRange(arr, mlsiPos, arr.length);
-			    	    	    	b1 = a1[2];
-			    	    	    	b2 = a1[3];
-			    	    	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
-			    	    	    	a1 = Arrays.copyOfRange(a1, 0, i + 4);
-			    	    	    	
-			    	    	    	maximumLengthSubItem = new MaximumLengthSubItem();
-			            	    	maximumLengthSubItem.setItemType(a1[0]);
-			            	    	maximumLengthSubItem.setItemLength(i);
-			            	    	
-			            	    	b1 = a1[4];
-			                	    b2 = a1[5];
-			                	    b3 = a1[6];
-			                	    b4 = a1[7];
-			                	    i = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
-			                	            ((0xFF & b3) << 8) | (0xFF & b4);
-			    	    	    	
-			                	    maximumLengthSubItem.setMaxPDULengthReceive(i);
-			            	    	userInformation.setMaximumLengthSubItem(maximumLengthSubItem);
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    if (icsiPos > 0) {
-			    	    	    	
-			    	    	    	a2 = Arrays.copyOfRange(arr, icsiPos, arr.length);
-			    	    	    	b1 = a2[2];
-			            	    	b2 = a2[3];
-			            	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
-			            	    	a2 = Arrays.copyOfRange(a2, 0, i + 4);
-			            	    	
-			            	    	implementationClassUIDSubItem = new ImplementationClassUIDSubItem();
-			            	    	implementationClassUIDSubItem.setItemType(a2[0]);
-			            	    	implementationClassUIDSubItem.setItemLength(i);
-			            	    	
-			            	    	s = new String(a2, 0, a2.length);
-			            	    	
-			            	    	implementationClassUIDSubItem.setImplementationClassUID(s);
-			            	    	
-			    	    	    }
-		    	    	    
-			    	    	    if (ivsiPos > 0) {
-			    	    	    	
-			    	    	    	a3 = Arrays.copyOfRange(arr, ivsiPos, arr.length);
-			    	    	    	b1 = a3[2];
-			    	    	    	b2 = a3[3];
-			            	    	i = ((0xFF & b1) << 8) | (0xFF & b2);
-			            	    	a3 = Arrays.copyOfRange(a3, 0, i + 4);
-			    	    	    	
-			            	    	implementationVersionNameSubItem = new ImplementationVersionNameSubItem();
-			            	    	implementationVersionNameSubItem.setItemType(a3[0]);
-			            	    	implementationVersionNameSubItem.setItemLength(i);
-			            	    	
-			            	    	s = new String(a3, 0, a3.length);
-			            	    	
-			            	    	implementationVersionNameSubItem.setImplementationVersionName(s);
-			            	    	
-			    	    	    }
-			    	    	    
-			    	    	    if ((implementationClassUIDSubItem != null) && (implementationVersionNameSubItem != null)) {
-			    	    	    	
-			    	    	    	implementationItem = new ImplementationItem();
-			    	    	    	implementationItem.setImplementationClassUIDSubItem(implementationClassUIDSubItem);
-			    	    	    	implementationItem.setImplementationVersionNameSubItem(implementationVersionNameSubItem);
-			    	    	    	userInformation.setImplementationItem(implementationItem);
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    if (aosiPos > 0) {
-			    	    	    	
-			    	    	    	
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    if (srsiPos > 0) {
-			    	    	    	
-			    	    	    	
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    if (ensiPos > 0) {
-			    	    	    	
-			    	    	    	
-			    	    	    	
-			    	    	    }
-			    	    	    
-			    	    	    this.associateRequestAC.setUserInformation(userInformation);
-			    	    	    
-		    	    	    }
-		    	    	    
-		    	    	}
-		    	    	
-		    	    	else {
-		    	    		
-		    	    		//The Transfer Syntax sub-items aren't significant in the case of non-acceptance
-		    	    		pl("RESPONSE: " + presentationContext.response());
-		    	    		retval = false;
-		    	    		
-		    	    	}
-		    	    	
-		    	    }
-	
-	    	    }
-	    	        	    
-	    	    else {
-	    	    	
-	    	    	//Problem with the Presentation Context
-	    	    	pl("First byte of the Presentation Context is not 21H");
-	    	    	retval = false;
-	    	    	
-	    	    }
+    	    arr = Arrays.copyOfRange(this.receivedData, 20, 36);
+    	    s = new String(arr);
+    	    this.associateRequestRQ.setCallingAE(s);
+    	    pl("Calling AE: " + s);
     	    
+    	    //Next 32 positions in the array are reserved and can be ignored
+    	    pos = 68;
+    	    
+    	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
+    	    b = arr[0];
+    	    
+    	    if (b == 0x10) {
+    	    	
+    	    	//Skip the next bit (arr[1])
+    	    	b1 = arr[2];
+        	    b2 = arr[3];
+        	    
+        	    i = ((0xFF & b1) << 8) | (0xFF & b2);
+    	    	length = i;
+    	    	subData = Arrays.copyOfRange(arr, 4, 4 + length);
+        	    s = new String(subData);
+        	    applicationContext = new ApplicationContext();
+        	    applicationContext.setItemType(b);
+        	    applicationContext.setItemLength(length);
+        	    applicationContext.setApplicationContextName(s);
+        	    this.associateRequestAC.setApplicationContext(applicationContext);
+        	    pl("Application Context: " + s);
+    	    	
+        	    pos += (4 + length);
+        	    //arr = Arrays.copyOfRange(this.receivedData, 68 + 4 + length, this.receivedData.length);
+        	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
+        	    count = 0;
+        	    b = 0x21;
+        	    
+        	    /*for (int a = 0; a < arr.length; a ++)
+        	    	
+        	    	pl("arr[" + a + "]: " + arr[a]);*/
+        	    
+        	    for (int a = 0; a < arr.length; a ++) 
+        	    	
+        	    	//pl("arr[" + a + "]: " + arr[a]);
+        	    	if(arr[a] == b && arr[a + 1] == 0 && a + 1 < arr.length) 
+        	    		
+        	    		count ++;
+        	    	
+        	    pl("Presentation Contexts found: " + count);
+        	    
+        	    if (count == 1) {
+        	    	
+        	    	presentationContext = new PresentationContext_AC();
+        	    	presentationContext.setItemType(b);
+        	    	
+        	    	//Skip the next byte (arr[1])
+        	    	b1 = arr[2];
+            	    b2 = arr[3];
+            	    
+            	    i = ((0xFF & b1) << 8) | (0xFF & b2);
+        	    	
+            	    length = i;
+        	    	presentationContext.setItemLength(length);
+        	    	b = arr[4];
+        	    	presentationContext.setPresentationContextID(b);
+        	    	
+        	    	//Skip the next bytes (arr[5 - 7])
+        	    	
+        	    	//arr = Arrays.copyOfRange(arr, 8, 4 + length);
+        	    	pos += 8;
+        	    	arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
+        	    	b = arr[0];
+        	    	
+        	    	/*for (int a = 0; a < arr.length; a ++)
+            	    	
+            	    	pl("arr[" + a + "]: " + arr[a]);*/
+        	    	
+        	    	if (b == 0x40) {
+        	    	
+        	    		transferSyntax = new TransferSyntax();
+        	    		transferSyntax.setItemType(b);
+        	    		
+            	    	//Skip the next byte (arr[1])
+            	    	b1 = arr[2];
+                	    b2 = arr[3];
+                	    
+                	    i = ((0xFF & b1) << 8) | (0xFF & b2);
+            	    	
+                	    length = i;
+                	    pos += (4 + length);
+                	    transferSyntax.setItemLength(length);
+        	    	    subData = Arrays.copyOfRange(arr, 4, length);
+                	    s = new String(subData);
+                	    transferSyntax.setTransferSyntaxName(s);
+                	    transferSyntaxes.add(transferSyntax);
+                	    presentationContext.setTransferSyntaxSubItems(transferSyntaxes);
+                	    presentationContexts.add(presentationContext);
+                	    this.associateRequestAC.setPresentationContexts(presentationContexts);
+                	    pl("Presentation Context: " + presentationContext.getPresentationContextID());
+                	    pl("Transfer Syntax: " + s);
+                	    
+                	    arr = Arrays.copyOfRange(this.receivedData, pos, this.receivedData.length);
+                	    
+                	    /*for (int a = 0; a < arr.length; a ++)
+                	    	
+                	    	pl("arr[" + a + "]: " + arr[a]);*/
+                	    
+                	    
+                	    
+        	    	}
+        	    	
+        	    	else {
+        	    		
+        	    	}
+        	    	
+        	    }
+        	    
+        	    else if (count < 1) {
+        	    	
+        	    	pl("No Presentation Context has been found in the acknowledgement");
+        	    	retval = false;
+        	    	
+        	    }
+        	    
+        	    else if (count > 1) {
+        	    	
+        	    	pl("More than one Presentation Context has been found in the acknowledgement");
+        	    	retval = true;
+        	    	
+        	    }
+        	    
     	    }
     	    
     	    else {
     	    	
-    	    	//No Application Context received
-    	    	pl("No Application Context received");
+    	    	pl("No Application Context has been found in the acknowledgement");
+    	    	retval = false;
     	    	
     	    }
-    	    */
+    	    
+    	    
     	} 
     	
     	else {
@@ -942,8 +1014,6 @@ public class Engine {
     }
     
     public boolean sendAssociateRequest() {
-    	
-    	    			
     	
     	boolean retval = false;
     	
@@ -1013,65 +1083,7 @@ public class Engine {
     	
     	try {
     		
-    		this.client.writeByte(this.dataTF.getPduType());
-    		pl("HERE 1");
-    		this.client.writeByte(this.dataTF.getReserved());
-    		pl("HERE 2");
-    		this.client.writeInt(this.dataTF.getPduLength());
-    		
-    		for (PresentationDataValue item: this.dataTF.getPresentationDataValueItems()) {
-    			
-    			this.client.writeInt(item.getItemLength());
-    			this.client.writeByte(item.getPresentationContextID());
-    			
-    			//Will need a for loop here for multiple PDV Iteams
-    			this.client.writeByte(item.getMessageControlHeader());
-    			
-    			PDU pdu = item.getPdvData();
-    			//Need some way of telling what kind of PDU it is
-    			//For now assume C-ECHO-RQ
-    			
-    			C_ECHO_RQ echo = (C_ECHO_RQ) pdu;
-    			
-    			DataElement element = echo.getCommandGroupLength();
-    			this.client.writeUInt16(element.getGroupNumber());
-    			this.client.writeUInt16(element.getElementNumber());
-    			this.client.write(element.getValueRepresentation().getBytes());
-    			String data = element.getElementData();
-    			int length = Integer.valueOf(data);
-    			this.client.writeUInt32(length);
-    			
-    			element = echo.getAffectedServiceClassUID();
-    			this.client.writeUInt16(element.getGroupNumber());
-    			this.client.writeUInt16(element.getElementNumber());
-    			this.client.write(element.getValueRepresentation().getBytes());
-    			data = element.getElementData();
-    			this.client.write(data.getBytes());
-    			
-    			element = echo.getCommandField();
-    			this.client.writeUInt16(element.getGroupNumber());
-    			this.client.writeUInt16(element.getElementNumber());
-    			this.client.write(element.getValueRepresentation().getBytes());
-    			data = element.getElementData();
-    			this.client.write(data.getBytes());
-    			
-    			element = echo.getMessageID();
-    			this.client.writeUInt16(element.getGroupNumber());
-    			this.client.writeUInt16(element.getElementNumber());
-    			this.client.write(element.getValueRepresentation().getBytes());
-    			data = element.getElementData();
-    			this.client.write(data.getBytes());
-    			
-    			element = echo.getDataSetType();
-    			this.client.writeUInt16(element.getGroupNumber());
-    			this.client.writeUInt16(element.getElementNumber());
-    			this.client.write(element.getValueRepresentation().getBytes());
-    			data = element.getElementData();
-    			this.client.write(data.getBytes());
-    			
-    			
-    		}
-    		
+    		this.client.write(this.dataTF.getBuffer().toByteArray());
     		this.client.flush();
     		
     		retval = true;
@@ -1127,6 +1139,15 @@ public class Engine {
     	boolean retval = false;
     	short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
     	this.echoRequest = new C_ECHO_RQ(randomNum);
+    	retval = true;
+    	return retval;
+    	
+    }
+    
+    public boolean buildEchoResponse() {
+    	
+    	boolean retval = false;
+    	this.echoResponse = new C_ECHO_RSP();
     	retval = true;
     	return retval;
     	
@@ -1257,9 +1278,10 @@ public class Engine {
     			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
     			pdValueItems.add(pdValue);
     			this.dataTF.setPresentationDataValueItems(pdValueItems);
+    			this.dataTF.writeToBuffer();
     			retval = true;
     			
-    			for (int a = 0; a < this.targetPDataTFData1.length; a ++)
+    			/*for (int a = 0; a < this.targetPDataTFData1.length; a ++)
     				
     				p("" + this.targetPDataTFData1[a]);
     			
@@ -1269,9 +1291,7 @@ public class Engine {
     			
     				p("" + this.targetPDataTFData2[b]);
     				
-    			pl();
-    			
-    			this.dataTF.writeToBuffer();
+    			pl();*/
     			
     			/*byte[] arr3 = {0x04, 0x00};
     			len = this.dataTF.getPduLength();
@@ -1287,13 +1307,15 @@ public class Engine {
     			for (int d = 0; d < arr4.length; d ++) 
     				
     				p("" + arr4[d]);
-    			*/
+    			
     			
     			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
     			
     			for (int e = 0; e < arr5.length; e ++)
     				
     				p("" + arr5[e]);
+    			*/
+    			
     			
     		}
     		

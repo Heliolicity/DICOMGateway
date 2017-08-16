@@ -8,28 +8,11 @@ import java.io.ObjectOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ByteArrayInputStream;
 import java.net.Socket;
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import com.gateway.dicom.protocols.A_ASSOCIATE_AC;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RJ;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RQ;
-import com.gateway.dicom.entities.DataElement;
-import com.gateway.dicom.entities.ExtendedNegotiationSubItem;
-import com.gateway.dicom.entities.ImplementationClassUIDSubItem;
-import com.gateway.dicom.entities.ImplementationItem;
-import com.gateway.dicom.entities.ImplementationVersionNameSubItem;
-import com.gateway.dicom.entities.MaximumLengthSubItem;
-import com.gateway.dicom.entities.PresentationContext_AC;
-import com.gateway.dicom.entities.ApplicationContext;
-import com.gateway.dicom.entities.AsynchronousOperationsWindowSubItem;
-import com.gateway.dicom.entities.PresentationContext_RQ;
-import com.gateway.dicom.entities.SCPSCURoleSelectionNegotiationSubItem;
-import com.gateway.dicom.entities.UserInformation;
-import com.gateway.dicom.entities.AbstractSyntax;
-import com.gateway.dicom.entities.TransferSyntax;
 import com.gateway.dicom.lib.DicomValueRepresentationInputStream;
 import com.gateway.dicom.lib.DicomValueRepresentationOutputStream;
 import com.gateway.dicom.lib.DicomByteOrderable;
@@ -54,12 +37,13 @@ public class Client extends DicomByteOrderable {
     private byte[] receivedData = null;
     private boolean requestAcknowledged;
     private boolean requestRejected;
-    private int bytesTransferred;
+    private int skip;
     
     public Client(String ipAddress, int port) {
     	this.ipAddress = ipAddress;
     	this.port = port;
     	this.byteOrdering = BYTE_ORDERING_BIG_ENDIAN;
+    	this.skip = 0;
     }
     
     public boolean connectToServer() {
@@ -148,16 +132,21 @@ public class Client extends DicomByteOrderable {
     	try {
     		
     		size = this.dataInputStream.available();
-    		//pl("AVAILABLE: " + this.dataInputStream.available());
+    		pl("AVAILABLE: " + size);
     		
     		if (size > 0) {
     		
     			pl("Data received from PACS");
     			retval = true;
 	        	arr = new byte[size];
+	        	
+	        	//if (this.skip > 0) this.dataInputStream.skip(this.skip);
+	        	
 	        	this.dataInputStream.readFully(arr);
 	        	
-	        	//for (int a = 0; a < arr.length; a ++) pl("arr[" + a + "]: " + arr[a]);
+	        	for (int a = 0; a < arr.length; a ++) 
+	        		
+	        		pl("arr[" + a + "]: " + arr[a]);
 	        	
 	        	this.receivedData = arr;
 	        
@@ -203,6 +192,26 @@ public class Client extends DicomByteOrderable {
     	}
     	
     }
+
+    public void writeByte(byte b, DataOutputStream dos) {
+    	
+    	try { 
+    	
+    		//pl("" + b);
+    		dos.writeByte(b);
+    		//pl("Size: " + this.dataOutputStream.size());
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		System.exit(0);
+    		
+    	}
+    	
+    }
     
     public void writeByte(int i) {
     	
@@ -223,12 +232,51 @@ public class Client extends DicomByteOrderable {
     	
     }
     
+    public void writeByte(int i, DataOutputStream dos) {
+    	
+    	try { 
+        	
+    		//pl("" + i);
+    		dos.writeByte(i);
+    		//pl("Size: " + this.dataOutputStream.size());
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		
+    	}
+    	
+    }
+
     public void writeInt(int i) {
     	
     	try { 
         	
     		//pl("" + i);
     		this.dataOutputStream.writeInt(i);
+    		//pl("Size: " + this.dataOutputStream.size());
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		System.exit(0);
+    		
+    	}
+    	
+    }
+
+    public void writeInt(int i, DataOutputStream dos) {
+    	
+    	try { 
+        	
+    		//pl("" + i);
+    		dos.writeInt(i);
     		//pl("Size: " + this.dataOutputStream.size());
     		
     	}
@@ -270,6 +318,33 @@ public class Client extends DicomByteOrderable {
     	
     }
 
+    public void write(byte[] b, DataOutputStream dos) {
+    	
+    	try { 
+        
+    		//p("Writing Bytes:");
+    		
+    		/*for (int i = 0; i < b.length ; i ++) 
+    			
+    			p(b[i] + " ");
+			*/
+    		
+    		dos.write(b);
+    		//pl("");
+    		//pl("Size: " + this.dataOutputStream.size());
+    		
+    	}
+    	
+    	catch (Exception e) {
+    		
+    		pl(e.getMessage());
+    		e.printStackTrace();
+    		System.exit(0);
+    		
+    	}
+    	
+    }
+
     public void writeUInt16(int value) throws IOException {
     	
 		int b0 = value & 0x00ff;
@@ -290,6 +365,33 @@ public class Client extends DicomByteOrderable {
 			this.dataOutputStream.write(b1);
 			//pl("" + b0);
 			this.dataOutputStream.write(b0);
+			
+		}
+		
+		//pl("Size: " + this.dataOutputStream.size());
+		
+	}
+    
+    public void writeUInt16(int value, DataOutputStream dos) throws IOException {
+    	
+		int b0 = value & 0x00ff;
+		int b1 = (value & 0xff00) >> 8;
+		
+		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
+			
+			//pl("" + b0);
+			dos.write(b0);
+			//pl("" + b1);
+			dos.write(b1);
+			
+		}
+		
+		else {
+		
+			//pl("" + b1);
+			dos.write(b1);
+			//pl("" + b0);
+			dos.write(b0);
 			
 		}
 		
@@ -333,7 +435,44 @@ public class Client extends DicomByteOrderable {
 		//pl("Size: " + this.dataOutputStream.size());
 		
 	}
-    
+	
+	public void writeUInt32(int value, DataOutputStream dos) throws IOException {
+		
+		int b0 = value & 0x000000ff; //masking out 24 bits
+		int b1 = (value & 0x0000ff00) >> 8;
+		int b2 = (value & 0x00ff0000) >> 16;
+		int b3 = (value & 0xff000000) >> 24;
+		
+		if(this.byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
+			
+			//pl("" + b0);
+			dos.write(b0);
+			//pl("" + b1);
+			dos.write(b1);
+			//pl("" + b2);
+			dos.write(b2);
+			//pl("" + b3);
+			dos.write(b3);
+			
+		}
+		
+		else {
+			
+			//pl("" + b3);
+			dos.write(b3);
+			//pl("" + b2);
+			dos.write(b2);
+			//pl("" + b1);
+			dos.write(b1);
+			//pl("" + b0);
+			dos.write(b0);
+			
+		}
+		
+		//pl("Size: " + this.dataOutputStream.size());
+		
+	}
+	
     public String readString(int length) throws IOException {
 		
     	byte[] byteArray = readByteArray(length);
@@ -352,6 +491,24 @@ public class Client extends DicomByteOrderable {
 	
     }
 	
+    public String readString(int length, DataInputStream dis) throws IOException {
+		
+    	byte[] byteArray = readByteArray(length, dis);
+		
+    	if (byteArray[byteArray.length-1] == 0x00) {
+		
+    		return new String(byteArray, 0, byteArray.length - 1);
+		
+    	}
+		
+    	else {
+	
+    		return new String(byteArray);
+		
+    	}	
+	
+    }
+    
 	public byte[] readByteArray(int length) throws IOException {
 	
 		byte[] buffer = new byte[length];
@@ -367,6 +524,92 @@ public class Client extends DicomByteOrderable {
 		}	
 		
 		return buffer;
+		
+	}
+	
+	public byte[] readByteArray(int length, DataInputStream dis) throws IOException {
+		
+		byte[] buffer = new byte[length];
+		
+		int totalBytesRead = 0;
+		
+		while(totalBytesRead != length) {
+		
+			totalBytesRead += dis.read(buffer, 
+					totalBytesRead, 
+					length - totalBytesRead);
+		
+		}	
+		
+		return buffer;
+		
+	}
+	
+	public byte[] readByteArray(int length, int start) throws IOException {
+		
+		byte[] buffer = new byte[length];
+		
+		int totalBytesRead = start;
+		
+		if (length > start) {
+		
+			while(totalBytesRead != length) {
+			
+				totalBytesRead += this.dataInputStream.read(buffer, 
+						totalBytesRead, 
+						length - totalBytesRead);
+			
+			}	
+		
+		}
+		
+		return buffer;
+		
+	}
+	
+	public byte[] readByteArray(int length, int start, DataInputStream dis) throws IOException {
+		
+		byte[] buffer = new byte[length];
+		
+		int totalBytesRead = start;
+		
+		if (length > start) {
+		
+			while(totalBytesRead != length) {
+			
+				totalBytesRead += dis.read(buffer, 
+						totalBytesRead, 
+						length - totalBytesRead);
+			
+			}	
+		
+		}
+		
+		return buffer;
+		
+	}
+	
+	public byte readByte() throws IOException {
+		
+		return this.dataInputStream.readByte();
+		
+	}
+	
+	public int readInt() throws IOException {
+		
+		return this.dataInputStream.readInt();
+		
+	}
+	
+	public void skip(long l) throws IOException {
+		
+		this.dataInputStream.skip(l);
+		
+	}
+	
+	public void skipBytes(int n) throws IOException {
+		
+		this.dataInputStream.skipBytes(n);
 		
 	}
 	
@@ -529,6 +772,14 @@ public class Client extends DicomByteOrderable {
 
 	public void setRequestRejected(boolean requestRejected) {
 		this.requestRejected = requestRejected;
+	}
+
+	public int getSkip() {
+		return skip;
+	}
+
+	public void setSkip(int skip) {
+		this.skip = skip;
 	}
 
 	private void pl(String s) { System.out.println(s); }

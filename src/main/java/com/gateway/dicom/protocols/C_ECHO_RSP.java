@@ -36,6 +36,8 @@ public class C_ECHO_RSP implements Serializable {
 		this.commandGroupLength = new DataElement(0x0000, 0x0000, "UL", 1, "" + this.elementLength);
 		
 	}
+	
+	public C_ECHO_RSP() {}
 
 	public DataElement getCommandGroupLength() {
 		return commandGroupLength;

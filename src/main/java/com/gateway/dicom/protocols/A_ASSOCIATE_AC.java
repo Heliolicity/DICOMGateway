@@ -1,6 +1,7 @@
 package com.gateway.dicom.protocols;
 
 import java.io.ByteArrayOutputStream;
+import java.util.List;
 
 import com.gateway.dicom.entities.ApplicationContext;
 import com.gateway.dicom.entities.PresentationContext_AC;
@@ -13,18 +14,18 @@ public class A_ASSOCIATE_AC extends PDU {
 	//private int pduLength; //4 bytes in length
 	private int protocolVersion = 0x0000; //2 bytes in length
 	private ApplicationContext applicationContext;
-	private PresentationContext_AC presentationContext;
+	private List<PresentationContext_AC> presentationContexts;
 	private UserInformation userInformation;
 	private ByteArrayOutputStream stream;
 	
 	public A_ASSOCIATE_AC() {}
 	
 	public A_ASSOCIATE_AC(byte pduType, ApplicationContext applicationContext, 
-			PresentationContext_AC presentationContext, UserInformation userInformation) {
+			List<PresentationContext_AC> presentationContexts, UserInformation userInformation) {
 		super();
 		this.pduType = pduType;
 		this.applicationContext = applicationContext;
-		this.presentationContext = presentationContext;
+		this.presentationContexts = presentationContexts;
 		this.userInformation = userInformation;
 	}
 
@@ -68,12 +69,12 @@ public class A_ASSOCIATE_AC extends PDU {
 		this.applicationContext = applicationContext;
 	}
 
-	public PresentationContext_AC getPresentationContext() {
-		return presentationContext;
+	public List<PresentationContext_AC> getPresentationContexts() {
+		return presentationContexts;
 	}
 
-	public void setPresentationContext(PresentationContext_AC presentationContext) {
-		this.presentationContext = presentationContext;
+	public void setPresentationContexts(List<PresentationContext_AC> presentationContexts) {
+		this.presentationContexts = presentationContexts;
 	}
 
 	public UserInformation getUserInformation() {
