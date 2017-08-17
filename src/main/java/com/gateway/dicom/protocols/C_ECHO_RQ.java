@@ -23,7 +23,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 	private int byteOrdering;
 	private int command = 3;
 
-	public C_ECHO_RQ(short id, String sopID) {
+	public C_ECHO_RQ(int id, String sopID) {
 		
 		this.sopID = sopID;
 		
@@ -51,7 +51,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.messageID.setElementNumber(0x0110);
 		this.messageID.setValueRepresentation("US");
 		//this.messageID.setElementData("" + id);
-		this.messageID.setShrElementData(id);
+		//this.messageID.setShrElementData(id);
 		this.messageID.setIntElementData(id);
 		this.messageID.setElementLength(2);
 		//this.messageID.writeToBuffer();
@@ -76,7 +76,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 	} 
 
 	
-	public C_ECHO_RQ(short id) {
+	public C_ECHO_RQ(int id) {
 		
 		this.affectedServiceClassUID = new DataElement();
 		this.affectedServiceClassUID.setByteOrder(this.byteOrdering);
@@ -102,7 +102,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.messageID.setElementNumber(0x0110);
 		this.messageID.setValueRepresentation("US");
 		//this.messageID.setElementData("" + id);
-		this.messageID.setShrElementData(id);
+		//this.messageID.setShrElementData(id);
 		this.messageID.setIntElementData(id);
 		this.messageID.setElementLength(2);
 		//this.messageID.writeToBuffer();

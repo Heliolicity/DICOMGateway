@@ -166,25 +166,63 @@ public class Engine {
     				    							//this.requestBuilt = this.buildDataTFResponse();
     				    							this.requestBuilt = this.buildEchoResponse();
     				    							
-    				    							if (this.requestBuilt) pl("C-ECHO was successful");
-    				    							else pl("C-ECHO was not successful");
+    				    							if (this.requestBuilt) {
+    				    								
+    				    								pl("C-ECHO was successful");
+    				    								this.requestAcknowledged = true;
+    				    								
+    				    								pl("Send A-RELEASE-RQ Y/N?");
+    				    				    			input = this.keyboard.nextLine().toUpperCase();
+    				    								
+    				    				    			if (input.equals("Y")) {
+    				    				    				
+    				    				    				this.requestBuilt = this.buildReleaseRequest();
+    				    				    				
+    				    				    				if (this.requestBuilt) {
+    				    				    					
+    				    				    					this.requestSent = this.sendReleaseRequest();
+    				    				    					
+    				    				    					if (this.requestSent) {
+    				    				    						
+    				    				    						pl("Sucessfully sent A-RELEASE-RQ");
+    				    				    						
+    				    				    					}
+    				    				    					
+    				    				    					else {
+    				    				    						
+    				    				    						pl("There was a problem sending A-RELEASE-RQ");
+        				    				    					System.exit(0);
+    				    				    						
+    				    				    					}
+    				    				    					
+    				    				    				}
+    				    				    				
+    				    				    				else {
+    				    				    					
+    				    				    					pl("There was a problem building A-RELEASE-RQ");
+    				    				    					System.exit(0);
+    				    				    					
+    				    				    				}
+    				    				    				
+    				    				    			}
+    				    				    			
+    				    				    			else {
+    				    				    				
+    				    				    				pl("Exiting programme");
+    				    				    				System.exit(0);
+    				    				    				
+    				    				    			}
+    				    				    			
+    				    							}
+    				    							
+    				    							else {
+    				    								
+    				    								pl("C-ECHO was not successful");
+    				    								System.exit(0);
+    				    								
+    				    							}
     				    							
     				    						}
-    				    						
-    				    						/*if (type == this.C_ECHO_RSP_PDU_TYPE) {
-    				    							
-    				    							pl("C-ECHO-RQ acknowledged");
-    				    							this.dataReceived = true;
-    				    							this.requestAcknowledged = true;
-    				    							this.client.skip(1);
-    				    							length = this.client.readInt();
-    				    							pl("PDU length: " + length);
-    				    							this.receivedData = this.client.readByteArray(length);
-    				    							this.requestBuilt = this.buildEchoResponse();
-    				    							
-    				    							
-    				    							
-    				    						}*/
     				    						
     				    					}
     				    					
@@ -1113,7 +1151,7 @@ public class Engine {
     public boolean buildEchoRequest() {
     	
     	boolean retval = false;
-    	short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
+    	int randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
     	this.echoRequest = new C_ECHO_RQ(randomNum);
     	this.messageID = this.echoRequest.getMessageID().getIntElementData();
     	retval = true;
@@ -1584,12 +1622,17 @@ public class Engine {
     		pl("Command: " + this.echoResponse.getCommandField().getIntElementData());
     		pl("Status: " + this.echoResponse.getStatus().getIntElementData());
     		
-    		if ((this.echoResponse.getMessageIDBeingRespondedTo().getIntElementData() == this.messageID && 
+    		/*if ((this.echoResponse.getMessageIDBeingRespondedTo().getIntElementData() == this.messageID && 
 				(this.echoResponse.getCommandField().getIntElementData() == 32816) && 
 				(this.echoResponse.getStatus().getIntElementData() == 0))) 
     				
-    			retval = true;
+    			retval = true;*/
     		
+    		if ((this.echoResponse.getCommandField().getIntElementData() == 32816) && 
+				(this.echoResponse.getStatus().getIntElementData() == 0))
+    		
+				retval = true;
+
     		else retval = false;
     		
     	}
@@ -2037,6 +2080,7 @@ public class Engine {
     	try {
     	
     		this.client.writeByte(this.releaseRequestRQ.getPduType());
+    		pl("Release PDU Type: " + this.releaseRequestRQ.getPduType());
     		this.client.writeByte(this.releaseRequestRQ.getReserved());
     		this.client.writeInt(this.releaseRequestRQ.getPduLength());
     		
