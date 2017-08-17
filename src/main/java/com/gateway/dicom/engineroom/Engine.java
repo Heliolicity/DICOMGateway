@@ -46,6 +46,7 @@ public class Engine {
     private A_RELEASE_RP releaseRequestRP = null;
     private A_ABORT abortRQ = null;
     private P_DATA_TF dataTF = null;
+    private P_DATA_TF dataTFResponse = null;
     private ImplementationVersionNameSubItem impName;
     private ImplementationClassUIDSubItem impUID;
     private MaximumLengthSubItem maxLen;
@@ -71,6 +72,7 @@ public class Engine {
     
     private final byte A_ASSOCIATE_AC_PDU_TYPE = 0x02;
     private final byte A_ASSOCIATE_RJ_PDU_TYPE = 0x03;
+    private final byte P_DATA_TF_PDU_TYPE = 0x04;
     private final byte C_ECHO_RSP_PDU_TYPE = 0x04;
     
     private DataInputStream dataInputStream;
@@ -124,68 +126,8 @@ public class Engine {
     							if (! this.requestBuilt) {
     								
     								pl("There was a problem building the A-ASSOCIATE-AC\nDo you wish to continue Y/N?");
-    				    			input = this.keyboard.nextLine().toUpperCase();
-    								
-    				    			if (input.equals("Y")) {
-    				    				
-    				    				pl("Select from the following options\n\n1 - Send C-ECHO-RQ\n2 - Send C-STORE-RQ");
-        				    			input = this.keyboard.nextLine().toUpperCase();
-        				    			
-        				    			if (input.equals("1")) {
-        				    				
-        				    				this.requestBuilt = this.buildDataTF(1);
-        				    				
-        				    				if (this.requestBuilt) {
-        				    					
-        				    					this.requestSent = this.sendDataTF();
-        				    					
-        				    					if (this.requestSent) {
-        				    						
-        				    						pl("Successfully sent P-DATA-TF C-ECHO-RQ");
-        				    						
-        				    						type = this.client.readByte();
-        				    						pl("PDU type received: " + type);
-
-        				    						
-        				    					}
-        				    					
-        				    					else {
-        				    						
-        				    						pl("There was a problem sending P-DATA-TF C-ECHO-RQ");
-        				    						
-        				    					}
-        				    					
-        				    				}
-        				    				
-        				    				else {
-        				    					
-        				    					pl("There was a problem building P-DATA-TF C-ECHO-RQ - Exiting");
-        				    					System.exit(0);
-        				    					
-        				    				}
-        				    				
-        				    			}
-        				    			
-        				    			else if (input.equals("2")) {
-        				    				
-        				    			}
-        				    			
-        				    			else {
-        				    				
-        				    				pl("Not a valid choice - Exiting programme");
-        				    				System.exit(0);
-        				    				
-        				    			}
-    				    				
-    				    			}
-    				    			
-    				    			else {
-    				    				
-    				    				pl("Exiting");
-    				    				System.exit(0);
-    				    				
-    				    			}
-    				    			
+    				    			System.exit(0);
+    								    				    			
     							}
     							
     							else {
@@ -207,7 +149,22 @@ public class Engine {
     				    						type = this.client.readByte();
     				    						pl("PDU type received: " + type);
     				    						
-    				    						if (type == this.C_ECHO_RSP_PDU_TYPE) {
+    				    						if (type == this.P_DATA_TF_PDU_TYPE) {
+    				    							
+    				    							pl("Received a P-DATA-TF in response");
+    				    							this.dataTFResponse = new P_DATA_TF();
+    				    							this.dataTFResponse.setPduType(type);
+    				    							this.dataReceived = true;
+    				    							this.client.skip(1);
+    				    							length = this.client.readInt();
+    				    							this.dataTFResponse.setPduLength(length);
+    				    							pl("PDU length: " + length);
+    				    							this.receivedData = this.client.readByteArray(length);
+    				    							this.requestBuilt = this.buildDataTFResponse();
+    				    							
+    				    						}
+    				    						
+    				    						/*if (type == this.C_ECHO_RSP_PDU_TYPE) {
     				    							
     				    							pl("C-ECHO-RQ acknowledged");
     				    							this.dataReceived = true;
@@ -218,7 +175,9 @@ public class Engine {
     				    							this.receivedData = this.client.readByteArray(length);
     				    							this.requestBuilt = this.buildEchoResponse();
     				    							
-    				    						}
+    				    							
+    				    							
+    				    						}*/
     				    						
     				    					}
     				    					
@@ -1144,127 +1103,6 @@ public class Engine {
     	
     }
     
-    public boolean sendAssociateRequest() {
-    	
-    	boolean retval = false;
-    	
-    	try {
-    	
-    		//this.client.write(arr1);
-    		//this.client.writeUInt32(len);
-    		//this.client.write(arr2);
-    		this.client.writeByte(this.associateRequestRQ.getPduType());
-    		this.client.writeByte(this.associateRequestRQ.getReserved());
-    		this.client.writeUInt32(this.associateRequestRQ.getPduLength());
-    		this.client.write(this.associateRequestRQ.getBuffer().toByteArray());
-    		
-			this.client.flush();
-			
-    		pl("Successfully sent A-ASSOCIATE-RQ");
-			retval = true;
-    	
-        } 
-    	
-        catch (Exception e) {   
-        	
-        	pl("EXCEPTION: " + e.getMessage());
-        	e.printStackTrace();
-        	retval = false;
-            
-        }	
-    		
-    	return retval;
-    	
-    }
-    
-    public boolean sendReleaseRequest() { 
-    	
-    	boolean retval = false;
-    	
-    	try {
-    	
-    		this.client.writeByte(this.releaseRequestRQ.getPduType());
-    		this.client.writeByte(this.releaseRequestRQ.getReserved());
-    		this.client.writeInt(this.releaseRequestRQ.getPduLength());
-    		
-    		for (int i = 0; i < 4; i ++) this.client.writeByte(this.releaseRequestRQ.getReserved());
-    		
-    		this.client.flush();
-    		
-    		retval = true;
-    		
-    	}
-    	
-    	catch (Exception e) {   
-        	
-        	pl("EXCEPTION: " + e.getMessage());
-        	e.printStackTrace();
-        	retval = false;
-            
-        }
-    	
-    	return retval;
-    	
-    }
-    
-    public boolean sendDataTF() {
-    	
-    	byte[] arr;
-    	boolean retval = false;
-    	
-    	try {
-    		
-    		this.client.write(this.dataTF.getBuffer().toByteArray());
-    		this.client.flush();
-    		
-    		retval = true;
-    		
-    	}
-    	
-    	catch (Exception e) {   
-        	
-        	pl("EXCEPTION: " + e.getMessage());
-        	e.printStackTrace();
-        	retval = false;
-            
-        }	
-    	
-    	return retval;
-    	
-    }
-    
-    public boolean sendAbortRequest() {
-    	
-    	boolean retval = false;
-    	
-    	try {
-    	
-    		this.client.writeByte(this.abortRQ.getPduType());
-    		this.client.writeByte(this.abortRQ.getReserved());
-    		this.client.writeInt(this.abortRQ.getPduLength());
-    		this.client.writeByte(this.abortRQ.getReserved());
-    		this.client.writeByte(this.abortRQ.getReserved());
-    		this.client.writeByte(this.abortRQ.getSource());
-    		this.client.writeByte(this.abortRQ.getReason());
-    		
-    		this.client.flush();
-    		
-    		retval = true;
-    		
-    	}
-    	
-    	catch (Exception e) {   
-        	
-        	pl("EXCEPTION: " + e.getMessage());
-        	e.printStackTrace();
-        	retval = false;
-            
-        }	
-    	
-    	return retval;
-    	
-    }
-    
     public boolean buildEchoRequest() {
     	
     	boolean retval = false;
@@ -1275,14 +1113,135 @@ public class Engine {
     	
     }
     
-    public boolean buildEchoResponse() {
+    public boolean buildEchoResponse(byte[] arr, int byteOrder) {
     	
     	boolean retval = false;
+    	int m = 0;
+    	int n = 0;
+    	int length = 0;
+    	int intData = 0;
+    	int pos = 0;
+    	DataElement commandGroupLength;
+    	DataElement affectedSOPClassUID;
+    	DataElement commandField;
+    	byte[] subData;
+    	String s = "";
     	
-    	if ((this.receivedData != null) && (this.isRequestAcknowledged() == true)) {
+    	if (arr != null) {
     		
     		this.echoResponse = new C_ECHO_RSP();
     		
+    		switch(byteOrder) {
+        	
+	        	case 1 : //Implicit VR Little Endian - read array from right to left
+	        		m = this.convertBytesToInt(arr[1], arr[0]);
+	        		n = this.convertBytesToInt(arr[3], arr[2]);
+	        		length = this.convertBytesToInt(arr[7], arr[6], arr[5], arr[4]);
+	        		intData = this.convertBytesToInt(arr[11], arr[10], arr[9], arr[8]);
+	        		break;
+	        	case 2 : //Implicit VR Big Endian - read array from left to right
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		intData = this.convertBytesToInt(arr[8], arr[9], arr[10], arr[11]);
+	        		break;
+	        	default : 
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		intData = this.convertBytesToInt(arr[8], arr[9], arr[10], arr[11]);
+	        		break;
+        		
+        	}
+
+    		commandGroupLength = new DataElement();
+    		commandGroupLength.setGroupNumber(m);
+    		commandGroupLength.setElementNumber(n);
+    		commandGroupLength.setElementLength(length);
+    		commandGroupLength.setIntElementData(intData);
+    		
+    		arr = Arrays.copyOfRange(arr, 12, arr.length);
+    		
+    		/*for (int a = 0; a < arr.length; a ++) 
+    			
+    			pl("" + arr[a]);*/
+    		
+    		switch(byteOrder) {
+        	
+	        	case 1 : //Implicit VR Little Endian - read array from right to left
+	        		m = this.convertBytesToInt(arr[1], arr[0]);
+	        		n = this.convertBytesToInt(arr[3], arr[2]);
+	        		length = this.convertBytesToInt(arr[7], arr[6], arr[5], arr[4]);
+	        		break;
+	        	case 2 : //Implicit VR Big Endian - read array from left to right
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		break;
+	        	default : 
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		break;
+	    		
+    		}
+    		
+    		affectedSOPClassUID = new DataElement();
+    		affectedSOPClassUID.setGroupNumber(m);
+    		affectedSOPClassUID.setElementNumber(n);
+    		affectedSOPClassUID.setElementLength(length);
+    		
+    		if (length % 2 == 0) pos = 7 + length; 
+    		else pos = 8 + length;
+    			
+    		subData = Arrays.copyOfRange(arr, 8, pos);
+    		
+    		s = new String(subData);
+    		affectedSOPClassUID.setElementData(s);
+    		
+    		/*for (int a = 0; a < subData.length; a ++) 
+    			
+    			pl("" + subData[a]);*/
+    		
+    		arr = Arrays.copyOfRange(arr, pos + 1, arr.length);
+    		
+    		/*for (int a = 0; a < arr.length; a ++) 
+    			
+    			pl("" + arr[a]);*/
+    		
+    		switch(byteOrder) {
+        	
+	        	case 1 : //Implicit VR Little Endian - read array from right to left
+	        		m = this.convertBytesToInt(arr[1], arr[0]);
+	        		n = this.convertBytesToInt(arr[3], arr[2]);
+	        		length = this.convertBytesToInt(arr[7], arr[6], arr[5], arr[4]);
+	        		intData = this.convertBytesToInt(arr[9], arr[8]);
+	        		pl("" + arr[9]);
+	        		pl("" + arr[8]);
+	        		pl("" + intData);
+	        		int test = arr[9];
+	        		pl("" + test);
+	        		break;
+	        	case 2 : //Implicit VR Big Endian - read array from left to right
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		intData = this.convertBytesToInt(arr[8], arr[9]);
+	        		break;
+	        	default : 
+	        		m = this.convertBytesToInt(arr[0], arr[1]);
+	        		n = this.convertBytesToInt(arr[2], arr[3]);
+	        		length = this.convertBytesToInt(arr[4], arr[5], arr[6], arr[7]);
+	        		intData = this.convertBytesToInt(arr[8], arr[9]);
+	        		break;
+	    		
+			}
+    		
+    		commandField = new DataElement();
+    		commandField.setGroupNumber(m);
+    		commandField.setElementNumber(0x0100);
+    		commandField.setElementLength(length);
+    		commandField.setIntElementData(intData);
     		
     	}
     	
@@ -1498,6 +1457,36 @@ public class Engine {
     	
     }
     
+    public boolean buildDataTFResponse() {
+    	
+    	boolean retval = false;
+    	byte b1;
+    	byte b2;
+    	int length;
+    	PresentationDataValue pdv;
+    	int n = 0;
+    	int pid = 0;
+    	byte[] arr;
+    	
+    	/*for (int a = 0; a < this.receivedData.length; a ++) 
+    		
+    		pl("" + this.receivedData[a]);*/
+    	
+	    length = this.convertBytesToInt(this.receivedData[0], this.receivedData[1], this.receivedData[2], this.receivedData[3]);
+    	pdv = new PresentationDataValue();
+    	pdv.setItemLength(length);
+    	pid = this.receivedData[4];
+    	pdv.setPresentationContextID(pid);
+    	n = this.receivedData[5];
+    	pdv.setMessageControlHeader(n);
+    	arr = Arrays.copyOfRange(this.receivedData, 6, this.receivedData.length);
+    	
+    	this.buildEchoResponse(arr, pid);
+	    
+    	return retval;
+    	
+    }
+    
     public boolean buildAbortRequest() {
     	
     	boolean retval = false;
@@ -1511,6 +1500,127 @@ public class Engine {
     	this.abortRQ = new A_ABORT(type, source, reason);
     	
     	retval = true;
+    	return retval;
+    	
+    }
+    
+    public boolean sendAssociateRequest() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		//this.client.write(arr1);
+    		//this.client.writeUInt32(len);
+    		//this.client.write(arr2);
+    		this.client.writeByte(this.associateRequestRQ.getPduType());
+    		this.client.writeByte(this.associateRequestRQ.getReserved());
+    		this.client.writeUInt32(this.associateRequestRQ.getPduLength());
+    		this.client.write(this.associateRequestRQ.getBuffer().toByteArray());
+    		
+			this.client.flush();
+			
+    		pl("Successfully sent A-ASSOCIATE-RQ");
+			retval = true;
+    	
+        } 
+    	
+        catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    		
+    	return retval;
+    	
+    }
+    
+    public boolean sendReleaseRequest() { 
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		this.client.writeByte(this.releaseRequestRQ.getPduType());
+    		this.client.writeByte(this.releaseRequestRQ.getReserved());
+    		this.client.writeInt(this.releaseRequestRQ.getPduLength());
+    		
+    		for (int i = 0; i < 4; i ++) this.client.writeByte(this.releaseRequestRQ.getReserved());
+    		
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }
+    	
+    	return retval;
+    	
+    }
+    
+    public boolean sendDataTF() {
+    	
+    	byte[] arr;
+    	boolean retval = false;
+    	
+    	try {
+    		
+    		this.client.write(this.dataTF.getBuffer().toByteArray());
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    	
+    	return retval;
+    	
+    }
+    
+    public boolean sendAbortRequest() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+    	
+    		this.client.writeByte(this.abortRQ.getPduType());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeInt(this.abortRQ.getPduLength());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeByte(this.abortRQ.getReserved());
+    		this.client.writeByte(this.abortRQ.getSource());
+    		this.client.writeByte(this.abortRQ.getReason());
+    		
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }	
+    	
     	return retval;
     	
     }
@@ -1703,6 +1813,21 @@ public class Engine {
 		this.dataReceived = dataReceived;
 	}
 
+	private int convertBytesToInt(byte b1, byte b2) {
+		
+	    int retval = ((0xFF & b1) << 8) | (0xFF & b2);
+		return retval;
+		
+	}
+	
+	private int convertBytesToInt(byte b1, byte b2, byte b3, byte b4) {
+		
+		int retval = ((0xFF & b1) << 24) | ((0xFF & b2) << 16) |
+	            ((0xFF & b3) << 8) | (0xFF & b4);
+		return retval;
+		
+	}
+	
 	private void p(String s) { System.out.print(s); }
 	
 	private void pl() { System.out.println(); }
