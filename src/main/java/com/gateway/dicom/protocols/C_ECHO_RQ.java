@@ -52,8 +52,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.messageID.setValueRepresentation("US");
 		//this.messageID.setElementData("" + id);
 		this.messageID.setShrElementData(id);
-		short a = 3;
-		this.messageID.setShrElementData(a);
+		this.messageID.setIntElementData(id);
 		this.messageID.setElementLength(2);
 		//this.messageID.writeToBuffer();
 		
@@ -104,8 +103,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 		this.messageID.setValueRepresentation("US");
 		//this.messageID.setElementData("" + id);
 		this.messageID.setShrElementData(id);
-		short a = 3;
-		this.messageID.setShrElementData(a);
+		this.messageID.setIntElementData(id);
 		this.messageID.setElementLength(2);
 		//this.messageID.writeToBuffer();
 		

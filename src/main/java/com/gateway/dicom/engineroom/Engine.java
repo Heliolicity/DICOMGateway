@@ -37,6 +37,7 @@ import com.gateway.dicom.entities.UserInformation;
 
 public class Engine {
 
+	private Client client;
     private C_ECHO_RQ echoRequest = null;
     private C_ECHO_RSP echoResponse = null;
     private A_ASSOCIATE_RQ associateRequestRQ = null;
@@ -50,6 +51,7 @@ public class Engine {
     private ImplementationVersionNameSubItem impName;
     private ImplementationClassUIDSubItem impUID;
     private MaximumLengthSubItem maxLen;
+    private int messageID;
     
     private byte[] targetAssociateRQData1;
     private int targetAssociateRQDataLen;
@@ -60,9 +62,9 @@ public class Engine {
     private byte[] targetPDataTFData2;
     
     private byte[] receivedData = null;
+    private boolean requestReceived;
     private boolean requestAcknowledged;
     private boolean requestRejected;
-    private Client client;
     private boolean connected;
     private boolean requestBuilt;
     private boolean requestSent;
@@ -159,8 +161,13 @@ public class Engine {
     				    							length = this.client.readInt();
     				    							this.dataTFResponse.setPduLength(length);
     				    							pl("PDU length: " + length);
-    				    							this.receivedData = this.client.readByteArray(length);
-    				    							this.requestBuilt = this.buildDataTFResponse();
+    				    							this.dataInputStream = this.client.getDataInputStream();
+    				    							//this.receivedData = this.client.readByteArray(length);
+    				    							//this.requestBuilt = this.buildDataTFResponse();
+    				    							this.requestBuilt = this.buildEchoResponse();
+    				    							
+    				    							if (this.requestBuilt) pl("C-ECHO was successful");
+    				    							else pl("C-ECHO was not successful");
     				    							
     				    						}
     				    						
@@ -1108,7 +1115,492 @@ public class Engine {
     	boolean retval = false;
     	short randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
     	this.echoRequest = new C_ECHO_RQ(randomNum);
+    	this.messageID = this.echoRequest.getMessageID().getIntElementData();
     	retval = true;
+    	return retval;
+    	
+    }
+    
+    public boolean buildEchoResponse() {
+    	
+    	boolean retval = false;
+    	int pdvItemLength;
+    	byte pid;
+    	byte command;
+    	int m;
+    	int n;
+    	int groupNumber;
+    	int elementNumber;
+    	int elementLength;
+    	int intData;
+    	String strData;
+    	byte b1;
+    	byte b2;
+    	byte b3;
+    	byte b4;
+    	DataElement commandGroupLength;
+    	DataElement affectedSOPClassUID;
+    	DataElement commandField;
+    	DataElement messageID;
+    	DataElement dataSetType;
+    	DataElement status;
+    	byte[] arr;
+    	
+    	try {
+
+    		pdvItemLength = this.dataInputStream.readInt();
+    		pid = this.dataInputStream.readByte();
+    		command = this.dataInputStream.readByte();
+    		
+    		switch(pid) {
+        	
+	        	case 1 : //Implicit VR Little Endian - read array from right to left
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b4, b3, b2, b1);
+	        		
+	        		commandGroupLength = new DataElement();
+	        		commandGroupLength.setGroupNumber(groupNumber);
+	        		commandGroupLength.setElementNumber(elementNumber);
+	        		commandGroupLength.setElementLength(elementLength);
+	        		commandGroupLength.setIntElementData(intData);
+	        		//pl("Command Group Length Group Number: " + groupNumber);
+	        		//pl("Command Group Length Element Number: " + elementNumber);
+	        		//pl("Command Group Length Element Length: " + elementLength);
+	        		//pl("Command Group Length Element Data: " + intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		arr = new byte[elementLength];
+	        		
+	        		for (int a = 0; a < elementLength; a ++) 
+	        			
+	        			arr[a] = this.dataInputStream.readByte();
+	        		
+	        		strData = new String(arr);
+	        		
+	        		affectedSOPClassUID = new DataElement();
+	        		affectedSOPClassUID.setGroupNumber(groupNumber);
+	        		affectedSOPClassUID.setElementNumber(elementNumber);
+	        		affectedSOPClassUID.setElementLength(elementLength);
+	        		affectedSOPClassUID.setElementData(strData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b2, b1);
+	        		
+	        		commandField = new DataElement();
+	        		commandField.setGroupNumber(groupNumber);
+	        		commandField.setElementNumber(elementNumber);
+	        		commandField.setElementLength(elementLength);
+	        		commandField.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b2, b1);
+	        		
+	        		messageID = new DataElement();
+	        		messageID.setGroupNumber(groupNumber);
+	        		messageID.setElementNumber(elementNumber);
+	        		messageID.setElementLength(elementLength);
+	        		messageID.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b2, b1);
+	        		
+	        		dataSetType = new DataElement();
+	        		dataSetType.setGroupNumber(groupNumber);
+	        		dataSetType.setElementNumber(elementNumber);
+	        		dataSetType.setElementLength(elementLength);
+	        		dataSetType.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b2, b1);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b4, b3);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b4, b3, b2, b1);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b2, b1);
+	        		
+	        		status = new DataElement();
+	        		status.setGroupNumber(groupNumber);
+	        		status.setElementNumber(elementNumber);
+	        		status.setElementLength(elementLength);
+	        		status.setIntElementData(intData);
+	        		
+	        		break;
+	        	case 2 : //Implicit VR Big Endian - read array from left to right
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2, b3, b4);
+	        		
+	        		commandGroupLength = new DataElement();
+	        		commandGroupLength.setGroupNumber(groupNumber);
+	        		commandGroupLength.setElementNumber(elementNumber);
+	        		commandGroupLength.setElementLength(elementLength);
+	        		commandGroupLength.setIntElementData(intData);
+	        		//pl("Command Group Length Group Number: " + groupNumber);
+	        		//pl("Command Group Length Element Number: " + elementNumber);
+	        		//pl("Command Group Length Element Length: " + elementLength);
+	        		//pl("Command Group Length Element Data: " + intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		arr = new byte[elementLength];
+	        		
+	        		for (int a = 0; a < elementLength; a ++) 
+	        			
+	        			arr[a] = this.dataInputStream.readByte();
+	        		
+	        		strData = new String(arr);
+	        		
+	        		affectedSOPClassUID = new DataElement();
+	        		affectedSOPClassUID.setGroupNumber(groupNumber);
+	        		affectedSOPClassUID.setElementNumber(elementNumber);
+	        		affectedSOPClassUID.setElementLength(elementLength);
+	        		affectedSOPClassUID.setElementData(strData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		commandField = new DataElement();
+	        		commandField.setGroupNumber(groupNumber);
+	        		commandField.setElementNumber(elementNumber);
+	        		commandField.setElementLength(elementLength);
+	        		commandField.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		messageID = new DataElement();
+	        		messageID.setGroupNumber(groupNumber);
+	        		messageID.setElementNumber(elementNumber);
+	        		messageID.setElementLength(elementLength);
+	        		messageID.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		dataSetType = new DataElement();
+	        		dataSetType.setGroupNumber(groupNumber);
+	        		dataSetType.setElementNumber(elementNumber);
+	        		dataSetType.setElementLength(elementLength);
+	        		dataSetType.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		status = new DataElement();
+	        		status.setGroupNumber(groupNumber);
+	        		status.setElementNumber(elementNumber);
+	        		status.setElementLength(elementLength);
+	        		status.setIntElementData(intData);
+	        		
+	        		break;
+	        	default : 
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2, b3, b4);
+	        		
+	        		commandGroupLength = new DataElement();
+	        		commandGroupLength.setGroupNumber(groupNumber);
+	        		commandGroupLength.setElementNumber(elementNumber);
+	        		commandGroupLength.setElementLength(elementLength);
+	        		commandGroupLength.setIntElementData(intData);
+	        		//pl("Command Group Length Group Number: " + groupNumber);
+	        		//pl("Command Group Length Element Number: " + elementNumber);
+	        		//pl("Command Group Length Element Length: " + elementLength);
+	        		//pl("Command Group Length Element Data: " + intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		arr = new byte[elementLength];
+	        		
+	        		for (int a = 0; a < elementLength; a ++) 
+	        			
+	        			arr[a] = this.dataInputStream.readByte();
+	        		
+	        		strData = new String(arr);
+	        		
+	        		affectedSOPClassUID = new DataElement();
+	        		affectedSOPClassUID.setGroupNumber(groupNumber);
+	        		affectedSOPClassUID.setElementNumber(elementNumber);
+	        		affectedSOPClassUID.setElementLength(elementLength);
+	        		affectedSOPClassUID.setElementData(strData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		commandField = new DataElement();
+	        		commandField.setGroupNumber(groupNumber);
+	        		commandField.setElementNumber(elementNumber);
+	        		commandField.setElementLength(elementLength);
+	        		commandField.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		messageID = new DataElement();
+	        		messageID.setGroupNumber(groupNumber);
+	        		messageID.setElementNumber(elementNumber);
+	        		messageID.setElementLength(elementLength);
+	        		messageID.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		dataSetType = new DataElement();
+	        		dataSetType.setGroupNumber(groupNumber);
+	        		dataSetType.setElementNumber(elementNumber);
+	        		dataSetType.setElementLength(elementLength);
+	        		dataSetType.setIntElementData(intData);
+	        		
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		groupNumber = this.convertBytesToInt(b1, b2);
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementNumber = this.convertBytesToInt(b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		b3 = this.dataInputStream.readByte();
+	        		b4 = this.dataInputStream.readByte();
+	        		elementLength = this.convertBytesToInt(b1, b2, b3, b4);
+	        		b1 = this.dataInputStream.readByte();
+	        		b2 = this.dataInputStream.readByte();
+	        		intData = this.convertBytesToInt(b1, b2);
+	        		
+	        		status = new DataElement();
+	        		status.setGroupNumber(groupNumber);
+	        		status.setElementNumber(elementNumber);
+	        		status.setElementLength(elementLength);
+	        		status.setIntElementData(intData);
+	        		
+	        		break;
+	    		
+    		}
+    		
+    		this.echoResponse = new C_ECHO_RSP();
+    		this.echoResponse.setCommandGroupLength(commandGroupLength);
+    		this.echoResponse.setAffectedSOPClassUID(affectedSOPClassUID);
+    		this.echoResponse.setCommandField(commandField);
+    		this.echoResponse.setMessageIDBeingRespondedTo(messageID);
+    		this.echoResponse.setCommandDataSetType(dataSetType);
+    		this.echoResponse.setStatus(status);
+    		
+    		pl("Message ID: " + this.echoResponse.getMessageIDBeingRespondedTo().getIntElementData());
+    		pl("Original Message ID: " + this.messageID);
+    		pl("Command: " + this.echoResponse.getCommandField().getIntElementData());
+    		pl("Status: " + this.echoResponse.getStatus().getIntElementData());
+    		
+    		if ((this.echoResponse.getMessageIDBeingRespondedTo().getIntElementData() == this.messageID && 
+				(this.echoResponse.getCommandField().getIntElementData() == 32816) && 
+				(this.echoResponse.getStatus().getIntElementData() == 0))) 
+    				
+    			retval = true;
+    		
+    		else retval = false;
+    		
+    	}
+    	
+    	catch (Exception e) {
+    	
+    		pl("There was a problem building the C-ECHO-RSP response");
+    		e.printStackTrace();
+    		
+    	}
+  
     	return retval;
     	
     }
@@ -1456,6 +1948,7 @@ public class Engine {
     	return retval;
     	
     }
+    
     
     public boolean buildDataTFResponse() {
     	
@@ -1811,6 +2304,14 @@ public class Engine {
 
 	public void setDataReceived(boolean dataReceived) {
 		this.dataReceived = dataReceived;
+	}
+
+	public boolean isRequestReceived() {
+		return requestReceived;
+	}
+
+	public void setRequestReceived(boolean requestReceived) {
+		this.requestReceived = requestReceived;
 	}
 
 	private int convertBytesToInt(byte b1, byte b2) {
