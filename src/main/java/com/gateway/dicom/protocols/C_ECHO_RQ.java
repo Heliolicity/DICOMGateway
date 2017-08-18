@@ -286,7 +286,7 @@ public class C_ECHO_RQ extends PDU implements Serializable {
 			this.buffer.writeUInt16(this.messageID.getGroupNumber());
 			this.buffer.writeUInt16(this.messageID.getElementNumber());
 			this.buffer.writeUInt32(this.messageID.getElementLength());
-			this.buffer.writeUInt16(this.messageID.getShrElementData());
+			this.buffer.writeUInt16(this.messageID.getIntElementData());
 			
 			this.buffer.writeUInt16(this.dataSetType.getGroupNumber());
 			this.buffer.writeUInt16(this.dataSetType.getElementNumber());

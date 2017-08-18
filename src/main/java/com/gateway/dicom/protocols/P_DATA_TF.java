@@ -85,7 +85,8 @@ public class P_DATA_TF extends PDU {
 				this.pduLength += iLen;
 				
 			}
-
+			
+			pl("PDU Length: " + this.pduLength);
 			this.buffer.writeUInt32(this.pduLength);
 			
 			for (PresentationDataValue pdv : this.presentationDataValueItems) { 
@@ -95,6 +96,7 @@ public class P_DATA_TF extends PDU {
 				this.buffer.write(pdv.getBuffer().toByteArray());
 				
 			}
+			
 		}
 		
 		catch (Exception e) {

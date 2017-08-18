@@ -10,6 +10,7 @@ import java.util.Scanner;
 
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RSP;
+import com.gateway.dicom.protocols.C_STORE_RQ;
 import com.gateway.dicom.protocols.PDU;
 import com.gateway.dicom.protocols.P_DATA_TF;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
@@ -40,6 +41,7 @@ public class Engine {
 	private Client client;
     private C_ECHO_RQ echoRequest = null;
     private C_ECHO_RSP echoResponse = null;
+    private C_STORE_RQ storeRequest = null;
     private A_ASSOCIATE_RQ associateRequestRQ = null;
     private A_ASSOCIATE_AC associateRequestAC = null;
     private A_ASSOCIATE_RJ associateRequestRJ = null;
@@ -244,6 +246,51 @@ public class Engine {
     				    			}
     				    			
     				    			else if (input.equals("2")) {
+    				    			
+    				    				this.requestBuilt = this.buildDataTF(2);
+    				    				
+    				    				if (this.requestBuilt) {
+    				    					
+    				    					this.requestSent = this.sendDataTF();
+    				    					
+    				    					if (this.requestSent) {
+    				    						
+    				    						pl();
+    				    						pl("Successfully sent P-DATA-TF C-STORE-RQ");
+    				    						System.exit(0);
+    				    						type = this.client.readByte();
+    				    						pl("PDU type received: " + type);
+    				    						
+    				    						if (type == this.P_DATA_TF_PDU_TYPE) {
+    				    							
+    				    							pl("Received a P-DATA-TF in response");
+    				    							this.dataTFResponse = new P_DATA_TF();
+    				    							this.dataTFResponse.setPduType(type);
+    				    							this.dataReceived = true;
+    				    							this.client.skip(1);
+    				    							length = this.client.readInt();
+    				    							this.dataTFResponse.setPduLength(length);
+    				    							pl("PDU length: " + length);
+    				    							this.dataInputStream = this.client.getDataInputStream();
+    				    							
+    				    						}
+    				    						
+    				    					}
+    				    					
+    				    					else {
+    				    						
+    				    						pl("There was a problem sending P-DATA-TF C-ECHO-RQ");
+    				    						
+    				    					}
+    				    					
+    				    				}
+    				    				
+    				    				else {
+    				    					
+    				    					pl("There was a problem building the P-DATA-TF C-ECHO-RQ - Exiting");
+    				    					System.exit(0);
+    				    					
+    				    				}
     				    				
     				    			}
     				    			
@@ -1751,11 +1798,7 @@ public class Engine {
 	        		n = this.convertBytesToInt(arr[3], arr[2]);
 	        		length = this.convertBytesToInt(arr[7], arr[6], arr[5], arr[4]);
 	        		intData = this.convertBytesToInt(arr[9], arr[8]);
-	        		pl("" + arr[9]);
-	        		pl("" + arr[8]);
-	        		pl("" + intData);
 	        		int test = arr[9];
-	        		pl("" + test);
 	        		break;
 	        	case 2 : //Implicit VR Big Endian - read array from left to right
 	        		m = this.convertBytesToInt(arr[0], arr[1]);
@@ -1793,6 +1836,15 @@ public class Engine {
     	
     }
     
+    public boolean buildStoreRequest() {
+    	    	
+    	boolean retval = false;
+    	this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.7", this.messageID, 0, "1.3.6.1.4.1.5962.99.1.2280943358.726300484.1363785608958.64.0");
+    	retval = true;
+    	return retval;
+    	
+    }
+    
     public boolean buildReleaseRequest() {
     	
     	boolean retval = false;
@@ -1806,7 +1858,7 @@ public class Engine {
     
     public boolean buildDataTF(int n) {
     	
-    	byte[] arr1 = {0x04, 0x00};
+    	/*byte[] arr1 = {0x04, 0x00};
     	
     	int len = 74;
     	
@@ -1887,79 +1939,251 @@ public class Engine {
     			0x00,
     			0x00,
     			0x01,
-    			0x01};
+    			0x01};*/
+    	
+    	byte[] arr1 = {0x04,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x00};
+    	
+    	int len1 = 0xa2;
+    	
+    	byte[] arr2 = {0x00,
+    			0x00,
+    			0x00};
+    	
+    	int len2 = 0x9e;
+    	
+    	byte[] arr3 = {
+    			0x01,
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x04,
+    			0x00,
+    			0x00,
+    			0x00};
+
+    	int len3 = 0x90;
+    	
+    	byte[] arr4 = {
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x02,
+    			0x00,
+    			0x1a,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x2e,
+
+    			0x38,
+    			0x34,
+    			0x30,
+    			0x2e,
+    			0x31,
+    			0x30,
+    			0x30,
+    			0x30,
+    			0x38,
+    			0x2e,
+    			0x35,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x34,
+    			0x2e,
+
+    			0x31,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x37,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x01,
+    			0x00,
+
+    			0x00,
+    			0x00,
+    			0x10,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x07,
+    			0x02,
+    			0x00,
+
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x08,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x02,
+    			0x01,
+    			0x00,
+    			0x00,
+
+    			0x00,
+    			0x10,
+    			0x3e,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x31,
+    			0x2e,
+    			0x33,
+    			0x2e,
+    			0x36,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x34,
+    			0x2e,
+
+    			0x31,
+    			0x2e,
+    			0x35,
+    			0x39,
+    			0x36,
+    			0x32,
+    			0x2e,
+    			0x39,
+    			0x39,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x32,
+    			0x38,
+    			0x30,
+
+    			0x39,
+    			0x34,
+    			0x33,
+    			0x33,
+    			0x35,
+    			0x38,
+    			0x2e,
+    			0x37,
+    			0x31,
+    			0x36,
+    			0x32,
+    			0x30,
+    			0x30,
+    			0x34,
+    			0x38,
+    			0x34,
+
+    			0x2e,
+    			0x31,
+    			0x33,
+    			0x36,
+    			0x33,
+    			0x37,
+    			0x38,
+    			0x35,
+    			0x36,
+    			0x30,
+    			0x38,
+    			0x39,
+    			0x35,
+    			0x38,
+    			0x2e,
+    			0x36,
+
+    			0x34,
+    			0x2e,
+    			0x30,
+    			0x00};
+    	
+    	/*for (int a = 0; a < arr1.length; a ++) 
+    		
+    		pl("" + arr1[a]);
+    	
+    	pl("" + len1);
+    	
+    	for (int a = 0; a < arr2.length; a ++) 
+    		
+    		p("" + arr2[a]);
+    	
+    	p("" + len2);
+    	
+    	for (int a = 0; a < arr3.length; a ++) 
+    		
+    		p("" + arr3[a]);
+    	
+    	p("" + len3);*/
+    	
+    	for (int a = 0; a < arr4.length; a ++) 
+    		
+    		p("" + arr4[a]);
+    	
+    	pl();
     	
     	boolean retval = false;
     	
     	try {
-    	
-    		this.targetPDataTFData1 = arr1;
-    		this.targetPDataTFDataLen = len;
-    		this.targetPDataTFData2 = arr2;
     		
     		byte type;
-    		
-    		//FOR NOW JUST USE C-ECHO REQUEST 
-    		//CHANGE THIS LATER SO DIFFERENT PDVS CAN BE SENT
-    		
+    		int pcID;
+    		int header;
+    		PresentationDataValue pdValue;
+			ArrayList<PresentationDataValue> pdValueItems;
+			PresentationContext_RQ presentationContext;
+			
     		switch (n) {
     		
 	    		case 1 : //C-ECHO-RQ
 	    			
 	    			type = 0x04;
 	        		
-	        		//PresentationContext_AC presentationContext = this.associateRequestAC.getPresentationContext();
-	        		PresentationContext_RQ presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
-	        		int pcID = presentationContext.getPresentationContextID();
-	        		int header = 0x03;
+	        		presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
+	        		pcID = presentationContext.getPresentationContextID();
+	        		header = 0x03;
 	        		
 	        		this.dataTF = new P_DATA_TF();
 	        		this.dataTF.setPduType(type);
 	        		
 	        		if (this.buildEchoRequest()) {
 	        		
-	        			PresentationDataValue pdValue = new PresentationDataValue(header, pcID, this.echoRequest, "C-ECHO");
-	        			ArrayList<PresentationDataValue> pdValueItems = new ArrayList<PresentationDataValue>();
+	        			pdValue = new PresentationDataValue(header, pcID, this.echoRequest, "C-ECHO");
+	        			pdValueItems = new ArrayList<PresentationDataValue>();
 	        			pdValueItems.add(pdValue);
 	        			this.dataTF.setPresentationDataValueItems(pdValueItems);
 	        			this.dataTF.writeToBuffer();
 	        			retval = true;
-	        			
-	        			/*for (int a = 0; a < this.targetPDataTFData1.length; a ++)
-	        				
-	        				p("" + this.targetPDataTFData1[a]);
-	        			
-	        			p("" + this.targetPDataTFDataLen);
-	        			
-	        			for (int b = 0; b < this.targetPDataTFData2.length; b ++)
-	        			
-	        				p("" + this.targetPDataTFData2[b]);
-	        				
-	        			pl();*/
-	        			
-	        			/*byte[] arr3 = {0x04, 0x00};
-	        			len = this.dataTF.getPduLength();
-	        			pl("LEN: " + len);
-	        			byte[] arr4 = this.dataTF.getBuffer().toByteArray();
-	        			
-	        			for (int c = 0; c < arr3.length; c ++)
-	        				
-	        				p("" + arr3[c]);
-	        			
-	        			p("" + len);
-	        			
-	        			for (int d = 0; d < arr4.length; d ++) 
-	        				
-	        				p("" + arr4[d]);
-	        			
-	        			
-	        			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
-	        			
-	        			for (int e = 0; e < arr5.length; e ++)
-	        				
-	        				p("" + arr5[e]);
-	        			*/
-	        			
 	        			
 	        		}
 	        		
@@ -1974,7 +2198,47 @@ public class Engine {
 	    			
 	    			break;
 	    			
-	    		case 2 : break;
+	    		case 2 : //C-STORE-RQ 
+	    			
+	    			type = 0x04;
+	    			
+	    			header = 0x03;
+	        		
+	        		this.dataTF = new P_DATA_TF();
+	        		this.dataTF.setPduType(type);
+	    			
+	        		if (this.buildStoreRequest()) {
+	        			
+	        			presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
+		        		pcID = presentationContext.getPresentationContextID();
+	        			pdValue = new PresentationDataValue(header, pcID, this.storeRequest, "C-STORE");
+	        			pdValueItems = new ArrayList<PresentationDataValue>();
+	        			pdValueItems.add(pdValue);
+	        			this.dataTF.setPresentationDataValueItems(pdValueItems);
+	        			this.dataTF.writeToBuffer();
+	        			retval = true;
+	        		
+	        			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
+	        	    	
+	        	    	/*for (int a = 0; a < arr5.length; a ++) 
+	        	    		
+	        	    		pl("" + arr5[a]);
+	        			*/
+	        		}
+	        		
+	        		else {
+	        			
+	        			//Problem building Store Request
+	        			pl("C-STORE-RQ was not built successfully");
+	        			retval = false;
+	        			
+	        		}
+	        		
+	    			break; 
+	    			
+	    		case 3 : //PDV Image Data
+	    			
+	    			break;
     		
     		}
     		    		

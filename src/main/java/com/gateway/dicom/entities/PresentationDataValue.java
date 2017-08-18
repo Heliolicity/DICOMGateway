@@ -76,6 +76,7 @@ public class PresentationDataValue extends DICOMItem {
 			
 			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			this.buffer.writeUInt8(this.presentationContextID);
+			pl("Presentation Context: " + this.presentationContextID);
 			
 			C_ECHO_RQ echo;
 			C_STORE_RQ store;
@@ -91,8 +92,32 @@ public class PresentationDataValue extends DICOMItem {
 					this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, echo.getCommandGroupLength().getIntElementData());
 					this.buffer.write(echo.getBuffer().toByteArray());
 					this.itemLength = this.buffer.size();
+					
 					break;
-				case "C-STORE" : break;
+					
+				case "C-STORE" : store = (C_STORE_RQ) this.pdvData;
+					pl("Command: " + store.getCommand());
+					this.buffer.writeUInt8(store.getCommand());
+					pl("Command Group Length Group Number: " + store.getCommandGroupLength().getGroupNumber());
+					this.buffer.writeUInt16(store.getCommandGroupLength().getGroupNumber());
+					pl("Command Group Length Element Number: " + store.getCommandGroupLength().getElementNumber());
+					this.buffer.writeUInt16(store.getCommandGroupLength().getElementNumber());
+					pl("Command Group Length Element Length: " + store.getCommandGroupLength().getElementLength());
+					this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, store.getCommandGroupLength().getElementLength());
+					store.writeToBuffer();
+					pl("Command Group Length Element Data: " + store.getCommandGroupLength().getIntElementData());
+					this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, store.getCommandGroupLength().getIntElementData());
+					this.buffer.write(store.getBuffer().toByteArray());
+					byte[] arr = store.getBuffer().toByteArray();
+					
+					/*for (int a = 0; a < arr.length; a ++)
+						
+						pl("" + arr[a]);
+					*/
+					this.itemLength = this.buffer.size();
+					
+					break;
+					
 				case "C-FIND" : break;
 				default : break;
 			

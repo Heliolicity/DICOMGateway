@@ -44,7 +44,7 @@ public class DicomOutputStream extends DicomByteOrder {
 	}
 	
 	public void writeUInt8(int value) throws IOException {
-		//pl("" + value);
+		pl("" + value);
 		outputStream.write(value);
 	}
 	
@@ -54,42 +54,42 @@ public class DicomOutputStream extends DicomByteOrder {
 	
 	public void writeUInt16(int byteOrdering, int value) throws IOException {
 		if(byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
-			//pl("HERE 1");
+			pl("HERE 1");
 			outputStream.write(value&0xff);
-			//pl("" + (value&0xff));
+			pl("" + (value&0xff));
 			outputStream.write((value>>8)&0xff);
-			//pl("" + ((value>>8)&0xff));
+			pl("" + ((value>>8)&0xff));
 		}
 		else {
-			//pl("HERE 2");
+			pl("HERE 2");
 			outputStream.write((value>>24)&0xff);
-			//pl("" + ((value>>24)&0xff));
+			pl("" + ((value>>24)&0xff));
 			outputStream.write((value>>16)&0xff);
-			//pl("" + ((value>>16)&0xff));
+			pl("" + ((value>>16)&0xff));
 		}
 	}
 	
 	public void writeUInt32(int byteOrdering, int value) throws IOException {
 		if(byteOrdering == BYTE_ORDERING_LITTLE_ENDIAN) {
-			//pl("HERE 1");
+			pl("HERE 1");
 			outputStream.write(value&0xff);
-			//pl("" + (value&0xff));
+			pl("" + (value&0xff));
 			outputStream.write((value>>8)&0xff);
-			//pl("" + ((value>>8)&0xff));
+			pl("" + ((value>>8)&0xff));
 			outputStream.write((value>>16)&0xff);
-			//pl("" + ((value>>16)&0xff));
+			pl("" + ((value>>16)&0xff));
 			outputStream.write((value>>24)&0xff);
-			//pl("" + ((value>>24)&0xff));
+			pl("" + ((value>>24)&0xff));
 		} else {
-			//pl("HERE 2");
+			pl("HERE 2");
 			outputStream.write((value>>24)&0xff);
-			//pl("" + ((value>>24)&0xff));
+			pl("" + ((value>>24)&0xff));
 			outputStream.write((value>>16)&0xff);
-			//pl("" + ((value>>16)&0xff));
+			pl("" + ((value>>16)&0xff));
 			outputStream.write((value>>8)&0xff);
-			//pl("" + ((value>>8)&0xff));
+			pl("" + ((value>>8)&0xff));
 			outputStream.write(value&0xff);
-			//pl("" + (value&0xff));
+			pl("" + (value&0xff));
 		}
 	}
 	
