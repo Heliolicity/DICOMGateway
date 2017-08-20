@@ -6,12 +6,14 @@ import java.net.Socket;
 import java.util.Scanner;
 
 import com.gateway.dicom.client.Client;
+import com.gateway.dicom.imagetypes.DicomImageGenerator;
 import com.gateway.dicom.server.Server;
 
 public class TestMain {
 
 	private static Client client = null;
 	private static Engine engine = null;
+	private static DicomImageGenerator generator = null;
 	
 	public static void main(String args[]) {
 		
@@ -49,7 +51,8 @@ public class TestMain {
 				//client = new Client(host, 104);
 				//host = "192.168.1.81";
 				//client = new Client(host, 4242);
-				engine = new Engine(client);
+				generator = new DicomImageGenerator("CTData.raw");
+				engine = new Engine(client, generator);
 				engine.run();
 				
 				/*pl("Do you wish to connect?");

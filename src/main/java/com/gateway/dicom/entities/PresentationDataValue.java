@@ -3,6 +3,7 @@ package com.gateway.dicom.entities;
 import com.gateway.dicom.lib.DicomOutputBuffer;
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.protocols.C_STORE_RQ;
+import com.gateway.dicom.protocols.ImagePacket;
 import com.gateway.dicom.protocols.PDU;
 
 public class PresentationDataValue extends DICOMItem {
@@ -80,6 +81,7 @@ public class PresentationDataValue extends DICOMItem {
 			
 			C_ECHO_RQ echo;
 			C_STORE_RQ store;
+			ImagePacket packet;
 			
 			switch(this.dimse) {
 			
@@ -118,6 +120,13 @@ public class PresentationDataValue extends DICOMItem {
 					
 					break;
 					
+				case "IMAGE_PACKET" : packet = (ImagePacket) this.pdvData;
+					this.buffer.writeUInt8(this.messageControlHeader);
+					this.buffer.write(packet.getPacketData());
+					this.itemLength = this.buffer.size();
+					
+					break;
+					
 				case "C-FIND" : break;
 				default : break;
 			
@@ -134,6 +143,5 @@ public class PresentationDataValue extends DICOMItem {
 		}
 		
 	}
-
 
 }

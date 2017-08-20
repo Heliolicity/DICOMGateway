@@ -92,6 +92,7 @@ public class P_DATA_TF extends PDU {
 			for (PresentationDataValue pdv : this.presentationDataValueItems) { 
 			
 				//CHANGE THIS IF MORE THAN ONE PDV
+				pl("PDV Length: " + pdv.getItemLength());
 				this.buffer.writeUInt32(pdv.getItemLength());
 				this.buffer.write(pdv.getBuffer().toByteArray());
 				

@@ -11,6 +11,7 @@ import java.util.Scanner;
 import com.gateway.dicom.protocols.C_ECHO_RQ;
 import com.gateway.dicom.protocols.C_ECHO_RSP;
 import com.gateway.dicom.protocols.C_STORE_RQ;
+import com.gateway.dicom.protocols.ImagePacket;
 import com.gateway.dicom.protocols.PDU;
 import com.gateway.dicom.protocols.P_DATA_TF;
 import com.gateway.dicom.protocols.A_ASSOCIATE_RQ;
@@ -35,13 +36,16 @@ import com.gateway.dicom.entities.PresentationDataValue;
 import com.gateway.dicom.entities.SCPSCURoleSelectionNegotiationSubItem;
 import com.gateway.dicom.entities.TransferSyntax;
 import com.gateway.dicom.entities.UserInformation;
+import com.gateway.dicom.imagetypes.DicomImageGenerator;
 
 public class Engine {
 
 	private Client client;
+	private DicomImageGenerator imageGenerator;
     private C_ECHO_RQ echoRequest = null;
     private C_ECHO_RSP echoResponse = null;
     private C_STORE_RQ storeRequest = null;
+    private List<P_DATA_TF> imagePackets = null;
     private A_ASSOCIATE_RQ associateRequestRQ = null;
     private A_ASSOCIATE_AC associateRequestAC = null;
     private A_ASSOCIATE_RJ associateRequestRJ = null;
@@ -82,9 +86,23 @@ public class Engine {
     private DataInputStream dataInputStream;
     private DataOutputStream dataOutputStream;
     
+    private String filePath;
+    private List<String> filePaths;
+    
     public Engine() {}
     
-    public Engine(Client client) { this.client = client; }
+    public Engine(Client client) { 
+    	this.client = client; 
+    }
+    
+    public Engine(DicomImageGenerator imageGenerator) { 
+    	this.imageGenerator = imageGenerator;
+    }
+    
+    public Engine(Client client, DicomImageGenerator imageGenerator) { 
+    	this.client = client; 
+    	this.imageGenerator = imageGenerator;
+    }
     
     public void run() {
     	
@@ -257,21 +275,55 @@ public class Engine {
     				    						
     				    						pl();
     				    						pl("Successfully sent P-DATA-TF C-STORE-RQ");
-    				    						System.exit(0);
-    				    						type = this.client.readByte();
-    				    						pl("PDU type received: " + type);
+    				    						this.filePath = this.imageGenerator.getFilePath();
+    				    						this.imageGenerator.setHeight(512);
+    				    						this.imageGenerator.setWidth(512);
+    				    						this.requestBuilt = this.buildDataTF(3);
     				    						
-    				    						if (type == this.P_DATA_TF_PDU_TYPE) {
+    				    						if (this.requestBuilt) {
+    				    						
+    				    							this.requestSent = this.sendImagePackets();
     				    							
-    				    							pl("Received a P-DATA-TF in response");
-    				    							this.dataTFResponse = new P_DATA_TF();
-    				    							this.dataTFResponse.setPduType(type);
-    				    							this.dataReceived = true;
-    				    							this.client.skip(1);
-    				    							length = this.client.readInt();
-    				    							this.dataTFResponse.setPduLength(length);
-    				    							pl("PDU length: " + length);
-    				    							this.dataInputStream = this.client.getDataInputStream();
+    				    							if (this.requestSent) {
+    				    								
+    				    								pl("Successfully sent image packets");
+    				    								
+    	    				    						type = this.client.readByte();
+    	    				    						pl("HERE 1");
+    	    				    						pl("PDU type received: " + type);
+    	    				    						pl("HERE 2");
+    	    				    						
+    	    				    						if (type == this.P_DATA_TF_PDU_TYPE) {
+    	    				    							
+    	    				    							pl("Received a P-DATA-TF in response");
+    	    				    							this.dataTFResponse = new P_DATA_TF();
+    	    				    							this.dataTFResponse.setPduType(type);
+    	    				    							this.dataReceived = true;
+    	    				    							this.client.skip(1);
+    	    				    							length = this.client.readInt();
+    	    				    							this.dataTFResponse.setPduLength(length);
+    	    				    							pl("PDU length: " + length);
+    	    				    							this.dataInputStream = this.client.getDataInputStream();
+    	    				    							System.exit(0);
+    	    				    							
+    	    				    						}
+
+    				    								
+    				    							} 
+    				    							
+    				    							else {
+    				    								
+    				    								pl("There was a problem sending the image packets");
+    				    								System.exit(0);
+    				    								
+    				    							}
+    				    							
+    				    						}
+    				    						
+    				    						else {
+    				    							
+    				    							pl("There was an error building the image packets");
+    				    							System.exit(0);
     				    							
     				    						}
     				    						
@@ -2159,9 +2211,16 @@ public class Engine {
     		byte type;
     		int pcID;
     		int header;
+    		int limit;
+    		int size;
+    		int packets;
+    		int count;
     		PresentationDataValue pdValue;
 			ArrayList<PresentationDataValue> pdValueItems;
 			PresentationContext_RQ presentationContext;
+			ImagePacket imagePacket;
+			byte[] arr;
+			byte[] temp;
 			
     		switch (n) {
     		
@@ -2238,8 +2297,106 @@ public class Engine {
 	    			
 	    		case 3 : //PDV Image Data
 	    			
+	    			type = 0x04;
+	    			
+	    			presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
+	    			pcID = presentationContext.getPresentationContextID();
+	        		header = 0x00;
+	    			limit = this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive() - 4;
+
+	    			if (this.filePath != null) {
+	    				
+	    				this.imageGenerator.setFilePath(this.filePath);
+	    				this.imageGenerator.readFile();
+	    				this.imageGenerator.writeToStream();
+	    				size = this.imageGenerator.getStream().size();
+	    				pl("Size of image data: " + size);
+	    				arr = this.imageGenerator.getStream().toByteArray();
+	    				pl("Array length: " + arr.length);
+	    				
+	    				if (limit > 0) packets = size / limit;
+	    				else packets = 0;
+	    				
+	    				pl("Limit: " + limit);
+	    				pl("Packet numbers: " + packets);
+	    				
+	    				if (packets > 0 && size > 0) {
+	    					
+	    					this.imagePackets = new ArrayList<P_DATA_TF>();
+	    					
+	    					count = 0;
+	    					
+	    					for (int a = 0; a < packets; a ++) {
+	    					
+	    						pl("Round: " + a);
+	    						pl("Count: " + count);
+	    						this.dataTF = new P_DATA_TF();
+	    						this.dataTF.setPduType(type);
+		    					pdValueItems = new ArrayList<PresentationDataValue>();
+		    					imagePacket = new ImagePacket();
+	    						temp = Arrays.copyOfRange(arr, count, count + limit); 
+	    						imagePacket.setPacketData(temp);
+	    						pdValue = new PresentationDataValue(header, pcID, imagePacket, "IMAGE_PACKET");
+	    						pdValueItems.add(pdValue);
+	    						this.dataTF.setPresentationDataValueItems(pdValueItems);
+	    						this.dataTF.writeToBuffer();
+	    						this.imagePackets.add(this.dataTF);
+	    						pl("Temp size: " + temp.length);
+	    						count += limit;
+	    						pl("Count: " + count);
+	    						
+	    					}
+	    					
+	    					if (size - count > 0) {
+	    						
+	    						header = 0x02;
+	    						pl("Remaining: " + (size - count));
+	    						this.dataTF = new P_DATA_TF();
+	    						this.dataTF.setPduType(type);
+		    					pdValueItems = new ArrayList<PresentationDataValue>();
+		    					imagePacket = new ImagePacket();
+	    						temp = Arrays.copyOfRange(arr, count, arr.length);
+	    						imagePacket.setPacketData(temp);
+	    						pdValue = new PresentationDataValue(header, pcID, imagePacket, "IMAGE_PACKET");
+	    						pdValueItems.add(pdValue);
+	    						this.dataTF.setPresentationDataValueItems(pdValueItems);
+	    						this.dataTF.writeToBuffer();
+	    						this.imagePackets.add(this.dataTF);
+	    						pl("Temp size: " + temp.length);
+	    						retval = true;
+	    						
+	    					}
+	    					
+	    					pl("Number of packets to send: " + this.imagePackets.size());
+	    					
+	    				}
+	    				
+	    				else {
+	    					
+	    					pl("Could not calculate the packet amount");
+		    				System.exit(0);
+	    					
+	    				}
+	    				
+	    			} 
+	    			
+	    			else {
+	    			
+	    				pl("No file path is specified");
+	    				System.exit(0);
+	    				
+	    			}
+	    			
 	    			break;
     		
+	    		case 4 : //C-FIND
+	    			
+	    			break;
+	    			
+	    		case 5 : //C-MOVE
+	    			
+	    			break;
+	    			
     		}
     		    		
     	}
@@ -2344,7 +2501,6 @@ public class Engine {
     	try {
     	
     		this.client.writeByte(this.releaseRequestRQ.getPduType());
-    		pl("Release PDU Type: " + this.releaseRequestRQ.getPduType());
     		this.client.writeByte(this.releaseRequestRQ.getReserved());
     		this.client.writeInt(this.releaseRequestRQ.getPduLength());
     		
@@ -2421,6 +2577,36 @@ public class Engine {
         	retval = false;
             
         }	
+    	
+    	return retval;
+    	
+    }
+    
+    public boolean sendImagePackets() {
+    	
+    	boolean retval = false;
+    	
+    	try {
+        	
+    		for (P_DATA_TF imagePacket : this.imagePackets) {
+    			
+    			this.client.write(imagePacket.getBuffer().toByteArray());
+    			
+    		}
+    		
+    		this.client.flush();
+    		
+    		retval = true;
+    		
+    	}
+    	
+    	catch (Exception e) {   
+        	
+        	pl("EXCEPTION: " + e.getMessage());
+        	e.printStackTrace();
+        	retval = false;
+            
+        }
     	
     	return retval;
     	
@@ -2637,6 +2823,30 @@ public class Engine {
 		
 	}
 	
+	public DicomImageGenerator getImageGenerator() {
+		return imageGenerator;
+	}
+
+	public void setImageGenerator(DicomImageGenerator imageGenerator) {
+		this.imageGenerator = imageGenerator;
+	}
+
+	public String getFilePath() {
+		return filePath;
+	}
+
+	public void setFilePath(String filePath) {
+		this.filePath = filePath;
+	}
+
+	public List<String> getFilePaths() {
+		return filePaths;
+	}
+
+	public void setFilePaths(List<String> filePaths) {
+		this.filePaths = filePaths;
+	}
+
 	private void p(String s) { System.out.print(s); }
 	
 	private void pl() { System.out.println(); }
