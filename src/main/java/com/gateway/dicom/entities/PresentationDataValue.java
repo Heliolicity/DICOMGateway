@@ -98,16 +98,11 @@ public class PresentationDataValue extends DICOMItem {
 					break;
 					
 				case "C-STORE" : store = (C_STORE_RQ) this.pdvData;
-					pl("Command: " + store.getCommand());
 					this.buffer.writeUInt8(store.getCommand());
-					pl("Command Group Length Group Number: " + store.getCommandGroupLength().getGroupNumber());
 					this.buffer.writeUInt16(store.getCommandGroupLength().getGroupNumber());
-					pl("Command Group Length Element Number: " + store.getCommandGroupLength().getElementNumber());
 					this.buffer.writeUInt16(store.getCommandGroupLength().getElementNumber());
-					pl("Command Group Length Element Length: " + store.getCommandGroupLength().getElementLength());
 					this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, store.getCommandGroupLength().getElementLength());
 					store.writeToBuffer();
-					pl("Command Group Length Element Data: " + store.getCommandGroupLength().getIntElementData());
 					this.buffer.writeUInt32(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN, store.getCommandGroupLength().getIntElementData());
 					this.buffer.write(store.getBuffer().toByteArray());
 					byte[] arr = store.getBuffer().toByteArray();

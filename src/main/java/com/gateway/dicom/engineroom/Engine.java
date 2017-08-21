@@ -288,10 +288,11 @@ public class Engine {
     				    								
     				    								pl("Successfully sent image packets");
     				    								
+    				    								pl("HERE 1");
     	    				    						type = this.client.readByte();
-    	    				    						pl("HERE 1");
-    	    				    						pl("PDU type received: " + type);
     	    				    						pl("HERE 2");
+    	    				    						pl("PDU type received: " + type);
+    	    				    						pl("HERE 3");
     	    				    						
     	    				    						if (type == this.P_DATA_TF_PDU_TYPE) {
     	    				    							
@@ -1251,7 +1252,8 @@ public class Engine {
     	
     	boolean retval = false;
     	int randomNum = (short) (ThreadLocalRandom.current().nextInt(0, 65535) - 32768);
-    	this.echoRequest = new C_ECHO_RQ(randomNum);
+    	//this.echoRequest = new C_ECHO_RQ(randomNum);
+    	this.echoRequest = new C_ECHO_RQ(3);
     	this.messageID = this.echoRequest.getMessageID().getIntElementData();
     	retval = true;
     	return retval;
@@ -1891,7 +1893,9 @@ public class Engine {
     public boolean buildStoreRequest() {
     	    	
     	boolean retval = false;
-    	this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.7", this.messageID, 0, "1.3.6.1.4.1.5962.99.1.2280943358.726300484.1363785608958.64.0");
+    	//this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.7", this.messageID, 0, "1.3.6.1.4.1.5962.99.1.2280943358.726300484.1363785608958.64.0");
+    	this.messageID = 3;
+    	this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.2", this.messageID, 0, "1.2.826.0.1.3680043.8.1055.1.20111102150758591.03296050.69180943");
     	retval = true;
     	return retval;
     	
@@ -1910,89 +1914,6 @@ public class Engine {
     
     public boolean buildDataTF(int n) {
     	
-    	/*byte[] arr1 = {0x04, 0x00};
-    	
-    	int len = 74;
-    	
-    	byte[] arr2 = {0x00,
-    			0x00,
-    			0x00,
-    			0x46,
-    			0x01,
-    			0x03,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x04,
-    			0x00,
-    			0x00,
-    			0x00,
-
-    			0x38,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x02,
-    			0x00,
-    			0x12,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x31,
-    			0x2e,
-    			0x32,
-    			0x2e,
-
-    			0x38,
-    			0x34,
-    			0x30,
-    			0x2e,
-    			0x31,
-    			0x30,
-    			0x30,
-    			0x30,
-    			0x38,
-    			0x2e,
-    			0x21,
-    			0x2e,
-    			0x31,
-    			0x00,
-    			0x00,
-    			0x00,
-
-    			0x00,
-    			0x01,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x30,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x10,
-    			0x01,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-
-    			0x03,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x08,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x01,
-    			0x01};*/
-    	
     	byte[] arr1 = {0x04,
     			0x00,
     			0x00,
@@ -2000,13 +1921,14 @@ public class Engine {
 
     			0x00};
     	
-    	int len1 = 0xa2;
+    	int len1 = 0xa4;
     	
-    	byte[] arr2 = {0x00,
+    	byte[] arr2 = {
+    			0x00,
     			0x00,
     			0x00};
     	
-    	int len2 = 0x9e;
+    	int len2 = 0xa0;
     	
     	byte[] arr3 = {
     			0x01,
@@ -2020,7 +1942,7 @@ public class Engine {
     			0x00,
     			0x00};
 
-    	int len3 = 0x90;
+    	int len3 = 0x92;
     	
     	byte[] arr4 = {
     			0x00,
@@ -2060,7 +1982,7 @@ public class Engine {
     			0x2e,
     			0x31,
     			0x2e,
-    			0x37,
+    			0x32,
     			0x00,
     			0x00,
     			0x00,
@@ -2109,82 +2031,86 @@ public class Engine {
 
     			0x00,
     			0x10,
-    			0x3e,
+    			0x40,
     			0x00,
     			0x00,
     			0x00,
     			0x31,
     			0x2e,
-    			0x33,
+    			0x32,
     			0x2e,
+    			0x38,
+    			0x32,
     			0x36,
     			0x2e,
-    			0x31,
-    			0x2e,
-    			0x34,
+    			0x30,
     			0x2e,
 
     			0x31,
     			0x2e,
-    			0x35,
-    			0x39,
+    			0x33,
     			0x36,
-    			0x32,
-    			0x2e,
-    			0x39,
-    			0x39,
-    			0x2e,
-    			0x31,
-    			0x2e,
-    			0x32,
-    			0x32,
     			0x38,
     			0x30,
-
-    			0x39,
+    			0x30,
     			0x34,
     			0x33,
-    			0x33,
-    			0x35,
+    			0x2e,
     			0x38,
     			0x2e,
+    			0x31,
+    			0x30,
+    			0x35,
+    			0x35,
+
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x30,
+    			0x31,
+    			0x31,
+    			0x31,
+    			0x31,
+    			0x30,
+    			0x32,
+    			0x31,
+    			0x35,
+    			0x30,
     			0x37,
-    			0x31,
-    			0x36,
-    			0x32,
-    			0x30,
-    			0x30,
-    			0x34,
-    			0x38,
-    			0x34,
+    			0x35,
 
-    			0x2e,
-    			0x31,
-    			0x33,
-    			0x36,
-    			0x33,
-    			0x37,
     			0x38,
     			0x35,
-    			0x36,
-    			0x30,
-    			0x38,
     			0x39,
-    			0x35,
-    			0x38,
-    			0x2e,
-    			0x36,
-
-    			0x34,
+    			0x31,
     			0x2e,
     			0x30,
-    			0x00};
+    			0x33,
+    			0x32,
+    			0x39,
+    			0x36,
+    			0x30,
+    			0x35,
+    			0x30,
+    			0x2e,
+    			0x36,
+    			0x39,
+
+    			0x31,
+    			0x38,
+    			0x30,
+    			0x39,
+    			0x34,
+    			0x33};
     	
-    	/*for (int a = 0; a < arr1.length; a ++) 
+    	pl("TARGET C-STORE-RQ");
+    	
+    	for (int a = 0; a < arr1.length; a ++) 
     		
-    		pl("" + arr1[a]);
+    		p("" + arr1[a]);
     	
-    	pl("" + len1);
+    	p("" + len1);
     	
     	for (int a = 0; a < arr2.length; a ++) 
     		
@@ -2196,7 +2122,7 @@ public class Engine {
     		
     		p("" + arr3[a]);
     	
-    	p("" + len3);*/
+    	p("" + len3);
     	
     	for (int a = 0; a < arr4.length; a ++) 
     		
@@ -2277,12 +2203,36 @@ public class Engine {
 	        			this.dataTF.writeToBuffer();
 	        			retval = true;
 	        		
+	        			pl();
+	        			pl("CURRENT C-STORE-RQ");
 	        			byte[] arr5 = this.dataTF.getBuffer().toByteArray();
 	        	    	
-	        	    	/*for (int a = 0; a < arr5.length; a ++) 
+	        	    	for (int a = 0; a < 5; a ++) 
 	        	    		
-	        	    		pl("" + arr5[a]);
-	        			*/
+	        	    		p("" + arr5[a]);
+	        	    	
+	        	    	p("" + this.dataTF.getPduLength());
+	        			
+	        	    	for (int a = 6; a < 9; a ++) 
+	        	    		
+	        	    		p("" + arr5[a]);
+	        	    	
+	        	    	p("" + this.dataTF.getPresentationDataValueItems().get(0).getItemLength());
+	        	    
+	        	    	for (int a = 10; a < 20; a ++) 
+	        	    		
+	        	    		p("" + arr5[a]);
+	        	    	
+	        	    	PresentationDataValue test = this.dataTF.getPresentationDataValueItems().get(0);
+	        	    	PDU test1 = test.getPdvData();
+	        	    	C_STORE_RQ test2 = (C_STORE_RQ) test1;
+	        	    	
+	        	    	p("" + test2.getCommandGroupLength().getIntElementData());
+	        	    	
+	        	    	for (int a = 22; a < arr5.length; a ++) 
+	        	    		
+	        	    		p("" + arr5[a]);
+	        	    	
 	        		}
 	        		
 	        		else {
@@ -2302,23 +2252,24 @@ public class Engine {
 	    			presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
 	    			pcID = presentationContext.getPresentationContextID();
 	        		header = 0x00;
-	    			limit = this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive() - 4;
+	    			limit = this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive() - 6;
 
 	    			if (this.filePath != null) {
 	    				
+	    				//Get the full byte array 
 	    				this.imageGenerator.setFilePath(this.filePath);
 	    				this.imageGenerator.readFile();
 	    				this.imageGenerator.writeToStream();
 	    				size = this.imageGenerator.getStream().size();
-	    				pl("Size of image data: " + size);
+	    				//pl("Size of image data: " + size);
 	    				arr = this.imageGenerator.getStream().toByteArray();
-	    				pl("Array length: " + arr.length);
+	    				//pl("Array length: " + arr.length);
 	    				
 	    				if (limit > 0) packets = size / limit;
 	    				else packets = 0;
 	    				
-	    				pl("Limit: " + limit);
-	    				pl("Packet numbers: " + packets);
+	    				//pl("Limit: " + limit);
+	    				//pl("Packet numbers: " + packets);
 	    				
 	    				if (packets > 0 && size > 0) {
 	    					
@@ -2328,8 +2279,8 @@ public class Engine {
 	    					
 	    					for (int a = 0; a < packets; a ++) {
 	    					
-	    						pl("Round: " + a);
-	    						pl("Count: " + count);
+	    						//pl("Round: " + a);
+	    						//pl("Count: " + count);
 	    						this.dataTF = new P_DATA_TF();
 	    						this.dataTF.setPduType(type);
 		    					pdValueItems = new ArrayList<PresentationDataValue>();
@@ -2343,14 +2294,14 @@ public class Engine {
 	    						this.imagePackets.add(this.dataTF);
 	    						pl("Temp size: " + temp.length);
 	    						count += limit;
-	    						pl("Count: " + count);
+	    						//pl("Count: " + count);
 	    						
 	    					}
 	    					
 	    					if (size - count > 0) {
 	    						
 	    						header = 0x02;
-	    						pl("Remaining: " + (size - count));
+	    						//pl("Remaining: " + (size - count));
 	    						this.dataTF = new P_DATA_TF();
 	    						this.dataTF.setPduType(type);
 		    					pdValueItems = new ArrayList<PresentationDataValue>();
@@ -2362,12 +2313,12 @@ public class Engine {
 	    						this.dataTF.setPresentationDataValueItems(pdValueItems);
 	    						this.dataTF.writeToBuffer();
 	    						this.imagePackets.add(this.dataTF);
-	    						pl("Temp size: " + temp.length);
+	    						//pl("Temp size: " + temp.length);
 	    						retval = true;
 	    						
 	    					}
 	    					
-	    					pl("Number of packets to send: " + this.imagePackets.size());
+	    					//pl("Number of packets to send: " + this.imagePackets.size());
 	    					
 	    				}
 	    				

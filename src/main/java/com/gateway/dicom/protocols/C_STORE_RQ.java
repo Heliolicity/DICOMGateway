@@ -264,12 +264,8 @@ public class C_STORE_RQ extends PDU {
 			else if (this.byteOrdering == 2) this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN);
 			else this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			
-			pl("Now writing C-STORE-RQ to buffer with byte ordering of " + this.byteOrdering);
-			
 			this.buffer.writeUInt16(this.affectedSOPClassUID.getGroupNumber());
-			pl("Affected SOP Class UID Group Number: " + this.affectedSOPClassUID.getGroupNumber());
 			this.buffer.writeUInt16(this.affectedSOPClassUID.getElementNumber());
-			pl("Affected SOP Class UID Element Number: " + this.affectedSOPClassUID.getElementNumber());
 			this.affectedSOPClassUID.writeToBuffer();
 			int a = this.affectedSOPClassUID.getBuffer().size();
 			this.affectedSOPClassUID.setElementLength(a);
@@ -299,9 +295,6 @@ public class C_STORE_RQ extends PDU {
 				this.buffer.write(arr);
 				
 			}
-			
-			pl("Affected SOP Class UID Element Length: " + this.affectedSOPClassUID.getElementLength());
-			pl("Affected SOP Class UID Element Data: " + this.affectedSOPClassUID.getElementData());
 			
 			//pl("Affected SOP Class Group Number: " + this.affectedSOPClassUID.getGroupNumber());
 			//pl("Affected SOP Class Element Number: " + this.affectedSOPClassUID.getElementNumber());
@@ -333,13 +326,9 @@ public class C_STORE_RQ extends PDU {
 			//pl("Priority Element Length: " + this.priority.getElementLength());
 			//pl("Priority Element Data: " + this.priority.getIntElementData());
 			
-			pl("Data Set Type Group Number: " + this.dataSetType.getGroupNumber());
 			this.buffer.writeUInt16(this.dataSetType.getGroupNumber());
-			pl("Data Set Type Element Number: " + this.dataSetType.getElementNumber());
 			this.buffer.writeUInt16(this.dataSetType.getElementNumber());
-			pl("Data Set Type Element Length: " + this.dataSetType.getElementLength());
 			this.buffer.writeUInt32(this.dataSetType.getElementLength());
-			pl("Data Set Type Element Data: " + this.dataSetType.getIntElementData());
 			this.buffer.writeUInt16(this.dataSetType.getIntElementData());
 			//this.buffer.writeUInt16(258);
 			
@@ -417,15 +406,15 @@ public class C_STORE_RQ extends PDU {
 			this.buffer.writeUInt16(this.moveOriginatorMessageID.getIntElementData());
 			*/
 			
-			pl("");
-			pl("Now check buffer");
+			//pl("");
+			//pl("Now check buffer");
 			
-			arr = this.buffer.toByteArray();
+			/*arr = this.buffer.toByteArray();
 			
 			for (int b = 0; b < arr.length; b ++) 
 				
 				p("" + arr[b]);
-						
+			*/			
 			int size = this.buffer.size();
 			
 			if (size % 2 != 0) size ++; 
