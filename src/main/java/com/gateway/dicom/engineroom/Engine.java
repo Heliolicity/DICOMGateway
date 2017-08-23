@@ -46,6 +46,7 @@ public class Engine {
     private C_ECHO_RSP echoResponse = null;
     private C_STORE_RQ storeRequest = null;
     private List<P_DATA_TF> imagePackets = null;
+    private ImagePacket imagePacket = null;
     private A_ASSOCIATE_RQ associateRequestRQ = null;
     private A_ASSOCIATE_AC associateRequestAC = null;
     private A_ASSOCIATE_RJ associateRequestRJ = null;
@@ -3662,9 +3663,190 @@ public class Engine {
     		
     		p("" + arr17[a]);
     	
+    	byte type;
+    	
     	try {
 
+    		type = 0x04;
     		
+    		this.imagePacket = new ImagePacket();
+    		this.imagePacket.setPduType(type);
+    		
+    		DataElement dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0008);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(20);
+    		dataElement.setElementData("ORIGINAL\\PRIMARY\\MPR");
+    		this.imagePacket.setImageType(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0016);
+    		dataElement.setValueRepresentation("UI");
+    		dataElement.setElementLength(26);
+    		dataElement.setElementData("1.2.840.10008.5.1.4.1.1.4");
+    		this.imagePacket.setSopClassUID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0018);
+    		dataElement.setValueRepresentation("UI");
+    		dataElement.setElementLength(40);
+    		dataElement.setElementData("0.0.0.0.1.8811.2.1.20010413115754.12432");
+    		this.imagePacket.setSopInstanceUID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0020);
+    		dataElement.setValueRepresentation("DA");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("20010316");
+    		this.imagePacket.setStudyDate(dataElement);
+
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0021);
+    		dataElement.setValueRepresentation("DA");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("20010316");
+    		this.imagePacket.setSeriesDate(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0022);
+    		dataElement.setValueRepresentation("DA");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("20010316");
+    		this.imagePacket.setAcquisitionDate(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0023);
+    		dataElement.setValueRepresentation("DA");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("20010323");
+    		this.imagePacket.setContentDate(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0030);
+    		dataElement.setValueRepresentation("TM");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("143008");
+    		this.imagePacket.setStudyTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0031);
+    		dataElement.setValueRepresentation("TM");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("143414");
+    		this.imagePacket.setSeriesTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0032);
+    		dataElement.setValueRepresentation("TM");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("143415");
+    		this.imagePacket.setAcquisitionTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0033);
+    		dataElement.setValueRepresentation("TM");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("143008");
+    		this.imagePacket.setContentTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0050);
+    		dataElement.setValueRepresentation("TM");
+    		dataElement.setElementLength(0);
+    		dataElement.setElementData(null);
+    		this.imagePacket.setAccesstionNumber(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0060);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("MR");
+    		this.imagePacket.setModality(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0070);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(18);
+    		dataElement.setElementData("GE MEDICAL SYSTEMS");
+    		this.imagePacket.setManufacturer(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0080);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(28);
+    		dataElement.setElementData("                    ");
+    		this.imagePacket.setInstitutionName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x0090);
+    		dataElement.setValueRepresentation("PN");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("    ");
+    		this.imagePacket.setReferringPhysiciansName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x1010);
+    		dataElement.setValueRepresentation("SH");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("MRS1");
+    		this.imagePacket.setStationName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x1030);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("BRAIN");
+    		this.imagePacket.setStudyDescription(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x103e);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(16);
+    		dataElement.setElementData("FSE PD AXIAL OBL");
+    		this.imagePacket.setSeriesDescription(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x1050);
+    		dataElement.setValueRepresentation("PN");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("      ");
+    		this.imagePacket.setPerformingPhysiciansName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x1070);
+    		dataElement.setValueRepresentation("PN");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("EC");
+    		this.imagePacket.setOperatorsName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0008);
+    		dataElement.setElementNumber(0x1090);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("SIGNA ");
+    		this.imagePacket.setManufacturersModelName(dataElement);
     		
     	}
     	
