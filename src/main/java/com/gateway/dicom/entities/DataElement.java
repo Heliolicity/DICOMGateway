@@ -26,6 +26,7 @@ public class DataElement extends DICOMItem implements Serializable {
 	private Date theDate;
 	private DicomOutputBuffer buffer;
 	private int byteOrder;
+	private byte[] data;
 	
 	public DataElement() { super(); }
 
@@ -290,6 +291,14 @@ public class DataElement extends DICOMItem implements Serializable {
 
 	public void setTheDate(Date theDate) {
 		this.theDate = theDate;
+	}
+
+	public byte[] getData() {
+		return data;
+	}
+
+	public void setData(byte[] data) {
+		this.data = data;
 	}
 
 	public String getUniqueIdentifier() {
