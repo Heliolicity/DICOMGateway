@@ -4129,6 +4129,264 @@ public class Engine {
     		dataElement.setElementData("HFS ");
     		this.imagePacket.setPatientPosition(dataElement);
     		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x000d);
+    		dataElement.setValueRepresentation("UI");
+    		dataElement.setElementLength(36);
+    		dataElement.setElementData("0.0.0.0.2.8811.20010413115754.12432");
+    		this.imagePacket.setStudyInstanceUID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x000e);
+    		dataElement.setValueRepresentation("UI");
+    		dataElement.setElementLength(38);
+    		dataElement.setElementData("0.0.0.0.2.8811.20010413115754.12432");
+    		this.imagePacket.setSeriesInstanceUID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0010);
+    		dataElement.setValueRepresentation("SH");
+    		dataElement.setElementLength(4);
+    		dataElement.setIntElementData(8811);
+    		this.imagePacket.setStudyID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0011);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("2 ");
+    		this.imagePacket.setSeriesNumber(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0012);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("31744 ");
+    		this.imagePacket.setAcquisitionNumber(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0013);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("1 ");
+    		this.imagePacket.setInstanceNumber(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0020);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("L\\PH");
+    		this.imagePacket.setPatientOrientation(dataElement);
+
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0030);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(26);
+    		dataElement.setElementData("-110.500\\-78.3063\\-72.7575");
+    		this.imagePacket.setImagePosition(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0032);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(26);
+    		dataElement.setElementData("-110.500\\-78.3063\\-72.7575");
+    		this.imagePacket.setImagePositionPatient(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0035);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(50);
+    		dataElement.setElementData("1.00000\\0.00000\\0.00000\\0.00000\\0.990960\\0.134158 ");
+    		this.imagePacket.setImageOrientation(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0037);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(50);
+    		dataElement.setElementData("1.00000\\0.00000\\0.00000\\0.00000\\0.990960\\0.134158 ");
+    		this.imagePacket.setImageOrientationPatient(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x0052);
+    		dataElement.setValueRepresentation("UI");
+    		dataElement.setElementLength(38);
+    		dataElement.setElementData("0.0.0.0.4.8811.2.20010413115754.12432 ");
+    		this.imagePacket.setFrameOfReferenceUID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x1002);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("1 ");
+    		this.imagePacket.setImagesInAcquisition(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x1040);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("NA");
+    		this.imagePacket.setPositionReferenceIndicator(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0020);
+    		dataElement.setElementNumber(0x1041);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("-58.0000");
+    		this.imagePacket.setSliceLocator(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0002);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(1);
+    		this.imagePacket.setSamplesPerPixel(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0004);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(12);
+    		dataElement.setElementData("MONOCHROME2 ");
+    		this.imagePacket.setPhotometricInterpretation(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0010);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(256);
+    		this.imagePacket.setRows(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0011);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(256);
+    		this.imagePacket.setColumns(dataElement);
+  
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0030);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(18);
+    		dataElement.setElementData("0.859375\\0.859375 ");
+    		this.imagePacket.setPixelSpacing(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0100);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(16);
+    		this.imagePacket.setBitsAllocated(dataElement);
+  
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0101);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(16);
+    		this.imagePacket.setBitsStored(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0102);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(15);
+    		this.imagePacket.setHighBit(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0103);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(1);
+    		this.imagePacket.setPixelRepresentation(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0106);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(0);
+    		this.imagePacket.setSmallestImagePixelValue(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0107);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(884);
+    		this.imagePacket.setLargestImagePixelValue(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0120);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(2);
+    		dataElement.setIntElementData(0);
+    		this.imagePacket.setPixelPaddingValue(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0150);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setWindowCenter(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0151);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setWindowWidth(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0152);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setRescaleIntercept(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0153);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("1 ");
+    		this.imagePacket.setRescaleSlope(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0028);
+    		dataElement.setElementNumber(0x0154);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(28);
+    		dataElement.setElementData("SIGNAL INTENSITY (UNITLESS)" );
+    		this.imagePacket.setRescaleType(dataElement);
+    		
+    		
+    		
     		
     		
     		
