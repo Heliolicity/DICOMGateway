@@ -3848,6 +3848,292 @@ public class Engine {
     		dataElement.setElementData("SIGNA ");
     		this.imagePacket.setManufacturersModelName(dataElement);
     		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x0010);
+    		dataElement.setValueRepresentation("PN");
+    		dataElement.setElementLength(14);
+    		dataElement.setElementData("              ");
+    		this.imagePacket.setPatientsName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x0020);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(6);
+    		dataElement.setElementData("123565");
+    		this.imagePacket.setPatientID(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x0030);
+    		dataElement.setValueRepresentation("DA");
+    		dataElement.setElementLength(0);
+    		dataElement.setElementData(null);
+    		this.imagePacket.setPatientsBirthDate(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x0040);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("F ");
+    		this.imagePacket.setPatientsSex(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x1010);
+    		dataElement.setValueRepresentation("AS");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("028Y");
+    		this.imagePacket.setPatientsAge(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x1030);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("61.2350 ");
+    		this.imagePacket.setPatientsSex(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0010);
+    		dataElement.setElementNumber(0x21b0);
+    		dataElement.setValueRepresentation("LT");
+    		dataElement.setElementLength(0);
+    		dataElement.setElementData(null);
+    		this.imagePacket.setAdditionalPatientHistory(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0020);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("SE");
+    		this.imagePacket.setScanningSequence(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0021);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("SK");
+    		this.imagePacket.setSequenceVariant(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0022);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("SP");
+    		this.imagePacket.setScanOptions(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0023);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("2D");
+    		this.imagePacket.setMrAcquisitionType(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0024);
+    		dataElement.setValueRepresentation("SH");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("fse ");
+    		this.imagePacket.setSequenceName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0050);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("5.00000 ");
+    		this.imagePacket.setSliceThickness(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0080);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("2300.00 ");
+    		this.imagePacket.setRepetitionTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0081);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("2200.00 ");
+    		this.imagePacket.setEchoTime(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0083);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("1.00000 ");
+    		this.imagePacket.setNumberOfAverages(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0084);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("63.8615 ");
+    		this.imagePacket.setImagingFrequency(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0086);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("1 ");
+    		this.imagePacket.setEchoNumber(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0087);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("1.50000 ");
+    		this.imagePacket.setMagneticFieldStrength(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0088);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("2.00000 ");
+    		this.imagePacket.setSpacingBetweenSlices(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0089);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("256 ");
+    		this.imagePacket.setNumberOfPhaseEncodingSteps(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0091);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("8 ");
+    		this.imagePacket.setEchoTrainLength(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x0095);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("31.2500 ");
+    		this.imagePacket.setPixelBandwidth(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1020);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("3 ");
+    		this.imagePacket.setSoftwareVersion(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1030);
+    		dataElement.setValueRepresentation("LO");
+    		dataElement.setElementLength(14);
+    		dataElement.setElementData("CLINICAL BRAIN");
+    		this.imagePacket.setProtocolName(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1088);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setHeartRate(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1090);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setCardiacNumberOfImages(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1094);
+    		dataElement.setValueRepresentation("IS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("0 ");
+    		this.imagePacket.setTriggerWindow(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1100);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(8);
+    		dataElement.setElementData("220.000 ");
+    		this.imagePacket.setReconstructionDiameter(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1250);
+    		dataElement.setValueRepresentation("SH");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("HEAD");
+    		this.imagePacket.setReceiveCoilName(dataElement);
+    		
+    		/*POTENTIAL ISSUE HERE - VALUE IS 0 BUT LENGTH IS 8*/
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1310);
+    		dataElement.setValueRepresentation("US");
+    		dataElement.setElementLength(8);
+    		dataElement.setIntElementData(0);
+    		this.imagePacket.setAcquisitionMatrix(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1312);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("ROW ");
+    		this.imagePacket.setInPhaseEncodingDirection(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1314);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(2);
+    		dataElement.setElementData("90");
+    		this.imagePacket.setFlipAngle(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x1316);
+    		dataElement.setValueRepresentation("DS");
+    		dataElement.setElementLength(10);
+    		dataElement.setElementData("0.0313309 ");
+    		this.imagePacket.setSAR(dataElement);
+    		
+    		dataElement = new DataElement();
+    		dataElement.setGroupNumber(0x0018);
+    		dataElement.setElementNumber(0x5100);
+    		dataElement.setValueRepresentation("CS");
+    		dataElement.setElementLength(4);
+    		dataElement.setElementData("HFS ");
+    		this.imagePacket.setPatientPosition(dataElement);
+    		
+    		
+    		
+    		
+    		
+    		
     	}
     	
     	catch (Exception e) {
