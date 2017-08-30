@@ -99,6 +99,12 @@ public class ImagePacket extends PDU {
 	private byte[] packetData;
 	private int command;
 	private DicomOutputBuffer buffer;
+	private int byteOrder;
+	
+	public ImagePacket(int byteOrder, byte[] packetData) {
+		this.byteOrder = byteOrder;
+		this.packetData = packetData;
+	}
 	
 	public ImagePacket(byte[] packetData) {
 		this.packetData = packetData;
@@ -153,13 +159,16 @@ public class ImagePacket extends PDU {
 		
 		try {
 			
-			this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			if (this.byteOrder == 1) this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
+			else if (this.byteOrder == 2) this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_LITTLE_ENDIAN);
+			else this.buffer = new DicomOutputBuffer(DicomOutputBuffer.BYTE_ORDERING_BIG_ENDIAN);
 			
 			this.buffer.writeUInt16(this.imageType.getGroupNumber());
 			this.buffer.writeUInt16(this.imageType.getElementNumber());
 			this.buffer.writeUInt32(this.imageType.getElementLength());
 			this.buffer.write(this.imageType.getElementData().getBytes());
 			
+			/*
 			this.buffer.writeUInt16(this.sopClassUID.getGroupNumber());
 			this.buffer.writeUInt16(this.sopClassUID.getElementNumber());
 			this.buffer.writeUInt32(this.sopClassUID.getElementLength());
@@ -423,7 +432,7 @@ public class ImagePacket extends PDU {
 			this.buffer.writeUInt16(this.acquisitionMatrix.getGroupNumber());
 			this.buffer.writeUInt16(this.acquisitionMatrix.getElementNumber());
 			this.buffer.writeUInt32(this.acquisitionMatrix.getElementLength());
-			this.buffer.write(this.acquisitionMatrix.getElementData().getBytes());
+			//0
 			
 			this.buffer.writeUInt16(this.inPhaseEncodingDirection.getGroupNumber());
 			this.buffer.writeUInt16(this.inPhaseEncodingDirection.getElementNumber());
@@ -458,7 +467,7 @@ public class ImagePacket extends PDU {
 			this.buffer.writeUInt16(this.studyID.getGroupNumber());
 			this.buffer.writeUInt16(this.studyID.getElementNumber());
 			this.buffer.writeUInt32(this.studyID.getElementLength());
-			this.buffer.write(this.studyID.getElementData().getBytes());
+			this.buffer.writeUInt16(this.studyID.getIntElementData());
 			
 			this.buffer.writeUInt16(this.seriesNumber.getGroupNumber());
 			this.buffer.writeUInt16(this.seriesNumber.getElementNumber());
@@ -604,8 +613,7 @@ public class ImagePacket extends PDU {
 			this.buffer.writeUInt16(this.rescaleType.getElementNumber());
 			this.buffer.writeUInt32(this.rescaleType.getElementLength());
 			this.buffer.write(this.rescaleType.getElementData().getBytes());
-
-			
+			*/
 		}
 		
 		catch (Exception e) {
@@ -1354,6 +1362,14 @@ public class ImagePacket extends PDU {
 
 	public void setPixelData(DataElement pixelData) {
 		this.pixelData = pixelData;
+	}
+
+	public int getByteOrder() {
+		return byteOrder;
+	}
+
+	public void setByteOrder(int byteOrder) {
+		this.byteOrder = byteOrder;
 	}
 
 	private void p(String s) { System.out.print(s); }

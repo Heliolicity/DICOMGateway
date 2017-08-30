@@ -11,7 +11,10 @@ public class TestMain {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 
-		try {
+		USBReader reader = new USBReader();
+		reader.run();
+		
+		/*try {
         
 			UsbServices services = UsbHostManager.getUsbServices();
 			dump(services.getRootUsbHub(), 0);
@@ -20,7 +23,7 @@ public class TestMain {
 		
 		catch (UsbException usbe) {
 			
-		}
+		}*/
 		
 	}
 

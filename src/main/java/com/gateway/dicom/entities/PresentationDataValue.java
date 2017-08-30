@@ -117,7 +117,9 @@ public class PresentationDataValue extends DICOMItem {
 					
 				case "IMAGE_PACKET" : packet = (ImagePacket) this.pdvData;
 					this.buffer.writeUInt8(this.messageControlHeader);
-					this.buffer.write(packet.getPacketData());
+					//this.buffer.write(packet.getPacketData());
+					packet.writeHeaderToBuffer();
+					this.buffer.write(packet.getBuffer().toByteArray());
 					this.itemLength = this.buffer.size();
 					
 					break;

@@ -1,5 +1,10 @@
 package com.gateway.dicom.client;
 
+/*
+ * Contains some code provided by Dr. Robert Sadleir
+ * 
+ * */
+
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;

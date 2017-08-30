@@ -2,10 +2,15 @@ package com.gateway.dicom.engineroom;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
+
+import org.joda.time.DateTime;
+
 import java.util.Scanner;
 
 import com.gateway.dicom.protocols.C_ECHO_RQ;
@@ -128,11 +133,13 @@ public class Engine {
     				
     				if (this.requestBuilt) {
     					
+    					pl("Sending A-ASSOCIATE-RQ at: " + this.systemTimeInDate(System.currentTimeMillis()));
     					this.requestSent = this.sendAssociateRequest();
     					
     					if (this.requestSent) {
     						
     						type = this.client.readByte();
+    						pl("Sent A-ASSOCIATE-RQ at: " + this.systemTimeInDate(System.currentTimeMillis()));
     						pl("PDU type received: " + type);
     						
     						if (type == this.A_ASSOCIATE_AC_PDU_TYPE) {
@@ -140,6 +147,7 @@ public class Engine {
     							pl("A-ASSOCIATE-RQ acknowledged");
     							this.dataReceived = true;
     							this.requestAcknowledged = true;
+    							pl("Received A-ASSOCIATE-AC at: " + this.systemTimeInDate(System.currentTimeMillis()));
     							this.client.skip(1);
     							length = this.client.readInt();
     							pl("PDU length: " + length);
@@ -164,6 +172,7 @@ public class Engine {
     				    				
     				    				if (this.requestBuilt) {
     				    					
+    				    					pl("Sending C-ECHO-RQ at: " + this.systemTimeInDate(System.currentTimeMillis()));
     				    					this.requestSent = this.sendDataTF();
     				    					
     				    					if (this.requestSent) {
@@ -186,11 +195,12 @@ public class Engine {
     				    							//this.receivedData = this.client.readByteArray(length);
     				    							//this.requestBuilt = this.buildDataTFResponse();
     				    							this.requestBuilt = this.buildEchoResponse();
-    				    							
+
     				    							if (this.requestBuilt) {
     				    								
     				    								pl("C-ECHO was successful");
     				    								this.requestAcknowledged = true;
+    				    								pl("Received C-ECHO-RSP at: " + this.systemTimeInDate(System.currentTimeMillis()));
     				    								
     				    								pl("Send A-RELEASE-RQ Y/N?");
     				    				    			input = this.keyboard.nextLine().toUpperCase();
@@ -276,6 +286,7 @@ public class Engine {
     				    						
     				    						pl();
     				    						pl("Successfully sent P-DATA-TF C-STORE-RQ");
+    				    						System.exit(0);
     				    						this.filePath = this.imageGenerator.getFilePath();
     				    						this.imageGenerator.setHeight(512);
     				    						this.imageGenerator.setWidth(512);
@@ -1893,6 +1904,186 @@ public class Engine {
     
     public boolean buildStoreRequest() {
     	    	
+    	byte[] arr1 = {0x04,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x00};
+    	
+    	int len1 = 0x8c;
+    	
+    	byte[] arr2 = {
+    			0x00,
+    			0x00,
+    			0x00};
+    	
+    	int len2 = 0x88;
+    	
+    	byte[] arr3 = {
+    			0x01,
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x04,
+    			0x00,
+    			0x00,
+    			0x00,
+
+    			0x7a,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x02,
+    			0x00,
+    			0x1a,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x2e,
+
+    			0x38,
+    			0x34,
+    			0x30,
+    			0x2e,
+    			0x31,
+    			0x30,
+    			0x30,
+    			0x30,
+    			0x38,
+    			0x2e,
+    			0x35,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x34,
+    			0x2e,
+
+    			0x31,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x34,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x01,
+    			0x00,
+
+    			0x00,
+    			0x00,
+    			0x10,
+    			0x01,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x03,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x07,
+    			0x02,
+    			0x00,
+
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x08,
+    			0x02,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x02,
+    			0x01,
+    			0x00,
+    			0x00,
+
+    			0x00,
+    			0x10,
+    			0x28,
+    			0x00,
+    			0x00,
+    			0x00,
+    			0x30,
+    			0x2e,
+    			0x30,
+    			0x2e,
+    			0x30,
+    			0x2e,
+    			0x30,
+    			0x2e,
+    			0x31,
+    			0x2e,
+
+    			0x38,
+    			0x38,
+    			0x31,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x2e,
+    			0x31,
+    			0x2e,
+    			0x32,
+    			0x30,
+    			0x30,
+    			0x31,
+    			0x30,
+    			0x34,
+    			0x31,
+
+    			0x33,
+    			0x31,
+    			0x31,
+    			0x35,
+    			0x37,
+    			0x35,
+    			0x34,
+    			0x2e,
+    			0x31,
+    			0x32,
+    			0x34,
+    			0x33,
+    			0x32,
+    			0x00};
+    	
+    	pl("TARGET C-STORE-RQ");
+    	
+    	for (int a = 0; a < arr1.length; a ++) 
+    		
+    		p("" + arr1[a]);
+    	
+    	p("" + len1);
+    	
+    	for (int a = 0; a < arr2.length; a ++) 
+    		
+    		p("" + arr2[a]);
+    	
+    	p("" + len2);
+    	
+    	for (int a = 0; a < arr3.length; a ++) 
+    		
+    		p("" + arr3[a]);
+    	
     	boolean retval = false;
     	//this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.7", this.messageID, 0, "1.3.6.1.4.1.5962.99.1.2280943358.726300484.1363785608958.64.0");
     	//this.storeRequest = new C_STORE_RQ(2, "1.2.840.10008.5.1.4.1.1.2", this.messageID, 0, "1.2.826.0.1.3680043.8.1055.1.20111102150758591.03296050.69180943");
@@ -3562,115 +3753,116 @@ public class Engine {
     			,0x20};
     	
     	pl("TARGET P-DATA-TF");
-    	
+    	/*
     	for (int a = 0; a < arr1.length; a ++)
     		
-    		p("" + arr1[a]);
+    		pl("" + arr1[a]);
     	
-    	p("" + len1);
+    	pl("" + len1);
     	
     	for (int a = 0; a < arr2.length; a ++)
     		
-    		p("" + arr2[a]);
+    		pl("" + arr2[a]);
     	
     	pl("" + len2);
 
     	for (int a = 0; a < arr3.length; a ++)
     		
-    		p("" + arr3[a]);
+    		pl("" + arr3[a]);
     	
     	pl("" + len3);
     	
     	for (int a = 0; a < arr4.length; a ++)
     		
-    		p("" + arr4[a]);
+    		pl("" + arr4[a]);
     	
     	pl("" + len4);
     	
     	for (int a = 0; a < arr5.length; a ++)
     		
-    		p("" + arr5[a]);
+    		pl("" + arr5[a]);
     	
     	pl("" + len5);
     	
     	for (int a = 0; a < arr6.length; a ++)
     		
-    		p("" + arr6[a]);
+    		pl("" + arr6[a]);
     	
     	pl("" + len6);
     	
     	for (int a = 0; a < arr7.length; a ++)
     		
-    		p("" + arr7[a]);
+    		pl("" + arr7[a]);
     	
     	pl("" + len7);
     	
     	for (int a = 0; a < arr8.length; a ++)
     		
-    		p("" + arr8[a]);
+    		pl("" + arr8[a]);
     	
     	pl("" + len8);
     	
     	for (int a = 0; a < arr9.length; a ++)
     		
-    		p("" + arr9[a]);
+    		pl("" + arr9[a]);
     	
     	pl("" + len9);
     	
     	for (int a = 0; a < arr10.length; a ++)
     		
-    		p("" + arr10[a]);
+    		pl("" + arr10[a]);
     	
     	pl("" + len10);
     	
     	for (int a = 0; a < arr11.length; a ++)
     		
-    		p("" + arr11[a]);
+    		pl("" + arr11[a]);
     	
     	pl("" + len11);
     	
     	for (int a = 0; a < arr12.length; a ++)
     		
-    		p("" + arr12[a]);
+    		pl("" + arr12[a]);
     	
     	pl("" + len12);
     	
     	for (int a = 0; a < arr13.length; a ++)
     		
-    		p("" + arr13[a]);
+    		pl("" + arr13[a]);
     	
     	pl("" + len13);
     	
     	for (int a = 0; a < arr14.length; a ++)
     		
-    		p("" + arr14[a]);
+    		pl("" + arr14[a]);
     	
     	pl("" + len14);
     	
     	for (int a = 0; a < arr15.length; a ++)
     		
-    		p("" + arr15[a]);
+    		pl("" + arr15[a]);
     	
     	pl("" + len15);
     	
     	for (int a = 0; a < arr16.length; a ++)
     		
-    		p("" + arr16[a]);
+    		pl("" + arr16[a]);
     	
     	pl("" + len16);
     	
     	for (int a = 0; a < arr17.length; a ++)
     		
-    		p("" + arr17[a]);
-    	
-    	byte type;
+    		pl("" + arr17[a]);
+    	*/
+    	//byte type;
+    	pl();
     	
     	try {
 
-    		type = 0x04;
+    		//type = 0x04;
     		
     		this.imagePacket = new ImagePacket();
-    		this.imagePacket.setPduType(type);
+    		//this.imagePacket.setPduType(type);
     		
     		DataElement dataElement = new DataElement();
     		dataElement.setGroupNumber(0x0008);
@@ -3894,7 +4086,7 @@ public class Engine {
     		dataElement.setValueRepresentation("DS");
     		dataElement.setElementLength(8);
     		dataElement.setElementData("61.2350 ");
-    		this.imagePacket.setPatientsSex(dataElement);
+    		this.imagePacket.setPatientsWeight(dataElement);
     		
     		dataElement = new DataElement();
     		dataElement.setGroupNumber(0x0010);
@@ -4385,12 +4577,7 @@ public class Engine {
     		dataElement.setElementData("SIGNAL INTENSITY (UNITLESS)" );
     		this.imagePacket.setRescaleType(dataElement);
     		
-    		
-    		
-    		
-    		
-    		
-    		
+    		retval = true;
     		
     	}
     	
@@ -4398,6 +4585,7 @@ public class Engine {
     		
     		pl(e.getMessage());
     		e.printStackTrace();
+    		retval = false;
     		
     	}
     	
@@ -4417,186 +4605,6 @@ public class Engine {
     }
     
     public boolean buildDataTF(int n) {
-    	
-    	byte[] arr1 = {0x04,
-    			0x00,
-    			0x00,
-    			0x00,
-
-    			0x00};
-    	
-    	int len1 = 0x8c;
-    	
-    	byte[] arr2 = {
-    			0x00,
-    			0x00,
-    			0x00};
-    	
-    	int len2 = 0x88;
-    	
-    	byte[] arr3 = {
-    			0x01,
-    			0x03,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x04,
-    			0x00,
-    			0x00,
-    			0x00,
-
-    			0x7a,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x02,
-    			0x00,
-    			0x1a,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x31,
-    			0x2e,
-    			0x32,
-    			0x2e,
-
-    			0x38,
-    			0x34,
-    			0x30,
-    			0x2e,
-    			0x31,
-    			0x30,
-    			0x30,
-    			0x30,
-    			0x38,
-    			0x2e,
-    			0x35,
-    			0x2e,
-    			0x31,
-    			0x2e,
-    			0x34,
-    			0x2e,
-
-    			0x31,
-    			0x2e,
-    			0x31,
-    			0x2e,
-    			0x34,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x01,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x01,
-    			0x00,
-
-    			0x00,
-    			0x00,
-    			0x10,
-    			0x01,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x03,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x07,
-    			0x02,
-    			0x00,
-
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x08,
-    			0x02,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x02,
-    			0x01,
-    			0x00,
-    			0x00,
-
-    			0x00,
-    			0x10,
-    			0x28,
-    			0x00,
-    			0x00,
-    			0x00,
-    			0x30,
-    			0x2e,
-    			0x30,
-    			0x2e,
-    			0x30,
-    			0x2e,
-    			0x30,
-    			0x2e,
-    			0x31,
-    			0x2e,
-
-    			0x38,
-    			0x38,
-    			0x31,
-    			0x31,
-    			0x2e,
-    			0x32,
-    			0x2e,
-    			0x31,
-    			0x2e,
-    			0x32,
-    			0x30,
-    			0x30,
-    			0x31,
-    			0x30,
-    			0x34,
-    			0x31,
-
-    			0x33,
-    			0x31,
-    			0x31,
-    			0x35,
-    			0x37,
-    			0x35,
-    			0x34,
-    			0x2e,
-    			0x31,
-    			0x32,
-    			0x34,
-    			0x33,
-    			0x32,
-    			0x00};
-    	
-    	pl("TARGET C-STORE-RQ");
-    	
-    	for (int a = 0; a < arr1.length; a ++) 
-    		
-    		p("" + arr1[a]);
-    	
-    	p("" + len1);
-    	
-    	for (int a = 0; a < arr2.length; a ++) 
-    		
-    		p("" + arr2[a]);
-    	
-    	p("" + len2);
-    	
-    	for (int a = 0; a < arr3.length; a ++) 
-    		
-    		p("" + arr3[a]);
     	
     	boolean retval = false;
     	
@@ -4691,7 +4699,42 @@ public class Engine {
 	        	    		
 	        	    		p("" + arr5[a]);
 	        	    	
-	        	    	System.exit(0);
+	        	    	pl();
+	        	    	
+		    			type = 0x04;
+		    			
+		    			presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
+		    			pcID = presentationContext.getPresentationContextID();
+		        		header = 0x02;
+		    			limit = this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive() - 6;
+		    			this.filePath = "";
+		    			
+		    			pl("HERE 1");
+		    			if (this.filePath != null) {
+		    				pl("HERE 2");
+		    				this.requestBuilt = this.buildImagePayload();
+		    				pl("HERE 3");
+		    				if (this.requestBuilt) {
+		    					pl("HERE 4");
+		    					this.dataTF = new P_DATA_TF();
+	    						this.dataTF.setPduType(type);
+		    					pdValueItems = new ArrayList<PresentationDataValue>();
+		    					pdValue = new PresentationDataValue(header, pcID, this.imagePacket, "IMAGE_PACKET");
+		    					pdValueItems.add(pdValue);
+	    						this.dataTF.setPresentationDataValueItems(pdValueItems);
+	    						this.dataTF.writeToBuffer();
+	    						arr = this.dataTF.getBuffer().toByteArray();
+	    						
+	    						pl("CURRENT P-DATA-TF");
+	    						for (int a = 0; a < arr.length; a ++) 
+	    							
+	    							p("" + arr[a]);
+		    					
+	    						System.exit(0);
+	    						
+		    				}
+
+		    			}
 	        	    	
 	        		}
 	        		
@@ -4711,10 +4754,32 @@ public class Engine {
 	    			
 	    			presentationContext = this.associateRequestRQ.getPresentationContexts().get(0);
 	    			pcID = presentationContext.getPresentationContextID();
-	        		header = 0x00;
+	        		header = 0x02;
 	    			limit = this.associateRequestRQ.getUserInformation().getMaximumLengthSubItem().getMaxPDULengthReceive() - 6;
 
 	    			if (this.filePath != null) {
+	    				
+	    				this.requestBuilt = this.buildImagePayload();
+	    				
+	    				if (this.requestBuilt) {
+	    					
+	    					this.dataTF = new P_DATA_TF();
+    						this.dataTF.setPduType(type);
+	    					pdValueItems = new ArrayList<PresentationDataValue>();
+	    					pdValue = new PresentationDataValue(header, pcID, this.imagePacket, "IMAGE_PACKET");
+    						pdValueItems.add(pdValue);
+    						this.dataTF.setPresentationDataValueItems(pdValueItems);
+    						this.dataTF.writeToBuffer();
+    						arr = this.dataTF.getBuffer().toByteArray();
+    						
+    						pl("CURRENT P-DATA-TF");
+    						for (int a = 0; a < arr.length; a ++) 
+    							
+    							p("" + arr[a]);
+	    					
+	    				}
+	    				
+	    				System.exit(0);
 	    				
 	    				//Get the full byte array 
 	    				this.imageGenerator.setFilePath(this.filePath);
@@ -5258,6 +5323,14 @@ public class Engine {
 		this.filePaths = filePaths;
 	}
 
+	private String systemTimeInDate(long ms) {
+		
+		DateTime date = new DateTime(ms);
+		String strDate = date.toString();
+		return strDate;
+		
+	}
+	
 	private void p(String s) { System.out.print(s); }
 	
 	private void pl() { System.out.println(); }
